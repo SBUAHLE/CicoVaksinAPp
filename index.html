@@ -2,315 +2,389 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Form Cek-In / Cek-Out Vaksinasi</title>
-<style>
-  body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
-  .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  label { font-weight: 600; display:block; margin-bottom: 4px; }
-  input[type=text], input[type=number], textarea, select {
-    width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 6px;
-  }
-  input[readonly], input[disabled] { background: #f8f8f8; }
-  textarea { min-height: 80px; }
-  .hidden { display: none; }
-  .batches { display:flex; flex-direction: column; gap:6px; }
-  .batch-row { display:flex; gap:8px; }
-  .batch-row input { flex:1; }
-  .btn { padding: 10px 14px; border: 0; border-radius: 6px; cursor: pointer; }
-  .btn-primary { background:#2563eb; color:#fff; }
-  .btn-secondary { background:#e5e7eb; }
-  .btn-danger { background:#ef4444; color:#fff; }
-  .note { font-size: 12px; color: #555; }
-  .req { color: #ef4444; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Form Cek-In / Cek-Out Vaksinasi</title>
+  <style>
+    :root{--primary:#2563eb;--danger:#ef4444;--muted:#6b7280;--bg:#f8fafc;--card:#ffffff;}
+    html,body{margin:0;padding:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827}
+    .container{max-width:880px;margin:24px auto;padding:0 16px}
+    h1{font-size:22px;margin:0 0 8px 0}
+    p.note{color:var(--muted);margin:0 0 16px 0}
+    .card{background:var(--card);border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){.grid{grid-template-columns:1fr}}
+    label{font-weight:600;display:block;margin:6px 0}
+    input[type=text],input[type=number],textarea,select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;background:#fff}
+    input[readonly]{background:#f3f4f6}
+    textarea{min-height:92px}
+    .btn{padding:10px 14px;border:0;border-radius:8px;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-ghost{background:#e5e7eb}
+    .btn-danger{background:var(--danger);color:#fff}
+    .hidden{display:none}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;background:#e5e7eb;color:#374151}
+    .warn{color:#b45309}
+    .ok{color:#059669}
+    .status{font-size:13px;color:var(--muted);margin-top:6px}
+    .batches{display:flex;flex-direction:column;gap:6px}
+    .batch-row{display:flex;gap:8px}
+    .batch-row input{flex:1}
+    .req{color:var(--danger)}
+  </style>
 </head>
 <body>
-  <h2>Form Cek-In / Cek-Out Vaksinasi</h2>
-  <p class="note">Lokasi & waktu diisi <b>otomatis</b> (read-only). Pastikan browser mengizinkan akses lokasi (GPS).</p>
+  <div class="container">
+    <h1>Form Cek-In / Cek-Out Vaksinasi</h1>
+    <p class="note">• Waktu diambil dari <b>server</b> (bukan jam HP). • Lokasi wajib aktif (GPS). Jika GPS ditolak, sistem mencoba lokasi <i>approximate</i> via IP.</p>
 
-  <div class="card">
-    <label for="mode">Pilih Mode</label>
-    <select id="mode">
-      <option value="">— Pilih —</option>
-      <option value="checkin">Cek-In</option>
-      <option value="checkout">Cek-Out</option>
-    </select>
-  </div>
-
-  <!-- Bagian umum -->
-  <div class="card">
-    <div class="row">
-      <div>
-        <label>Nomor Order <span class="req">*</span></label>
-        <input type="text" id="nomorOrder" placeholder="Contoh: ORD-2026-00123" required />
-      </div>
-      <div>
-        <label>Nama Vaksinator</label>
-        <input type="text" id="namaVaksinator" placeholder="Nama petugas" />
-      </div>
-      <div>
-        <label>Waktu (ISO, UTC) <span class="req">*</span></label>
-        <input type="text" id="waktuIso" readonly />
-        <div class="note">Otomatis saat form dibuka/diperbarui</div>
-      </div>
-      <div>
-        <label>Waktu Lokal (Asia/Jakarta)</label>
-        <input type="text" id="waktuLocal" readonly />
-      </div>
-      <div>
-        <label>Latitude <span class="req">*</span></label>
-        <input type="text" id="lat" readonly />
-      </div>
-      <div>
-        <label>Longitude <span class="req">*</span></label>
-        <input type="text" id="lng" readonly />
-      </div>
+    <div class="card">
+      <label for="mode">Pilih Mode</label>
+      <select id="mode">
+        <option value="">— Pilih —</option>
+        <option value="checkin">Cek-In</option>
+        <option value="checkout">Cek-Out</option>
+      </select>
     </div>
-    <div style="margin-top:10px;">
-      <button class="btn btn-secondary" id="btnRefreshTime">Ambil Ulang Waktu</button>
-      <button class="btn btn-secondary" id="btnGetLocation">Ambil Ulang Lokasi</button>
-    </div>
-  </div>
 
-  <!-- Bagian Cek-In -->
-  <div class="card hidden" id="sectionCheckIn">
-    <h3>Cek-In</h3>
-    <div class="row">
-      <div>
-        <label>Kondisi Vaksin</label>
-        <select id="kondisiVaksin">
-          <option value="">— Pilih —</option>
-          <option>Baik</option>
-          <option>Perlu Pendinginan</option>
-          <option>Rusak</option>
-        </select>
-      </div>
-      <div style="grid-column: 1 / span 2;">
-        <label>Nomor Batch Vaksin (bisa lebih dari satu)</label>
-        <div class="batches" id="batchListIn">
-          <div class="batch-row">
-            <input type="text" placeholder="Batch #1" />
-            <button type="button" class="btn btn-danger" onclick="removeBatch(this)">Hapus</button>
-          </div>
+    <!-- Umum -->
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label>Nomor Order <span class="req">*</span></label>
+          <input type="text" id="nomorOrder" placeholder="Contoh: ORD-2026-00123" required />
         </div>
-        <div style="margin-top:8px;">
-          <button type="button" class="btn btn-secondary" onclick="addBatch('batchListIn')">+ Tambah Batch</button>
+        <div>
+          <label>Nama Vaksinator</label>
+          <input type="text" id="namaVaksinator" placeholder="Nama petugas" />
+        </div>
+        <div>
+          <label>Waktu Server (ISO) <span class="req">*</span></label>
+          <input type="text" id="waktuIso" readonly />
+          <div class="status" id="timeStatus">Mengambil waktu server…</div>
+        </div>
+        <div>
+          <label>Waktu Lokal (Asia/Jakarta)</label>
+          <input type="text" id="waktuLocal" readonly />
+        </div>
+        <div>
+          <label>Latitude <span class="req">*</span></label>
+          <input type="text" id="lat" readonly />
+        </div>
+        <div>
+          <label>Longitude <span class="req">*</span></label>
+          <input type="text" id="lng" readonly />
         </div>
       </div>
-      <div style="grid-column: 1 / span 2;">
-        <label>Catatan Cek-In</label>
-        <textarea id="catatanCheckIn" placeholder="Catatan"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-ghost" id="btnRefreshTime">Ambil Ulang Waktu</button>
+        <button class="btn btn-ghost" id="btnGetLocation">Ambil Ulang Lokasi</button>
+        <span id="locBadge" class="badge">Lokasi: —</span>
+      </div>
+      <div class="status" id="gpsStatus">Mencoba GPS…</div>
+    </div>
+
+    <!-- Cek-In -->
+    <div class="card hidden" id="sectionCheckIn">
+      <h3>Cek-In</h3>
+      <div class="grid">
+        <div>
+          <label>Kondisi Vaksin</label>
+          <select id="kondisiVaksin">
+            <option value="">— Pilih —</option>
+            <option>Baik</option>
+            <option>Perlu Pendinginan</option>
+            <option>Rusak</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Nomor Batch Vaksin (bisa lebih dari satu)</label>
+          <div class="batches" id="batchListIn"></div>
+          <div style="margin-top:8px"><button type="button" class="btn btn-ghost" onclick="addBatch('batchListIn')">+ Tambah Batch</button></div>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Catatan Cek-In</label>
+          <textarea id="catatanCheckIn" placeholder="Catatan"></textarea>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Bagian Cek-Out -->
-  <div class="card hidden" id="sectionCheckOut">
-    <h3>Cek-Out</h3>
+    <!-- Cek-Out -->
+    <div class="card hidden" id="sectionCheckOut">
+      <h3>Cek-Out</h3>
+      <div class="grid">
+        <div>
+          <label>No Kandang</label>
+          <input type="text" id="noKandang" placeholder="No kandang" />
+        </div>
+        <div>
+          <label>Jumlah Ayam Tervaksin</label>
+          <input type="number" id="jmlAyam" min="0" step="1" />
+        </div>
+        <div>
+          <label>Jumlah Vaksin Terpakai</label>
+          <input type="number" id="jmlVaksinTerpakai" min="0" step="1" />
+        </div>
+        <div style="grid-column:1/-1">
+          <label>No Batch Vaksin Terpakai (bisa lebih dari satu)</label>
+          <div class="batches" id="batchListOut"></div>
+          <div style="margin-top:8px"><button type="button" class="btn btn-ghost" onclick="addBatch('batchListOut')">+ Tambah Batch</button></div>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Kendala</label>
+          <textarea id="kendala" placeholder="Ada kendala?"></textarea>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Catatan Cek-Out</label>
+          <textarea id="catatanCheckOut" placeholder="Catatan"></textarea>
+        </div>
+      </div>
+    </div>
+
     <div class="row">
-      <div>
-        <label>No Kandang</label>
-        <input type="text" id="noKandang" placeholder="No kandang" />
-      </div>
-      <div>
-        <label>Jumlah Ayam Tervaksin</label>
-        <input type="number" id="jmlAyam" min="0" step="1" />
-      </div>
-      <div>
-        <label>Jumlah Vaksin Terpakai</label>
-        <input type="number" id="jmlVaksinTerpakai" min="0" step="1" />
-      </div>
-      <div style="grid-column: 1 / span 2;">
-        <label>No Batch Vaksin Terpakai</label>
-        <input type="text" id="batchTerpakai" placeholder="Contoh: BATCH-001; BATCH-002" />
-        <div class="note">Pisahkan dengan titik koma (;) jika lebih dari satu.</div>
-      </div>
-      <div style="grid-column: 1 / span 2;">
-        <label>Kendala</label>
-        <textarea id="kendala" placeholder="Ada kendala?"></textarea>
-      </div>
-      <div style="grid-column: 1 / span 2;">
-        <label>Catatan Cek-Out</label>
-        <textarea id="catatanCheckOut" placeholder="Catatan"></textarea>
-      </div>
+      <button class="btn btn-primary" id="btnSubmit">Kirim</button>
+      <button class="btn" type="button" onclick="resetForm()">Reset</button>
     </div>
+    <p class="status" id="status"></p>
   </div>
-
-  <div style="display:flex; gap:8px;">
-    <button class="btn btn-primary" id="btnSubmit">Kirim</button>
-    <button class="btn" type="button" onclick="resetForm()">Reset</button>
-  </div>
-  <p id="status" class="note"></p>
 
 <script>
-  // ======= KONFIGURASI: Ganti dengan URL Flow kamu =======
-  const FLOW_URL = 'PASTE_URL_FLOW_DI_SINI'; // contoh: https://prod-XX.westus.logic.azure.com:443/workflows/.../triggers/manual/paths/invoke?api-version=...
-  // =======================================================
+  // ====== KONFIG: Ganti dengan URL Flow kamu ======
+  const FLOW_URL = 'PASTE_URL_FLOW_DI_SINI';
+  // ================================================
 
   const modeEl = document.getElementById('mode');
   const sectionIn = document.getElementById('sectionCheckIn');
   const sectionOut = document.getElementById('sectionCheckOut');
   const statusEl = document.getElementById('status');
+  const gpsStatus = document.getElementById('gpsStatus');
+  const locBadge = document.getElementById('locBadge');
+  const timeStatus = document.getElementById('timeStatus');
 
-  function showSection() {
+  let locationSource = 'gps'; // 'gps' | 'ip' | 'none'
+  let gpsTries = 0;
+  const GPS_MAX_TRIES = 4;
+
+  function showSection(){
     const m = modeEl.value;
     sectionIn.classList.toggle('hidden', m !== 'checkin');
     sectionOut.classList.toggle('hidden', m !== 'checkout');
   }
   modeEl.addEventListener('change', showSection);
 
-  function setTimeNow() {
-    const now = new Date();
-    document.getElementById('waktuIso').value = now.toISOString(); // UTC ISO
-    // tampilkan lokal (Asia/Jakarta)
-    try {
-      const local = now.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour12:false });
+  // ====== WAKTU DARI SERVER ======
+  async function fetchServerTime(){
+    timeStatus.textContent = 'Mengambil waktu server…';
+    try{
+      const r = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta', {cache:'no-store'});
+      if(!r.ok) throw new Error('Gagal ambil waktu server');
+      const j = await r.json();
+      const iso = j.datetime; // contoh: 2026-01-27T10:10:10.123+07:00
+      document.getElementById('waktuIso').value = iso;
+      const d = new Date(iso);
+      const local = d.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour12:false });
       document.getElementById('waktuLocal').value = local;
-    } catch(e) {
-      document.getElementById('waktuLocal').value = now.toString();
+      timeStatus.textContent = 'Waktu server berhasil diambil.';
+    }catch(e){
+      // fallback: waktu dari device
+      const now = new Date();
+      document.getElementById('waktuIso').value = now.toISOString();
+      document.getElementById('waktuLocal').value = now.toLocaleString('id-ID', { hour12:false });
+      timeStatus.innerHTML = 'Gagal ambil waktu server, pakai waktu perangkat <span class="warn">(fallback)</span>.';
     }
   }
 
-  function getLocation() {
-    if (!navigator.geolocation) {
-      alert('GPS tidak didukung perangkat ini.');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        document.getElementById('lat').value = pos.coords.latitude.toFixed(6);
-        document.getElementById('lng').value = pos.coords.longitude.toFixed(6);
-      },
-      err => {
-        alert('Gagal mengambil lokasi. Aktifkan izin lokasi & GPS: ' + err.message);
-      },
-      { enableHighAccuracy:true, timeout: 15000, maximumAge: 0 }
-    );
+  document.getElementById('btnRefreshTime').addEventListener('click', fetchServerTime);
+
+  // ====== LOKASI: GPS dengan Auto-Retry ======
+  function updateLocBadge(){
+    locBadge.textContent = 'Lokasi: ' + (locationSource==='gps'?'GPS':'Perkiraan IP');
+  }
+  updateLocBadge();
+
+  function getLocationOnce(){
+    return new Promise((resolve,reject)=>{
+      if(!navigator.geolocation){
+        return reject(new Error('Perangkat tidak mendukung GPS'));
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos=>resolve(pos),
+        err=>reject(err),
+        { enableHighAccuracy:true, timeout: 12000, maximumAge: 0 }
+      );
+    });
   }
 
-  document.getElementById('btnRefreshTime').addEventListener('click', setTimeNow);
-  document.getElementById('btnGetLocation').addEventListener('click', getLocation);
+  async function tryGPSWithRetry(){
+    gpsStatus.textContent = 'Mencoba GPS…';
+    for(gpsTries=1; gpsTries<=GPS_MAX_TRIES; gpsTries++){
+      try{
+        const pos = await getLocationOnce();
+        const { latitude, longitude, accuracy } = pos.coords;
+        document.getElementById('lat').value = latitude.toFixed(6);
+        document.getElementById('lng').value = longitude.toFixed(6);
+        locationSource = 'gps';
+        updateLocBadge();
+        gpsStatus.innerHTML = `GPS OK (<span class="ok">±${Math.round(accuracy)} m</span>)`;
+        return true;
+      }catch(err){
+        // Jika user deny permission (code 1), segera hentikan dan fallback ke IP
+        if(err && err.code === 1){
+          gpsStatus.innerHTML = 'Akses GPS ditolak pengguna. Menggunakan lokasi perkiraan (IP)…';
+          await fallbackIP();
+          return false;
+        }
+        // selain itu, coba ulang
+        gpsStatus.textContent = `GPS gagal (percobaan ${gpsTries}/${GPS_MAX_TRIES}). Mencoba lagi…`;
+        await new Promise(r=>setTimeout(r, 1500));
+      }
+    }
+    // habis percobaan -> fallback IP
+    gpsStatus.innerHTML = 'GPS masih gagal. Menggunakan lokasi perkiraan (IP)…';
+    await fallbackIP();
+    return false;
+  }
 
-  function addBatch(containerId) {
+  async function fallbackIP(){
+    try{
+      const r = await fetch('https://ipapi.co/json/', {cache:'no-store'});
+      if(!r.ok) throw new Error('IP API error');
+      const j = await r.json();
+      if(j && j.latitude && j.longitude){
+        document.getElementById('lat').value = Number(j.latitude).toFixed(6);
+        document.getElementById('lng').value = Number(j.longitude).toFixed(6);
+        locationSource = 'ip';
+        updateLocBadge();
+        gpsStatus.innerHTML = `Lokasi perkiraan: ${j.city || ''} ${j.region || ''}`;
+      }else{
+        locationSource = 'none';
+        updateLocBadge();
+        gpsStatus.innerHTML = 'Tidak bisa mendapatkan lokasi (IP).';
+      }
+    }catch(e){
+      locationSource = 'none';
+      updateLocBadge();
+      gpsStatus.innerHTML = 'Tidak bisa mendapatkan lokasi (IP).';
+    }
+  }
+
+  document.getElementById('btnGetLocation').addEventListener('click', tryGPSWithRetry);
+
+  // ====== BATCH INPUT ======
+  function addBatch(containerId){
     const wrap = document.getElementById(containerId);
     const row = document.createElement('div');
     row.className = 'batch-row';
-    row.innerHTML = `
-      <input type="text" placeholder="Batch" />
-      <button type="button" class="btn btn-danger" onclick="removeBatch(this)">Hapus</button>
-    `;
+    row.innerHTML = `<input type="text" placeholder="No Batch" /><button type="button" class="btn btn-danger" onclick="removeBatch(this)">Hapus</button>`;
     wrap.appendChild(row);
   }
-  function removeBatch(btn) {
-    const row = btn.parentElement;
-    row.parentElement.removeChild(row);
-  }
+  function removeBatch(btn){ btn.parentElement.remove(); }
 
-  function resetForm() {
-    document.getElementById('nomorOrder').value = '';
-    document.getElementById('namaVaksinator').value = '';
-    document.getElementById('kondisiVaksin').value = '';
-    document.getElementById('catatanCheckIn').value = '';
-    document.getElementById('noKandang').value = '';
-    document.getElementById('jmlAyam').value = '';
-    document.getElementById('jmlVaksinTerpakai').value = '';
-    document.getElementById('batchTerpakai').value = '';
-    document.getElementById('kendala').value = '';
-    document.getElementById('catatanCheckOut').value = '';
-    // reset batch list check-in ke satu baris
-    const bl = document.getElementById('batchListIn');
-    bl.innerHTML = '';
+  // ====== FORM ======
+  function resetForm(){
+    document.getElementById('nomorOrder').value='';
+    document.getElementById('namaVaksinator').value='';
+    document.getElementById('kondisiVaksin').value='';
+    document.getElementById('catatanCheckIn').value='';
+    document.getElementById('noKandang').value='';
+    document.getElementById('jmlAyam').value='';
+    document.getElementById('jmlVaksinTerpakai').value='';
+    document.getElementById('kendala').value='';
+    document.getElementById('catatanCheckOut').value='';
+    document.getElementById('lat').value='';
+    document.getElementById('lng').value='';
+
+    // reset batch list
+    document.getElementById('batchListIn').innerHTML='';
+    document.getElementById('batchListOut').innerHTML='';
     addBatch('batchListIn');
-    setTimeNow();
-    getLocation();
-    statusEl.textContent = '';
+    addBatch('batchListOut');
+
+    fetchServerTime();
+    tryGPSWithRetry();
+    statusEl.textContent='';
   }
 
-  async function submitData() {
+  async function submitData(){
     const mode = document.getElementById('mode').value; // checkin / checkout
-    const nomorOrder = (document.getElementById('nomorOrder').value || '').trim();
-    const waktuIso = (document.getElementById('waktuIso').value || '').trim();
-    const lat = (document.getElementById('lat').value || '').trim();
-    const lng = (document.getElementById('lng').value || '').trim();
-    const namaVaksinator = (document.getElementById('namaVaksinator').value || '').trim();
+    const nomorOrder = (document.getElementById('nomorOrder').value||'').trim();
+    const waktuIso = (document.getElementById('waktuIso').value||'').trim();
+    const lat = (document.getElementById('lat').value||'').trim();
+    const lng = (document.getElementById('lng').value||'').trim();
+    const namaVaksinator = (document.getElementById('namaVaksinator').value||'').trim();
 
-    // validasi umum
-    if (!mode) { alert('Pilih mode Cek-In atau Cek-Out.'); return; }
-    if (!nomorOrder) { alert('Nomor Order wajib diisi.'); return; }
-    if (!waktuIso) { alert('Waktu otomatis belum terisi. Klik Ambil Ulang Waktu.'); return; }
-    if (!lat || !lng) { alert('Lokasi belum terisi. Klik Ambil Ulang Lokasi & izinkan GPS.'); return; }
+    if(!mode){ alert('Pilih mode Cek-In atau Cek-Out.'); return; }
+    if(!nomorOrder){ alert('Nomor Order wajib diisi.'); return; }
+    if(!waktuIso){ alert('Waktu belum terisi. Klik Ambil Ulang Waktu.'); return; }
 
-    let payload = {
-      mode,
-      nomorOrder,
-      waktuIso,
-      latitude: lat,
-      longitude: lng,
-      namaVaksinator
-    };
-
-    if (mode === 'checkin') {
-      const kondisiVaksin = document.getElementById('kondisiVaksin').value;
-      const catatanCheckIn = document.getElementById('catatanCheckIn').value;
-      const batchInputs = Array.from(document.querySelectorAll('#batchListIn input'))
-                               .map(i => i.value.trim()).filter(v => v);
-      payload.kondisiVaksin = kondisiVaksin || null;
-      payload.batchVaksin = batchInputs; // array
-      payload.catatanCheckIn = catatanCheckIn || null;
-    } else {
-      const noKandang = document.getElementById('noKandang').value;
-      const jmlAyam = document.getElementById('jmlAyam').value;
-      const jmlVaksinTerpakai = document.getElementById('jmlVaksinTerpakai').value;
-      const batchTerpakai = document.getElementById('batchTerpakai').value; // ; separated
-      const kendala = document.getElementById('kendala').value;
-      const catatanCheckOut = document.getElementById('catatanCheckOut').value;
-
-      payload.noKandang = noKandang || null;
-      payload.jumlahAyamTervaksin = jmlAyam ? Number(jmlAyam) : null;
-      payload.jumlahVaksinTerpakai = jmlVaksinTerpakai ? Number(jmlVaksinTerpakai) : null;
-      payload.batchVaksinTerpakai = batchTerpakai ? batchTerpakai.split(';').map(s => s.trim()).filter(Boolean) : [];
-      payload.kendala = kendala || null;
-      payload.catatanCheckOut = catatanCheckOut || null;
+    // Lokasi wajib, tapi boleh fallback IP. Jika masih kosong -> block
+    if(!lat || !lng){
+      alert('Lokasi belum tersedia. Aktifkan GPS dan klik Ambil Ulang Lokasi.');
+      return;
     }
 
-    try {
+    let payload = {
+      mode, nomorOrder, waktuIso,
+      latitude: lat, longitude: lng,
+      namaVaksinator,
+      locationSource // gps | ip | none
+    };
+
+    if(mode==='checkin'){
+      const kondisiVaksin = document.getElementById('kondisiVaksin').value || null;
+      const catatanCheckIn = document.getElementById('catatanCheckIn').value || null;
+      const batchInputs = Array.from(document.querySelectorAll('#batchListIn input'))
+                              .map(i=>i.value.trim()).filter(Boolean);
+      payload.kondisiVaksin = kondisiVaksin;
+      payload.batchVaksin = batchInputs; // array
+      payload.catatanCheckIn = catatanCheckIn;
+    }else{
+      const noKandang = document.getElementById('noKandang').value || null;
+      const jmlAyam = document.getElementById('jmlAyam').value;
+      const jmlVaksin = document.getElementById('jmlVaksinTerpakai').value;
+      const batchOut = Array.from(document.querySelectorAll('#batchListOut input'))
+                            .map(i=>i.value.trim()).filter(Boolean);
+      const kendala = document.getElementById('kendala').value || null;
+      const catatanCheckOut = document.getElementById('catatanCheckOut').value || null;
+
+      payload.noKandang = noKandang;
+      payload.jumlahAyamTervaksin = jmlAyam? Number(jmlAyam): null;
+      payload.jumlahVaksinTerpakai = jmlVaksin? Number(jmlVaksin): null;
+      payload.batchVaksinTerpakai = batchOut; // array
+      payload.kendala = kendala;
+      payload.catatanCheckOut = catatanCheckOut;
+    }
+
+    try{
       statusEl.textContent = 'Mengirim data…';
       const resp = await fetch(FLOW_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        // mode: 'cors'  // default; Response action harus set Access-Control-Allow-Origin: *
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
       });
-      if (!resp.ok) {
-        statusEl.textContent = 'Gagal: ' + resp.status + ' ' + (resp.statusText || '');
-        alert('Gagal mengirim data. Coba lagi.');
+      if(!resp.ok){
+        alert('Gagal mengirim data: '+resp.status);
+        statusEl.textContent = 'Gagal mengirim ('+resp.status+').';
         return;
       }
-      // coba baca JSON
-      let msg = 'Berhasil terkirim.';
-      try {
-        const j = await resp.json();
-        if (j && j.message) msg = j.message;
-      } catch(e){/* ignore */}
+      let msg='Berhasil terkirim.';
+      try{ const j = await resp.json(); if(j && j.message) msg=j.message; }catch(e){}
+      alert(msg);
       statusEl.textContent = msg;
-      alert('Terima kasih! Data tersimpan.');
       resetForm();
-    } catch (e) {
+    }catch(e){
       console.error(e);
-      statusEl.textContent = 'Terjadi kesalahan jaringan.';
-      alert('Terjadi kesalahan jaringan. Cek koneksi & coba lagi.');
+      alert('Terjadi masalah jaringan. Coba lagi.');
+      statusEl.textContent = 'Masalah jaringan saat mengirim.';
     }
   }
 
   document.getElementById('btnSubmit').addEventListener('click', submitData);
 
-  // init awal
+  // Init awal
   addBatch('batchListIn');
-  setTimeNow();
-  getLocation();
+  addBatch('batchListOut');
+  fetchServerTime();
+  tryGPSWithRetry();
 </script>
 </body>
 </html>
