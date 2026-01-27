@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Form Cek-In / Cek-Out Vaksinasi</title>
+<style>
+  body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  label { font-weight: 600; display:block; margin-bottom: 4px; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 6px;
+  }
+  input[readonly], input[disabled] { background: #f8f8f8; }
+  textarea { min-height: 80px; }
+  .hidden { display: none; }
+  .batches { display:flex; flex-direction: column; gap:6px; }
+  .batch-row { display:flex; gap:8px; }
+  .batch-row input { flex:1; }
+  .btn { padding: 10px 14px; border: 0; border-radius: 6px; cursor: pointer; }
+  .btn-primary { background:#2563eb; color:#fff; }
+  .btn-secondary { background:#e5e7eb; }
+  .btn-danger { background:#ef4444; color:#fff; }
+  .note { font-size: 12px; color: #555; }
+  .req { color: #ef4444; }
+</style>
+</head>
+<body>
+  <h2>Form Cek-In / Cek-Out Vaksinasi</h2>
+  <p class="note">Lokasi & waktu diisi <b>otomatis</b> (read-only). Pastikan browser mengizinkan akses lokasi (GPS).</p>
+
+  <div class="card">
+    <label for="mode">Pilih Mode</label>
+    <select id="mode">
+      <option value="">— Pilih —</option>
+      <option value="checkin">Cek-In</option>
+      <option value="checkout">Cek-Out</option>
+    </select>
+  </div>
+
+  <!-- Bagian umum -->
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Nomor Order <span class="req">*</span></label>
+        <input type="text" id="nomorOrder" placeholder="Contoh: ORD-2026-00123" required />
+      </div>
+      <div>
+        <label>Nama Vaksinator</label>
+        <input type="text" id="namaVaksinator" placeholder="Nama petugas" />
+      </div>
+      <div>
+        <label>Waktu (ISO, UTC) <span class="req">*</span></label>
+        <input type="text" id="waktuIso" readonly />
+        <div class="note">Otomatis saat form dibuka/diperbarui</div>
+      </div>
+      <div>
+        <label>Waktu Lokal (Asia/Jakarta)</label>
+        <input type="text" id="waktuLocal" readonly />
+      </div>
+      <div>
+        <label>Latitude <span class="req">*</span></label>
+        <input type="text" id="lat" readonly />
+      </div>
+      <div>
+        <label>Longitude <span class="req">*</span></label>
+        <input type="text" id="lng" readonly />
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-secondary" id="btnRefreshTime">Ambil Ulang Waktu</button>
+      <button class="btn btn-secondary" id="btnGetLocation">Ambil Ulang Lokasi</button>
+    </div>
+  </div>
+
+  <!-- Bagian Cek-In -->
+  <div class="card hidden" id="sectionCheckIn">
+    <h3>Cek-In</h3>
+    <div class="row">
+      <div>
+        <label>Kondisi Vaksin</label>
+        <select id="kondisiVaksin">
+          <option value="">— Pilih —</option>
+          <option>Baik</option>
+          <option>Perlu Pendinginan</option>
+          <option>Rusak</option>
+        </select>
+      </div>
+      <div style="grid-column: 1 / span 2;">
+        <label>Nomor Batch Vaksin (bisa lebih dari satu)</label>
+        <div class="batches" id="batchListIn">
+          <div class="batch-row">
+            <input type="text" placeholder="Batch #1" />
+            <button type="button" class="btn btn-danger" onclick="removeBatch(this)">Hapus</button>
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <button type="button" class="btn btn-secondary" onclick="addBatch('batchListIn')">+ Tambah Batch</button>
+        </div>
+      </div>
+      <div style="grid-column: 1 / span 2;">
+        <label>Catatan Cek-In</label>
+        <textarea id="catatanCheckIn" placeholder="Catatan"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bagian Cek-Out -->
+  <div class="card hidden" id="sectionCheckOut">
+    <h3>Cek-Out</h3>
+    <div class="row">
+      <div>
+        <label>No Kandang</label>
+        <input type="text" id="noKandang" placeholder="No kandang" />
+      </div>
+      <div>
+        <label>Jumlah Ayam Tervaksin</label>
+        <input type="number" id="jmlAyam" min="0" step="1" />
+      </div>
+      <div>
+        <label>Jumlah Vaksin Terpakai</label>
+        <input type="number" id="jmlVaksinTerpakai" min="0" step="1" />
+      </div>
+      <div style="grid-column: 1 / span 2;">
+        <label>No Batch Vaksin Terpakai</label>
+        <input type="text" id="batchTerpakai" placeholder="Contoh: BATCH-001; BATCH-002" />
+        <div class="note">Pisahkan dengan titik koma (;) jika lebih dari satu.</div>
+      </div>
+      <div style="grid-column: 1 / span 2;">
+        <label>Kendala</label>
+        <textarea id="kendala" placeholder="Ada kendala?"></textarea>
+      </div>
+      <div style="grid-column: 1 / span 2;">
+        <label>Catatan Cek-Out</label>
+        <textarea id="catatanCheckOut" placeholder="Catatan"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px;">
+    <button class="btn btn-primary" id="btnSubmit">Kirim</button>
+    <button class="btn" type="button" onclick="resetForm()">Reset</button>
+  </div>
+  <p id="status" class="note"></p>
+
+<script>
+  // ======= KONFIGURASI: Ganti dengan URL Flow kamu =======
+  const FLOW_URL = 'PASTE_URL_FLOW_DI_SINI'; // contoh: https://prod-XX.westus.logic.azure.com:443/workflows/.../triggers/manual/paths/invoke?api-version=...
+  // =======================================================
+
+  const modeEl = document.getElementById('mode');
+  const sectionIn = document.getElementById('sectionCheckIn');
+  const sectionOut = document.getElementById('sectionCheckOut');
+  const statusEl = document.getElementById('status');
+
+  function showSection() {
+    const m = modeEl.value;
+    sectionIn.classList.toggle('hidden', m !== 'checkin');
+    sectionOut.classList.toggle('hidden', m !== 'checkout');
+  }
+  modeEl.addEventListener('change', showSection);
+
+  function setTimeNow() {
+    const now = new Date();
+    document.getElementById('waktuIso').value = now.toISOString(); // UTC ISO
+    // tampilkan lokal (Asia/Jakarta)
+    try {
+      const local = now.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour12:false });
+      document.getElementById('waktuLocal').value = local;
+    } catch(e) {
+      document.getElementById('waktuLocal').value = now.toString();
+    }
+  }
+
+  function getLocation() {
+    if (!navigator.geolocation) {
+      alert('GPS tidak didukung perangkat ini.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        document.getElementById('lat').value = pos.coords.latitude.toFixed(6);
+        document.getElementById('lng').value = pos.coords.longitude.toFixed(6);
+      },
+      err => {
+        alert('Gagal mengambil lokasi. Aktifkan izin lokasi & GPS: ' + err.message);
+      },
+      { enableHighAccuracy:true, timeout: 15000, maximumAge: 0 }
+    );
+  }
+
+  document.getElementById('btnRefreshTime').addEventListener('click', setTimeNow);
+  document.getElementById('btnGetLocation').addEventListener('click', getLocation);
+
+  function addBatch(containerId) {
+    const wrap = document.getElementById(containerId);
+    const row = document.createElement('div');
+    row.className = 'batch-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Batch" />
+      <button type="button" class="btn btn-danger" onclick="removeBatch(this)">Hapus</button>
+    `;
+    wrap.appendChild(row);
+  }
+  function removeBatch(btn) {
+    const row = btn.parentElement;
+    row.parentElement.removeChild(row);
+  }
+
+  function resetForm() {
+    document.getElementById('nomorOrder').value = '';
+    document.getElementById('namaVaksinator').value = '';
+    document.getElementById('kondisiVaksin').value = '';
+    document.getElementById('catatanCheckIn').value = '';
+    document.getElementById('noKandang').value = '';
+    document.getElementById('jmlAyam').value = '';
+    document.getElementById('jmlVaksinTerpakai').value = '';
+    document.getElementById('batchTerpakai').value = '';
+    document.getElementById('kendala').value = '';
+    document.getElementById('catatanCheckOut').value = '';
+    // reset batch list check-in ke satu baris
+    const bl = document.getElementById('batchListIn');
+    bl.innerHTML = '';
+    addBatch('batchListIn');
+    setTimeNow();
+    getLocation();
+    statusEl.textContent = '';
+  }
+
+  async function submitData() {
+    const mode = document.getElementById('mode').value; // checkin / checkout
+    const nomorOrder = (document.getElementById('nomorOrder').value || '').trim();
+    const waktuIso = (document.getElementById('waktuIso').value || '').trim();
+    const lat = (document.getElementById('lat').value || '').trim();
+    const lng = (document.getElementById('lng').value || '').trim();
+    const namaVaksinator = (document.getElementById('namaVaksinator').value || '').trim();
+
+    // validasi umum
+    if (!mode) { alert('Pilih mode Cek-In atau Cek-Out.'); return; }
+    if (!nomorOrder) { alert('Nomor Order wajib diisi.'); return; }
+    if (!waktuIso) { alert('Waktu otomatis belum terisi. Klik Ambil Ulang Waktu.'); return; }
+    if (!lat || !lng) { alert('Lokasi belum terisi. Klik Ambil Ulang Lokasi & izinkan GPS.'); return; }
+
+    let payload = {
+      mode,
+      nomorOrder,
+      waktuIso,
+      latitude: lat,
+      longitude: lng,
+      namaVaksinator
+    };
+
+    if (mode === 'checkin') {
+      const kondisiVaksin = document.getElementById('kondisiVaksin').value;
+      const catatanCheckIn = document.getElementById('catatanCheckIn').value;
+      const batchInputs = Array.from(document.querySelectorAll('#batchListIn input'))
+                               .map(i => i.value.trim()).filter(v => v);
+      payload.kondisiVaksin = kondisiVaksin || null;
+      payload.batchVaksin = batchInputs; // array
+      payload.catatanCheckIn = catatanCheckIn || null;
+    } else {
+      const noKandang = document.getElementById('noKandang').value;
+      const jmlAyam = document.getElementById('jmlAyam').value;
+      const jmlVaksinTerpakai = document.getElementById('jmlVaksinTerpakai').value;
+      const batchTerpakai = document.getElementById('batchTerpakai').value; // ; separated
+      const kendala = document.getElementById('kendala').value;
+      const catatanCheckOut = document.getElementById('catatanCheckOut').value;
+
+      payload.noKandang = noKandang || null;
+      payload.jumlahAyamTervaksin = jmlAyam ? Number(jmlAyam) : null;
+      payload.jumlahVaksinTerpakai = jmlVaksinTerpakai ? Number(jmlVaksinTerpakai) : null;
+      payload.batchVaksinTerpakai = batchTerpakai ? batchTerpakai.split(';').map(s => s.trim()).filter(Boolean) : [];
+      payload.kendala = kendala || null;
+      payload.catatanCheckOut = catatanCheckOut || null;
+    }
+
+    try {
+      statusEl.textContent = 'Mengirim data…';
+      const resp = await fetch(FLOW_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        // mode: 'cors'  // default; Response action harus set Access-Control-Allow-Origin: *
+      });
+      if (!resp.ok) {
+        statusEl.textContent = 'Gagal: ' + resp.status + ' ' + (resp.statusText || '');
+        alert('Gagal mengirim data. Coba lagi.');
+        return;
+      }
+      // coba baca JSON
+      let msg = 'Berhasil terkirim.';
+      try {
+        const j = await resp.json();
+        if (j && j.message) msg = j.message;
+      } catch(e){/* ignore */}
+      statusEl.textContent = msg;
+      alert('Terima kasih! Data tersimpan.');
+      resetForm();
+    } catch (e) {
+      console.error(e);
+      statusEl.textContent = 'Terjadi kesalahan jaringan.';
+      alert('Terjadi kesalahan jaringan. Cek koneksi & coba lagi.');
+    }
+  }
+
+  document.getElementById('btnSubmit').addEventListener('click', submitData);
+
+  // init awal
+  addBatch('batchListIn');
+  setTimeNow();
+  getLocation();
+</script>
+</body>
+</html>
