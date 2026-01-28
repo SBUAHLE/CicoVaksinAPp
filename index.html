@@ -11,7 +11,6 @@
 
   <!-- ================= STYLE ================= -->
   <style>
-    /* ===== VARIABLE WARNA (AMAN DIUBAH) ===== */
     :root{
       --bg:#eef2f7;
       --card:#ffffff;
@@ -31,11 +30,9 @@
       color:#0f172a;
     }
 
-    /* ===== LAYOUT ===== */
     .container{max-width:960px;margin:28px auto;padding:0 16px}
     .hidden{display:none !important}
 
-    /* ===== CARD ===== */
     .card{
       background:var(--card);
       border:1px solid var(--border);
@@ -45,13 +42,7 @@
       box-shadow:0 10px 30px rgba(15,23,42,.08);
     }
 
-    .section-title{
-      font-weight:700;
-      color:#1e3a8a;
-      margin-bottom:12px;
-    }
-
-    /* ===== FORM ===== */
+    .section-title{font-weight:700;color:#1e3a8a;margin-bottom:12px}
     label{font-weight:600;display:block;margin:12px 0 6px}
 
     input,select,textarea{
@@ -60,28 +51,20 @@
       border-radius:10px;
       border:1px solid var(--border);
       font-size:15px;
+      background:#fff;
     }
-
     input[readonly]{background:#f5f7fb}
     textarea{min-height:90px}
 
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .row>div{flex:1}
 
-    /* ===== BUTTON ===== */
-    .btn{
-      padding:14px 18px;
-      border-radius:12px;
-      border:none;
-      font-weight:600;
-      cursor:pointer;
-    }
-
+    .btn{padding:12px 16px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
     .btn-primary{background:var(--primary);color:#fff}
     .btn-ghost{background:#eef2ff;color:#1e3a8a}
-    .btn-back{background:none;color:#2563eb;margin-bottom:12px}
+    .btn-danger{background:#fee2e2;color:#b91c1c}
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 
-    /* ===== BADGE & WARNING ===== */
     .warn{
       background:#fff1f2;
       color:var(--danger);
@@ -100,7 +83,6 @@
       margin-top:6px;
     }
 
-    /* ===== LANDING PAGE ===== */
     .landing-wrap{
       min-height:100vh;
       display:flex;
@@ -108,7 +90,6 @@
       justify-content:center;
       background:radial-gradient(circle at top,#e0e7ff,#eef2f7);
     }
-
     .landing-card{
       background:linear-gradient(180deg,#ffffff,#f8fafc);
       border-radius:22px;
@@ -119,75 +100,70 @@
       box-shadow:0 24px 50px rgba(30,64,175,.2);
       border:1px solid var(--border);
     }
-
-    .landing-card h1{
-      font-size:30px;
-      margin:6px 0;
-      color:#1e3a8a;
-    }
-
-    .landing-card p{
-      font-size:15px;
-      color:var(--muted);
-      margin-bottom:28px;
-    }
-
+    .landing-card h1{font-size:30px;margin:6px 0;color:#1e3a8a}
+    .landing-card p{font-size:15px;color:#1f2937;margin-bottom:28px}
     .landing-actions{display:grid;gap:14px}
+    .footer-note{margin-top:22px;font-size:13px;color:#64748b}
 
-    .footer-note{
-      margin-top:22px;
-      font-size:13px;
-      color:#64748b;
+    /* Foto preview */
+    .photos-preview{
+      display:flex;gap:8px;flex-wrap:wrap;margin-top:8px
+    }
+    .photo-item{
+      position:relative;width:72px;height:72px;border-radius:8px;border:1px solid var(--border);overflow:hidden;background:#f8fafc
+    }
+    .photo-item img{
+      width:100%;height:100%;object-fit:cover
+    }
+    .photo-del{
+      position:absolute;top:2px;right:2px;
+      background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:999px;
+      width:20px;height:20px;line-height:20px;text-align:center;font-size:13px;cursor:pointer
+    }
+    .hint{color:#64748b;font-size:12px;margin-top:4px}
+
+    /* Signature pad */
+    .sig-wrap{
+      border:1px dashed var(--border);
+      border-radius:12px;
+      background:#f8fafc;
+      padding:10px;
+      margin-top:14px;
+    }
+    .sig-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .sig-toolbar .title{font-weight:600;color:#1e3a8a;font-size:14px}
+    canvas.sig{
+      width:100%;height:180px;border-radius:8px;background:#fff;border:1px solid var(--border)
     }
   </style>
 </head>
 
 <body>
 
-<!-- ========================================================= -->
-<!-- ========================= HOME ========================== -->
-<!-- ========================================================= -->
+<!-- ========================= HOME ========================= -->
 <div id="view-home" class="landing-wrap">
   <div class="landing-card">
     <div style="font-size:44px">💉</div>
-
-    <!-- UBAH NAMA APLIKASI DI SINI -->
     <h1>CICO Vaksinasi</h1>
-
-    <!-- UBAH DESKRIPSI DI SINI -->
-    <p>
-      Sistem Check-In &amp; Check-Out Vaksinasi<br>
-      Dengan Lokasi &amp; Waktu Otomatis
-    </p>
-
+    <p>Sistem Check-In &amp; Check-Out Vaksinasi<br>Dengan Lokasi &amp; Waktu Otomatis</p>
     <div class="landing-actions">
-      <button class="btn btn-primary" onclick="show('checkin')">
-        ✅ CEK-IN VAKSIN
-      </button>
-      <button class="btn btn-ghost" onclick="show('checkout')">
-        🚚 CEK-OUT VAKSIN
-      </button>
+      <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN VAKSIN</button>
+      <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT VAKSIN</button>
     </div>
-
-    <div class="footer-note">
-      📍 GPS • ⏱️ Waktu Sistem • 📸 Bukti Foto
-    </div>
+    <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto • ✍️ Tanda Tangan Digital (Cek-Out)</div>
   </div>
 </div>
 
-<!-- ========================================================= -->
-<!-- ======================== CEK IN ========================= -->
-<!-- ========================================================= -->
+<!-- ========================= CEK IN ========================= -->
 <div id="view-checkin" class="container hidden">
-  <button class="btn-back" onclick="show('home')">← Kembali</button>
+  <button class="btn btn-ghost" onclick="show('home')">← Kembali</button>
   <h2>Form Cek-In</h2>
 
   <div id="ci_warn" class="warn hidden"></div>
 
-  <!-- ===== DATA OTOMATIS ===== -->
+  <!-- Data otomatis -->
   <div class="card">
     <div class="section-title">Data Otomatis (Sistem)</div>
-
     <div class="row">
       <div>
         <label>Tanggal</label>
@@ -198,11 +174,9 @@
         <input id="ci_jam" readonly>
       </div>
     </div>
-
     <label>Nama Lokasi</label>
     <input id="ci_lokasi" readonly>
     <span id="ci_src" class="badge">Lokasi: -</span>
-
     <div class="row">
       <div>
         <label>Latitude</label>
@@ -215,18 +189,17 @@
     </div>
   </div>
 
-  <!-- ===== DATA DIISI PETUGAS ===== -->
+  <!-- Data diisi petugas -->
   <div class="card">
     <div class="section-title">Data Diisi Petugas</div>
 
-    <!-- Nomor Order -->
     <label>Nomor Order</label>
     <select id="ci_order">
       <option value="">⏳ Memuat...</option>
     </select>
 
     <label>Nama Vaksinator</label>
-    <input id="ci_nama">
+    <input id="ci_nama" placeholder="Nama lengkap petugas">
 
     <label>Kondisi Vaksin</label>
     <select id="ci_kondisi">
@@ -240,33 +213,41 @@
 
     <label>Nomor Batch Vaksin</label>
     <div id="ci_batch_wrap"></div>
-    <button class="btn btn-ghost" type="button" onclick="addBatch()">➕ Tambah Batch</button>
+    <div class="btn-group">
+      <button class="btn btn-ghost" type="button" onclick="addBatch()">➕ Tambah Batch</button>
+      <button class="btn btn-ghost" type="button" onclick="resetBatches()">↺ Reset Batch</button>
+    </div>
 
-    <label>Foto Bukti</label>
-    <input type="file" id="ci_foto" accept="image/*">
+    <label>Upload Foto (maks. 5)</label>
+    <input type="file" id="ci_fotos" accept="image/*" multiple>
+    <div class="hint">Pilih 1–5 foto. Bisa hapus per-foto (ikon ×) atau hapus semua.</div>
+    <div id="ci_fotos_preview" class="photos-preview"></div>
+    <div class="btn-group">
+      <button type="button" id="ci_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
+    </div>
+
+    <!-- TTD DIHAPUS untuk CEK-IN sesuai permintaan -->
 
     <label>Catatan</label>
-    <textarea id="ci_catatan"></textarea>
+    <textarea id="ci_catatan" placeholder="Opsional"></textarea>
 
-    <button class="btn btn-primary" type="button" onclick="submitCI()">
-      Kirim Cek-In
-    </button>
+    <div class="btn-group">
+      <button class="btn btn-primary" type="button" onclick="submitCI()">Kirim Cek-In</button>
+      <button class="btn btn-ghost" type="button" onclick="resetForm('ci')">↺ Reset Form</button>
+    </div>
   </div>
 </div>
 
-<!-- ========================================================= -->
-<!-- ======================= CEK OUT ========================= -->
-<!-- ========================================================= -->
+<!-- ========================= CEK OUT ======================== -->
 <div id="view-checkout" class="container hidden">
-  <button class="btn-back" onclick="show('home')">← Kembali</button>
+  <button class="btn btn-ghost" onclick="show('home')">← Kembali</button>
   <h2>Form Cek-Out</h2>
 
   <div id="co_warn" class="warn hidden"></div>
 
-  <!-- ===== DATA OTOMATIS ===== -->
+  <!-- Data otomatis -->
   <div class="card">
     <div class="section-title">Data Otomatis (Sistem)</div>
-
     <div class="row">
       <div>
         <label>Tanggal</label>
@@ -277,11 +258,9 @@
         <input id="co_jam" readonly>
       </div>
     </div>
-
     <label>Nama Lokasi</label>
     <input id="co_lokasi" readonly>
     <span id="co_src" class="badge">Lokasi: -</span>
-
     <div class="row">
       <div>
         <label>Latitude</label>
@@ -294,197 +273,53 @@
     </div>
   </div>
 
-  <!-- ===== DATA DIISI PETUGAS ===== -->
+  <!-- Data diisi petugas -->
   <div class="card">
     <div class="section-title">Data Diisi Petugas</div>
 
     <label>Nomor Order</label>
-    <!-- FIX: gunakan co_order, bukan ci_order -->
     <select id="co_order">
       <option value="">⏳ Memuat...</option>
     </select>
 
     <label>Nama Vaksinator</label>
-    <input id="co_nama">
+    <input id="co_nama" placeholder="Nama lengkap petugas">
 
     <label>No Kandang</label>
-    <input id="co_kandang">
+    <input id="co_kandang" placeholder="Contoh: A-12">
 
     <label>Jumlah Ayam Tervaksin</label>
-    <input type="number" id="co_ayam">
+    <input type="number" id="co_ayam" min="0" step="1" placeholder="0">
 
     <label>Jumlah Vaksin Terpakai</label>
-    <input type="number" id="co_vaksin">
+    <input type="number" id="co_vaksin" min="0" step="1" placeholder="0">
 
-    <label>Foto Bukti</label>
-    <input type="file" id="co_foto" accept="image/*">
+    <label>Upload Foto (maks. 5)</label>
+    <input type="file" id="co_fotos" accept="image/*" multiple>
+    <div class="hint">Pilih 1–5 foto. Bisa hapus per-foto (ikon ×) atau hapus semua.</div>
+    <div id="co_fotos_preview" class="photos-preview"></div>
+    <div class="btn-group">
+      <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
+    </div>
+
+    <div class="sig-wrap">
+      <div class="sig-toolbar">
+        <div class="title">Tanda Tangan Digital (Petugas Farm)</div>
+        <button type="button" class="btn btn-ghost" onclick="clearSignature('co')">Hapus TTD</button>
+      </div>
+      <canvas id="co_sig_canvas" class="sig"></canvas>
+      <input type="hidden" id="co_signature_data">
+    </div>
 
     <label>Catatan</label>
-    <textarea id="co_catatan"></textarea>
+    <textarea id="co_catatan" placeholder="Opsional"></textarea>
 
-    <button class="btn btn-primary" type="button" onclick="submitCO()">
-      Kirim Cek-Out
-    </button>
+    <div class="btn-group">
+      <button class="btn btn-primary" type="button" onclick="submitCO()">Kirim Cek-Out</button>
+      <button class="btn btn-ghost" type="button" onclick="resetForm('co')">↺ Reset Form</button>
+    </div>
   </div>
 </div>
-
-<!-- ========================================================= -->
-<!-- ======================= SCRIPT ========================== -->
-<!-- ========================================================= -->
-<script>
-  /* ===== FLOW CONFIG (GANTI URL JIKA PERLU) ===== */
-  const FLOW_GET_ORDER_URL =
-  "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4d31684f653446e286f83fcea2294ab1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Iw6sf_iQ4yO6JgSCoY1e3HXKi2Gtd5CRTfzbOWMMwvw";
-
-  /* ===== NAVIGASI VIEW ===== */
-  function show(v){
-    document.getElementById('view-home').classList.add('hidden');
-    document.getElementById('view-checkin').classList.add('hidden');
-    document.getElementById('view-checkout').classList.add('hidden');
-
-    document.getElementById('view-'+v).classList.remove('hidden');
-    window.scrollTo({top:0,behavior:'instant'});
-
-    if(v==='checkin'){ init('ci'); initBatch(); loadOrders('ci_order'); }
-    if(v==='checkout'){ init('co'); loadOrders('co_order'); }
-  }
-
-  /* ===== INIT TANGGAL & JAM ===== */
-  function init(p){
-    const d=new Date();
-    document.getElementById(p+'_tanggal').value =
-      d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-    document.getElementById(p+'_jam').value =
-      d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false});
-    loadLocation(p);
-  }
-
-  /* ===== LOKASI ===== */
-  function simplifyAddress(a){
-    const p=a.split(',');
-    return p.slice(1).join(',').trim();
-  }
-
-  async function loadLocation(p){
-    const src=document.getElementById(p+'_src');
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      document.getElementById(p+'_lat').value=pos.coords.latitude.toFixed(6);
-      document.getElementById(p+'_lng').value=pos.coords.longitude.toFixed(6);
-      src.textContent='Lokasi: GPS';
-      try{
-        const r=await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
-        );
-        const j=await r.json();
-        if(j?.display_name){
-          document.getElementById(p+'_lokasi').value=simplifyAddress(j.display_name);
-        }
-      }catch(e){
-        console.warn('Gagal reverse geocode', e);
-      }
-    }, async ()=>{
-      try{
-        const r=await fetch('https://ipapi.co/json/');
-        const j=await r.json();
-        document.getElementById(p+'_lat').value=j.latitude ?? '';
-        document.getElementById(p+'_lng').value=j.longitude ?? '';
-        document.getElementById(p+'_lokasi').value=
-          `${j.city ?? '-'}, ${j.region ?? '-'}, ${j.country_name ?? '-'}`;
-        src.textContent='Lokasi: Perkiraan IP';
-      }catch(e){
-        console.warn('Gagal ambil lokasi via IP', e);
-        src.textContent='Lokasi: Tidak tersedia';
-      }
-    });
-  }
-
-  /* ===== BATCH ===== */
-  function initBatch(){
-    ci_batch_wrap.innerHTML='';
-    addBatch();
-  }
-
-  function addBatch(){
-    const i=document.createElement('input');
-    i.placeholder='Nomor Batch';
-    i.style.marginBottom='8px';
-    ci_batch_wrap.appendChild(i);
-  }
-
-  /* ===== SUBMIT ===== */
-  function submitCI(){
-    if(ci_order.value === '' || ci_nama.value.trim()==='' || ci_kondisi.value==='' ||
-       ci_batch_wrap.children.length===0 || ci_foto.files.length===0){
-      ci_warn.textContent='⚠️ Semua kolom wajib diisi (termasuk Nomor Order & Foto)';
-      ci_warn.classList.remove('hidden');
-      return;
-    }
-    ci_warn.classList.add('hidden');
-    alert('✅ Cek-In berhasil');
-    show('home');
-  }
-
-  function submitCO(){
-    if(co_order.value === '' || co_nama.value.trim()==='' ||
-       co_kandang.value.trim()==='' || co_ayam.value==='' || co_vaksin.value==='' ||
-       co_foto.files.length===0){
-      co_warn.textContent='⚠️ Semua kolom wajib diisi (termasuk Nomor Order & Foto)';
-      co_warn.classList.remove('hidden');
-      return;
-    }
-    co_warn.classList.add('hidden');
-    alert('✅ Cek-Out berhasil');
-    show('home');
-  }
-
-  /* ===== LOADING ===== */
-  function showLoading(){
-    document.getElementById('loading').classList.remove('hidden');
-  }
-  function hideLoading(){
-    document.getElementById('loading').classList.add('hidden');
-  }
-
-  /* ===== LOAD ORDERS ===== */
-  async function loadOrders(selectId){
-    showLoading();
-    const sel=document.getElementById(selectId);
-    sel.innerHTML='<option value="">-- Pilih Nomor Order --</option>';
-
-    try{
-      const r=await fetch(FLOW_GET_ORDER_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'}
-      });
-      if(!r.ok){
-        throw new Error(`HTTP ${r.status}`);
-      }
-      const j=await r.json();
-      const list = Array.isArray(j?.orders) ? j.orders : [];
-
-      if(list.length===0){
-        const opt=document.createElement('option');
-        opt.value='';
-        opt.textContent='(Tidak ada data order)';
-        sel.appendChild(opt);
-      }else{
-        list.forEach(o=>{
-          const val = o?.orderNumber ?? o?.order_no ?? o?.id ?? '';
-          if(!val) return;
-          const opt=document.createElement('option');
-          opt.value=val;
-          opt.textContent=val;
-          sel.appendChild(opt);
-        });
-      }
-    }catch(e){
-      console.error('Gagal mengambil data order', e);
-      alert('Gagal mengambil data order. Pastikan URL Flow benar, Flow diizinkan untuk diakses publik/anonym atau melalui mekanisme auth yang sesuai, serta tidak diblokir CORS.');
-    }finally{
-      hideLoading();
-    }
-  }
-</script>
 
 <!-- ================= LOADING OVERLAY ================= -->
 <div id="loading" class="hidden"
@@ -497,10 +332,464 @@
     justify-content:center;
     z-index:9999;
     font-weight:600;
-    font-size:18px;
-  ">
-  ⏳ Mengambil data order...
+    font-size:18px;">
+  ⏳ Memproses...
 </div>
+
+<!-- ========================= SCRIPT ======================== -->
+<script>
+  /* ====== KONFIG FLOW (GANTI JIKA PERLU) ====== */
+  const FLOW_GET_ORDER_URL =
+  "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4d31684f653446e286f83fcea2294ab1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Iw6sf_iQ4yO6JgSCoY1e3HXKi2Gtd5CRTfzbOWMMwvw";
+
+  const FLOW_SUBMIT_CI_URL = ""; // contoh: "https://.../submit-ci"
+  const FLOW_SUBMIT_CO_URL = ""; // contoh: "https://.../submit-co"
+
+  const MAX_PHOTOS = 5;
+  const REQUIRE_SIGNATURE_CO = true; // TTD hanya diwajibkan pada Cek-Out
+
+  /* ====== UTIL ====== */
+  const $ = (id)=>document.getElementById(id);
+
+  function showLoading(msg){
+    const el=$('loading');
+    if(msg) el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+  function hideLoading(){
+    const el=$('loading');
+    el.classList.add('hidden');
+    el.textContent = '⏳ Memproses...';
+  }
+
+  /* ====== VIEW NAV ====== */
+  function show(v){
+    $('view-home').classList.add('hidden');
+    $('view-checkin').classList.add('hidden');
+    $('view-checkout').classList.add('hidden');
+
+    $('view-'+v).classList.remove('hidden');
+    window.scrollTo({top:0,behavior:'instant'});
+
+    if(v==='checkin'){
+      init('ci');
+      initBatches();
+      loadOrders('ci_order');
+      attachMultiPhotoHandler('ci_fotos','ci_fotos_preview','ci_fotos_clear');
+    }
+    if(v==='checkout'){
+      init('co');
+      loadOrders('co_order');
+      initSignature('co');
+      attachMultiPhotoHandler('co_fotos','co_fotos_preview','co_fotos_clear');
+    }
+  }
+
+  /* ====== INIT TANGGAL & JAM ====== */
+  function init(p){
+    const d=new Date();
+    $(p+'_tanggal').value =
+      d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+    $(p+'_jam').value =
+      d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false});
+    loadLocation(p);
+  }
+
+  /* ====== LOKASI ====== */
+  function simplifyAddress(a){
+    const p=a.split(',');
+    return p.slice(1).join(',').trim();
+  }
+
+  async function loadLocation(p){
+    const src=$(p+'_src');
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      $(p+'_lat').value=pos.coords.latitude.toFixed(6);
+      $(p+'_lng').value=pos.coords.longitude.toFixed(6);
+      src.textContent='Lokasi: GPS';
+      try{
+        const r=await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
+        );
+        const j=await r.json();
+        if(j?.display_name){
+          $(p+'_lokasi').value=simplifyAddress(j.display_name);
+        }
+      }catch(e){
+        console.warn('Gagal reverse geocode', e);
+      }
+    }, async ()=>{
+      try{
+        const r=await fetch('https://ipapi.co/json/');
+        const j=await r.json();
+        $(p+'_lat').value=j.latitude ?? '';
+        $(p+'_lng').value=j.longitude ?? '';
+        $(p+'_lokasi').value=
+          `${j.city ?? '-'}, ${j.region ?? '-'}, ${j.country_name ?? '-'}`;
+        src.textContent='Lokasi: Perkiraan IP';
+      }catch(e){
+        console.warn('Gagal ambil lokasi via IP', e);
+        src.textContent='Lokasi: Tidak tersedia';
+      }
+    });
+  }
+
+  /* ====== BATCHES (CEK-IN) ====== */
+  function initBatches(){
+    $('ci_batch_wrap').innerHTML='';
+    addBatch();
+  }
+  function addBatch(){
+    const wrap = $('ci_batch_wrap');
+    const i=document.createElement('input');
+    i.placeholder='Nomor Batch';
+    i.style.marginBottom='8px';
+    wrap.appendChild(i);
+  }
+  function resetBatches(){
+    initBatches();
+  }
+
+  /* ====== FOTO HANDLER ====== */
+  const photoHandlers = {}; // map per inputId
+
+  function attachMultiPhotoHandler(inputId, previewId, clearBtnId){
+    const inp=$(inputId);
+    const preview=$(previewId);
+    const clearBtn = clearBtnId ? $(clearBtnId) : null;
+
+    function syncLimit(){
+      let files = Array.from(inp.files || []);
+      if(files.length>MAX_PHOTOS){
+        alert(`Maksimal ${MAX_PHOTOS} foto. Hanya ${MAX_PHOTOS} pertama yang digunakan.`);
+        const dt = new DataTransfer();
+        files.slice(0,MAX_PHOTOS).forEach(f=>dt.items.add(f));
+        inp.files = dt.files;
+        files = Array.from(inp.files);
+      }
+      return files;
+    }
+
+    function render(){
+      const files = syncLimit();
+      preview.innerHTML='';
+      files.forEach((f, idx)=>{
+        if(!f.type.startsWith('image/')) return;
+        const item=document.createElement('div');
+        item.className='photo-item';
+        const img=document.createElement('img');
+        img.alt=f.name;
+        img.src=URL.createObjectURL(f);
+        const del=document.createElement('button');
+        del.className='photo-del';
+        del.type='button';
+        del.textContent='×';
+        del.title='Hapus foto ini';
+        del.onclick = ()=> removeAt(idx);
+        item.appendChild(img);
+        item.appendChild(del);
+        preview.appendChild(item);
+      });
+    }
+
+    function clearAll(){
+      const dt = new DataTransfer();
+      inp.files = dt.files;
+      preview.innerHTML='';
+    }
+
+    function removeAt(idx){
+      const files = Array.from(inp.files || []);
+      const dt = new DataTransfer();
+      files.forEach((f,i)=>{ if(i!==idx) dt.items.add(f); });
+      inp.files = dt.files;
+      render();
+    }
+
+    if(clearBtn){
+      clearBtn.onclick = clearAll;
+    }
+    inp.onchange = render;
+
+    photoHandlers[inputId] = {clear: clearAll, render, removeAt};
+  }
+
+  /* ====== SIGNATURE PAD (CEK-OUT) ====== */
+  const sigPads = {}; // {co:{canvas,ctx,signedRef,clear}}
+  function initSignature(prefix){
+    const canvas = $(prefix+'_sig_canvas');
+    const hidden = $(prefix+'_signature_data');
+
+    function setupCanvasSize(){
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(ratio,0,0,ratio,0,0);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#0f172a';
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      return ctx;
+    }
+
+    const ctx = setupCanvasSize();
+    let drawing=false, signed=false, last={x:0,y:0};
+
+    function getPos(e){
+      const rect = canvas.getBoundingClientRect();
+      if(e.touches && e.touches.length){
+        return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      }else{
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }
+    }
+
+    function start(e){ e.preventDefault(); drawing=true; last=getPos(e); }
+    function move(e){
+      if(!drawing) return;
+      e.preventDefault();
+      const p = getPos(e);
+      ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+      last=p; signed=true;
+    }
+    function end(){ if(!drawing) return; drawing=false; if(signed){ hidden.value = canvas.toDataURL('image/png'); } }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', end);
+    canvas.addEventListener('mouseleave', end);
+    canvas.addEventListener('touchstart', start, {passive:false});
+    canvas.addEventListener('touchmove', move, {passive:false});
+    canvas.addEventListener('touchend', end);
+
+    sigPads[prefix] = {
+      canvas, ctx,
+      signedRef:()=>signed,
+      clear:()=>{
+        const rect = canvas.getBoundingClientRect();
+        ctx.clearRect(0,0,rect.width,rect.height);
+        ctx.fillStyle='#fff'; ctx.fillRect(0,0,rect.width,rect.height);
+        signed=false; hidden.value='';
+      }
+    };
+  }
+  function clearSignature(prefix){ sigPads[prefix]?.clear(); }
+
+  function dataURLtoBlob(dataURL){
+    const parts = dataURL.split(',');
+    const mime = parts[0].match(/:(.*?);/)[1];
+    const bstr = atob(parts[1]); let n=bstr.length;
+    const u8=new Uint8Array(n); while(n--) u8[n]=bstr.charCodeAt(n);
+    return new Blob([u8],{type:mime});
+  }
+
+  /* ====== LOAD ORDERS ====== */
+  async function loadOrders(selectId){
+    const sel=$(selectId);
+    sel.innerHTML='<option value="">-- Pilih Nomor Order --</option>';
+
+    try{
+      $('loading').textContent = '⏳ Mengambil data order...';
+      showLoading();
+      const r=await fetch(FLOW_GET_ORDER_URL,{ method:'POST', headers:{'Content-Type':'application/json'} });
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j=await r.json();
+      const list = Array.isArray(j?.orders) ? j.orders : [];
+      if(list.length===0){
+        const opt=document.createElement('option');
+        opt.value=''; opt.textContent='(Tidak ada data order)';
+        sel.appendChild(opt);
+      }else{
+        list.forEach(o=>{
+          const val = o?.orderNumber ?? o?.order_no ?? o?.id ?? '';
+          if(!val) return;
+          const opt=document.createElement('option');
+          opt.value=val; opt.textContent=val;
+          sel.appendChild(opt);
+        });
+      }
+    }catch(e){
+      console.error('Gagal mengambil data order', e);
+      alert('Gagal mengambil data order. Pastikan URL Flow benar, izin akses sesuai, dan tidak diblokir CORS.');
+    }finally{
+      hideLoading();
+    }
+  }
+
+  /* ====== VALIDASI & SUBMIT ====== */
+  function getBatchValues(){
+    const inputs = Array.from($('ci_batch_wrap').querySelectorAll('input'));
+    return inputs.map(i=>i.value.trim()).filter(v=>v!=='');
+  }
+  function appendPhotos(fd, inputId){
+    const files = Array.from($(inputId).files || []).slice(0,MAX_PHOTOS);
+    files.forEach((f,idx)=> fd.append(`photos[${idx}]`, f, f.name));
+  }
+
+  async function sendFormData(url, formData){
+    if(!url){
+      // Belum dihubungkan – tampilkan di console untuk verifikasi
+      console.log('[DEBUG payload untuk submit]', ...Array.from(formData.entries()).map(([k,v]) => [k, v instanceof File ? `File(${v.name}, ${v.type}, ${v.size})` : v]));
+      await new Promise(r=>setTimeout(r,500)); // simulasi
+      return {ok:true};
+    }
+    const r = await fetch(url, { method:'POST', body:formData });
+    return r;
+  }
+
+  function submitCI(){
+    const warn = $('ci_warn'); warn.classList.add('hidden'); warn.textContent='';
+    const order = $('ci_order').value;
+    const nama = $('ci_nama').value.trim();
+    const kondisi = $('ci_kondisi').value;
+    const batches = getBatchValues();
+    const fotos = $('ci_fotos').files;
+
+    if(!order || !nama || !kondisi){
+      warn.textContent='⚠️ Nomor Order, Nama Vaksinator, dan Kondisi wajib diisi.'; warn.classList.remove('hidden'); return;
+    }
+    if(batches.length===0){
+      warn.textContent='⚠️ Minimal 1 Nomor Batch diisi.'; warn.classList.remove('hidden'); return;
+    }
+    if(!fotos || fotos.length===0){
+      warn.textContent='⚠️ Wajib unggah minimal 1 foto (maksimal 5).'; warn.classList.remove('hidden'); return;
+    }
+    if(fotos.length>MAX_PHOTOS){
+      warn.textContent=`⚠️ Maksimal ${MAX_PHOTOS} foto.`; warn.classList.remove('hidden'); return;
+    }
+
+    const fd = new FormData();
+    fd.append('formType','checkin');
+    fd.append('orderNumber', order);
+    fd.append('namaVaksinator', nama);
+    fd.append('kondisiVaksin', kondisi);
+    fd.append('tanggal', $('ci_tanggal').value);
+    fd.append('jam', $('ci_jam').value);
+    fd.append('lokasi', $('ci_lokasi').value);
+    fd.append('latitude', $('ci_lat').value);
+    fd.append('longitude', $('ci_lng').value);
+    fd.append('catatan', $('ci_catatan').value || '');
+    getBatchValues().forEach((b,i)=> fd.append(`batches[${i}]`, b));
+    appendPhotos(fd, 'ci_fotos');
+
+    (async ()=>{
+      try{
+        showLoading('⏳ Mengirim Cek-In...');
+        const resp = await sendFormData(FLOW_SUBMIT_CI_URL, fd);
+        hideLoading();
+        if(resp.ok){
+          alert('✅ Cek-In berhasil'); show('home');
+        }else{
+          alert('❌ Gagal submit Cek-In');
+        }
+      }catch(e){
+        hideLoading(); console.error(e); alert('❌ Terjadi kesalahan saat submit Cek-In');
+      }
+    })();
+  }
+
+  function submitCO(){
+    const warn = $('co_warn'); warn.classList.add('hidden'); warn.textContent='';
+    const order = $('co_order').value;
+    const nama = $('co_nama').value.trim();
+    const kandang = $('co_kandang').value.trim();
+    const ayam = $('co_ayam').value;
+    const vaksin = $('co_vaksin').value;
+    const fotos = $('co_fotos').files;
+    const sigData = $('co_signature_data').value;
+
+    if(!order || !nama || !kandang){
+      warn.textContent='⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.'; warn.classList.remove('hidden'); return;
+    }
+    if(ayam==='' || Number(ayam)<0 || vaksin==='' || Number(vaksin)<0){
+      warn.textContent='⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0.'; warn.classList.remove('hidden'); return;
+    }
+    if(!fotos || fotos.length===0){
+      warn.textContent='⚠️ Wajib unggah minimal 1 foto (maksimal 5).'; warn.classList.remove('hidden'); return;
+    }
+    if(fotos.length>MAX_PHOTOS){
+      warn.textContent=`⚠️ Maksimal ${MAX_PHOTOS} foto.`; warn.classList.remove('hidden'); return;
+    }
+    if(REQUIRE_SIGNATURE_CO && !sigData){
+      warn.textContent='⚠️ Tanda tangan digital wajib.'; warn.classList.remove('hidden'); return;
+    }
+
+    const fd = new FormData();
+    fd.append('formType','checkout');
+    fd.append('orderNumber', order);
+    fd.append('namaVaksinator', nama);
+    fd.append('noKandang', kandang);
+    fd.append('jumlahAyam', ayam);
+    fd.append('jumlahVaksin', vaksin);
+    fd.append('tanggal', $('co_tanggal').value);
+    fd.append('jam', $('co_jam').value);
+    fd.append('lokasi', $('co_lokasi').value);
+    fd.append('latitude', $('co_lat').value);
+    fd.append('longitude', $('co_lng').value);
+    fd.append('catatan', $('co_catatan').value || '');
+    appendPhotos(fd, 'co_fotos');
+    if(sigData){ fd.append('signature', dataURLtoBlob(sigData), 'signature_co.png'); }
+
+    (async ()=>{
+      try{
+        showLoading('⏳ Mengirim Cek-Out...');
+        const resp = await sendFormData(FLOW_SUBMIT_CO_URL, fd);
+        hideLoading();
+        if(resp.ok){
+          alert('✅ Cek-Out berhasil'); show('home');
+        }else{
+          alert('❌ Gagal submit Cek-Out');
+        }
+      }catch(e){
+        hideLoading(); console.error(e); alert('❌ Terjadi kesalahan saat submit Cek-Out');
+      }
+    })();
+  }
+
+  /* ====== RESET FORM ====== */
+  function resetForm(prefix){
+    // warning
+    const warnEl = $(prefix+'_warn'); if(warnEl){ warnEl.classList.add('hidden'); warnEl.textContent=''; }
+
+    // dropdown order ke default
+    const selOrder = $(prefix+'_order'); if(selOrder){ selOrder.selectedIndex = 0; }
+
+    // input teks/angka/textarea
+    const fields = Array.from(document.querySelectorAll(`#view-${prefix==='ci'?'checkin':'checkout'} input, #view-${prefix==='ci'?'checkin':'checkout'} textarea, #view-${prefix==='ci'?'checkin':'checkout'} select`));
+    fields.forEach(el=>{
+      if(el.id.endsWith('_tanggal') || el.id.endsWith('_jam') || el.id.endsWith('_lokasi') || el.id.endsWith('_lat') || el.id.endsWith('_lng')) return; // biarkan auto
+      if(el.tagName==='SELECT'){ if(el.id!==prefix+'_order') el.selectedIndex=0; }
+      else if(el.type==='file'){
+        // clear file input via handler
+      }else if(el.type==='hidden'){
+        el.value='';
+      }else{
+        el.value='';
+      }
+    });
+
+    // batches (khusus cek-in)
+    if(prefix==='ci'){ initBatches(); }
+
+    // foto
+    const photoId = prefix+'_fotos';
+    if(photoHandlers[photoId]) photoHandlers[photoId].clear();
+
+    // signature (khusus cek-out)
+    if(prefix==='co'){ clearSignature('co'); }
+
+    // re-init tanggal, jam, lokasi
+    init(prefix);
+  }
+
+  /* ====== START ====== */
+  // Buka halaman awal (home). Bila ingin langsung ke form:
+  // show('checkin'); // atau show('checkout')
+</script>
 
 </body>
 </html>
