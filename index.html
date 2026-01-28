@@ -1,120 +1,240 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CICO Vaksinasi</title>
 
 <style>
-body{margin:0;background:#f5f7ff;font-family:system-ui}
-.container{max-width:900px;margin:24px auto;padding:0 16px}
-h1,h2{margin:10px 0}
-.card{background:#fff;border-radius:14px;padding:18px;margin-bottom:16px}
-label{font-weight:600;margin-top:10px;display:block}
-input,select,textarea{
-  width:100%;padding:12px;border-radius:10px;
-  border:1px solid #dbe3ff;font-size:15px
+:root{
+  --bg:#eef2f7;
+  --card:#ffffff;
+  --primary:#1e40af;
+  --secondary:#6366f1;
+  --border:#dbe2f1;
+  --muted:#64748b;
+  --danger:#b91c1c;
 }
-input[readonly]{background:#f2f4ff}
-textarea{min-height:90px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:linear-gradient(180deg,#f4f7fb,#e9eef7);
+  color:#0f172a;
+}
+
+/* ===== LAYOUT ===== */
+.container{max-width:960px;margin:28px auto;padding:0 16px}
 .hidden{display:none}
-.btn{padding:12px 16px;border-radius:12px;border:0;font-weight:600;cursor:pointer}
-.btn-primary{background:#4f46e5;color:#fff}
-.btn-back{background:none;color:#4f46e5;font-weight:600}
-.warn{background:#fff5f5;color:#b42318;padding:10px;border-radius:10px;margin-bottom:10px}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:18px;
+  box-shadow:0 10px 30px rgba(15,23,42,.08);
+}
+.section-title{
+  font-weight:700;
+  color:#1e3a8a;
+  margin-bottom:12px;
+}
+
+/* ===== FORM ===== */
+label{font-weight:600;display:block;margin:12px 0 6px}
+input,select,textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-size:15px;
+}
+input[readonly]{background:#f5f7fb}
+textarea{min-height:90px}
+
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1}
+
+/* ===== BUTTON ===== */
+.btn{
+  padding:14px 18px;
+  border-radius:12px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-ghost{background:#eef2ff;color:#1e3a8a}
+.btn-back{background:none;color:#2563eb;margin-bottom:12px}
+
+/* ===== BADGE & WARN ===== */
+.warn{
+  background:#fff1f2;
+  color:var(--danger);
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  background:#eef2ff;
+  color:#1e3a8a;
+  font-size:13px;
+  margin-top:6px;
+}
+
+/* ===== LANDING ===== */
+.landing-wrap{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at top,#e0e7ff,#eef2f7);
+}
+.landing-card{
+  background:linear-gradient(180deg,#ffffff,#f8fafc);
+  border-radius:22px;
+  padding:40px 28px;
+  max-width:420px;
+  width:100%;
+  text-align:center;
+  box-shadow:0 24px 50px rgba(30,64,175,.2);
+  border:1px solid var(--border);
+}
+.landing-card h1{
+  font-size:30px;
+  margin:6px 0;
+  color:#1e3a8a;
+}
+.landing-card p{
+  font-size:15px;
+  color:var(--muted);
+  margin-bottom:28px;
+}
+.landing-actions{
+  display:grid;
+  gap:14px;
+}
+.footer-note{
+  margin-top:22px;
+  font-size:13px;
+  color:#64748b;
+}
 </style>
 </head>
 
 <body>
-<div class="container">
 
-<!-- HOME -->
-<div id="view-home">
-  <h1>CICO Vaksinasi</h1>
-  <button class="btn btn-primary" onclick="show('checkin')">CEK-IN</button>
-  <button class="btn btn-primary" onclick="show('checkout')">CEK-OUT</button>
-</div>
+<!-- ================= HOME ================= -->
+<div id="view-home" class="landing-wrap">
+  <div class="landing-card">
+    <div style="font-size:44px">💉</div>
+    <h1>CICO Vaksinasi</h1>
+    <p>Sistem Check-In & Check-Out Vaksinasi<br>
+       Dengan Lokasi & Waktu Otomatis</p>
 
-<!-- CEK IN -->
-<div id="view-checkin" class="hidden">
-  <button class="btn-back" onclick="show('home')">← Kembali</button>
-  <h2>Form Cek-In</h2>
-
-  <div id="ci_warn" class="warn hidden"></div>
-
-  <div class="card">
-    <input id="ci_order" placeholder="Nomor Order *">
-    <input id="ci_nama" placeholder="Nama Vaksinator *">
-
-    <div class="row">
-      <input id="ci_tanggal" readonly placeholder="Tanggal *">
-      <input id="ci_jam" readonly placeholder="Jam (24 Jam) *">
+    <div class="landing-actions">
+      <button class="btn btn-primary" onclick="show('checkin')">
+        ✅ CEK-IN VAKSIN
+      </button>
+      <button class="btn btn-ghost" onclick="show('checkout')">
+        🚚 CEK-OUT VAKSIN
+      </button>
     </div>
 
-    <input id="ci_lokasi" readonly placeholder="Nama Lokasi *">
-
-    <div class="row">
-      <input id="ci_lat" readonly placeholder="Latitude *">
-      <input id="ci_lng" readonly placeholder="Longitude *">
+    <div class="footer-note">
+      📍 GPS • ⏱️ Waktu Sistem • 📸 Bukti Foto
     </div>
-
-    <select id="ci_kondisi">
-      <option value="">-- Kondisi Vaksin * --</option>
-      <option>Baik</option>
-      <option>Perlu Pendinginan</option>
-      <option>Rusak</option>
-      <option>Thawing</option>
-      <option>Tidak Thawing</option>
-    </select>
-
-    <input id="ci_batch" placeholder="Nomor Batch Vaksin *">
-
-    <label>Foto Bukti *</label>
-    <input type="file" id="ci_foto" accept="image/*">
-
-    <textarea id="ci_catatan" placeholder="Catatan *"></textarea>
-
-    <button class="btn btn-primary" onclick="submitCI()">Kirim</button>
   </div>
 </div>
 
-<!-- CEK OUT -->
-<div id="view-checkout" class="hidden">
-  <button class="btn-back" onclick="show('home')">← Kembali</button>
-  <h2>Form Cek-Out</h2>
+<!-- ================= CEK IN ================= -->
+<div id="view-checkin" class="container hidden">
+<button class="btn-back" onclick="show('home')">← Kembali</button>
+<h2>Form Cek-In</h2>
 
-  <div id="co_warn" class="warn hidden"></div>
+<div id="ci_warn" class="warn hidden"></div>
 
-  <div class="card">
-    <input id="co_order" placeholder="Nomor Order *">
-    <input id="co_nama" placeholder="Nama Vaksinator *">
-
-    <div class="row">
-      <input id="co_tanggal" readonly placeholder="Tanggal *">
-      <input id="co_jam" readonly placeholder="Jam (24 Jam) *">
-    </div>
-
-    <input id="co_lokasi" readonly placeholder="Nama Lokasi *">
-
-    <div class="row">
-      <input id="co_lat" readonly placeholder="Latitude *">
-      <input id="co_lng" readonly placeholder="Longitude *">
-    </div>
-
-    <input id="co_kandang" placeholder="No Kandang *">
-    <input id="co_ayam" type="number" placeholder="Jumlah Ayam Tervaksin *">
-    <input id="co_vaksin" type="number" placeholder="Jumlah Vaksin Terpakai *">
-
-    <label>Foto Bukti *</label>
-    <input type="file" id="co_foto" accept="image/*">
-
-    <textarea id="co_catatan" placeholder="Catatan *"></textarea>
-
-    <button class="btn btn-primary" onclick="submitCO()">Kirim</button>
+<div class="card">
+  <div class="section-title">Data Otomatis (Sistem)</div>
+  <div class="row">
+    <div><label>Tanggal</label><input id="ci_tanggal" readonly></div>
+    <div><label>Jam</label><input id="ci_jam" readonly></div>
+  </div>
+  <label>Nama Lokasi</label>
+  <input id="ci_lokasi" readonly>
+  <span id="ci_src" class="badge">Lokasi: -</span>
+  <div class="row">
+    <div><label>Latitude</label><input id="ci_lat" readonly></div>
+    <div><label>Longitude</label><input id="ci_lng" readonly></div>
   </div>
 </div>
 
+<div class="card">
+  <div class="section-title">Data Diisi Petugas</div>
+  <label>Nomor Order</label><input id="ci_order">
+  <label>Nama Vaksinator</label><input id="ci_nama">
+  <label>Kondisi Vaksin</label>
+  <select id="ci_kondisi">
+    <option value="">-- Pilih --</option>
+    <option>Baik</option>
+    <option>Perlu Pendinginan</option>
+    <option>Rusak</option>
+    <option>Thawing</option>
+    <option>Tidak Thawing</option>
+  </select>
+
+  <label>Nomor Batch Vaksin</label>
+  <div id="ci_batch_wrap"></div>
+  <button class="btn btn-ghost" onclick="addBatch()">➕ Tambah Batch</button>
+
+  <label>Foto Bukti</label>
+  <input type="file" id="ci_foto" accept="image/*">
+
+  <label>Catatan</label>
+  <textarea id="ci_catatan"></textarea>
+
+  <button class="btn btn-primary" onclick="submitCI()">Kirim Cek-In</button>
+</div>
+</div>
+
+<!-- ================= CEK OUT ================= -->
+<div id="view-checkout" class="container hidden">
+<button class="btn-back" onclick="show('home')">← Kembali</button>
+<h2>Form Cek-Out</h2>
+
+<div id="co_warn" class="warn hidden"></div>
+
+<div class="card">
+  <div class="section-title">Data Otomatis (Sistem)</div>
+  <div class="row">
+    <div><label>Tanggal</label><input id="co_tanggal" readonly></div>
+    <div><label>Jam</label><input id="co_jam" readonly></div>
+  </div>
+  <label>Nama Lokasi</label>
+  <input id="co_lokasi" readonly>
+  <span id="co_src" class="badge">Lokasi: -</span>
+  <div class="row">
+    <div><label>Latitude</label><input id="co_lat" readonly></div>
+    <div><label>Longitude</label><input id="co_lng" readonly></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Data Diisi Petugas</div>
+  <label>Nomor Order</label><input id="co_order">
+  <label>Nama Vaksinator</label><input id="co_nama">
+  <label>No Kandang</label><input id="co_kandang">
+  <label>Jumlah Ayam Tervaksin</label><input type="number" id="co_ayam">
+  <label>Jumlah Vaksin Terpakai</label><input type="number" id="co_vaksin">
+  <label>Foto Bukti</label><input type="file" id="co_foto" accept="image/*">
+  <label>Catatan</label><textarea id="co_catatan"></textarea>
+  <button class="btn btn-primary" onclick="submitCO()">Kirim Cek-Out</button>
+</div>
 </div>
 
 <script>
@@ -122,44 +242,56 @@ function show(v){
   ['home','checkin','checkout'].forEach(x=>{
     document.getElementById('view-'+x).classList.toggle('hidden',v!==x)
   })
-  if(v==='checkin') initCI()
-  if(v==='checkout') initCO()
+  if(v==='checkin'){init('ci');initBatch()}
+  if(v==='checkout') init('co')
 }
 
-function formatTanggal(d){
-  return d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
-}
-function formatJam(d){
-  return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false})
-}
-
-function initCI(){initTime('ci');initLoc('ci')}
-function initCO(){initTime('co');initLoc('co')}
-
-function initTime(p){
-  const now=new Date()
-  document.getElementById(p+'_tanggal').value=formatTanggal(now)
-  document.getElementById(p+'_jam').value=formatJam(now)
+function init(p){
+  const d=new Date()
+  document.getElementById(p+'_tanggal').value=
+    d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+  document.getElementById(p+'_jam').value=
+    d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false})
+  loadLocation(p)
 }
 
-function initLoc(p){
+function simplifyAddress(a){
+  const p=a.split(',')
+  return p.slice(1).join(',').trim()
+}
+
+async function loadLocation(p){
+  const src=document.getElementById(p+'_src')
   navigator.geolocation.getCurrentPosition(async pos=>{
     document.getElementById(p+'_lat').value=pos.coords.latitude.toFixed(6)
     document.getElementById(p+'_lng').value=pos.coords.longitude.toFixed(6)
-
-    try{
-      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
-      const j=await r.json()
-      document.getElementById(p+'_lokasi').value=j.display_name
-    }catch{
-      document.getElementById(p+'_lokasi').value='Lokasi tidak tersedia'
-    }
+    src.textContent='Lokasi: GPS'
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+    const j=await r.json()
+    document.getElementById(p+'_lokasi').value=simplifyAddress(j.display_name)
+  },async ()=>{
+    const r=await fetch('https://ipapi.co/json/')
+    const j=await r.json()
+    document.getElementById(p+'_lat').value=j.latitude
+    document.getElementById(p+'_lng').value=j.longitude
+    document.getElementById(p+'_lokasi').value=`${j.city}, ${j.region}, ${j.country_name}`
+    src.textContent='Lokasi: Perkiraan IP'
   })
 }
 
+function initBatch(){
+  ci_batch_wrap.innerHTML=''
+  addBatch()
+}
+function addBatch(){
+  const i=document.createElement('input')
+  i.placeholder='Nomor Batch'
+  i.style.marginBottom='8px'
+  ci_batch_wrap.appendChild(i)
+}
+
 function submitCI(){
-  const req=['ci_order','ci_nama','ci_tanggal','ci_jam','ci_lokasi','ci_lat','ci_lng','ci_kondisi','ci_batch','ci_catatan']
-  if(req.some(id=>!document.getElementById(id).value)||ci_foto.files.length===0){
+  if(ci_batch_wrap.children.length===0||ci_foto.files.length===0){
     ci_warn.textContent='⚠️ Semua kolom wajib diisi'
     ci_warn.classList.remove('hidden');return
   }
@@ -168,8 +300,7 @@ function submitCI(){
 }
 
 function submitCO(){
-  const req=['co_order','co_nama','co_tanggal','co_jam','co_lokasi','co_lat','co_lng','co_kandang','co_ayam','co_vaksin','co_catatan']
-  if(req.some(id=>!document.getElementById(id).value)||co_foto.files.length===0){
+  if(co_foto.files.length===0){
     co_warn.textContent='⚠️ Semua kolom wajib diisi'
     co_warn.classList.remove('hidden');return
   }
