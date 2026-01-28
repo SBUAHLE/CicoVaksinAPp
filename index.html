@@ -6,44 +6,23 @@
 <title>CICO Vaksinasi</title>
 
 <style>
-:root{
-  --bg:#f5f7ff;--card:#fff;--line:#e6ecff;
-  --primary:#4f46e5;--primary-weak:#eef2ff;
-  --text:#1f2937;--muted:#6b7280;
-  --ok:#059669;--danger:#ef4444;
-}
-html,body{margin:0;background:var(--bg);font-family:system-ui;color:var(--text)}
-.container{max-width:820px;margin:28px auto;padding:0 18px}
-h1{font-size:26px} h2{font-size:22px}
-.note{color:var(--muted)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+body{margin:0;background:#f5f7ff;font-family:system-ui}
+.container{max-width:900px;margin:24px auto;padding:0 16px}
+h1,h2{margin:10px 0}
+.card{background:#fff;border-radius:14px;padding:18px;margin-bottom:16px}
 label{font-weight:600;margin-top:10px;display:block}
-input,textarea,select{
+input,select,textarea{
   width:100%;padding:12px;border-radius:10px;
-  border:1px solid var(--line);font-size:16px
+  border:1px solid #dbe3ff;font-size:15px
 }
-input[readonly]{background:#f8f9ff}
+input[readonly]{background:#f2f4ff}
 textarea{min-height:90px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
 .hidden{display:none}
 .btn{padding:12px 16px;border-radius:12px;border:0;font-weight:600;cursor:pointer}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-ghost{background:var(--primary-weak)}
-.btn-link{background:none;color:var(--primary);text-decoration:underline}
-.hero{display:flex;gap:16px;margin-top:16px;flex-wrap:wrap}
-.big{flex:1 1 300px;padding:24px;border-radius:16px;font-size:24px;font-weight:800;cursor:pointer}
-.big.in{background:#e7f6ef;color:#0b8a50}
-.big.out{background:#fff5f5;color:#b42318}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.stack{display:flex;flex-direction:column;gap:10px}
-.status{font-size:14px;color:var(--muted)}
-.bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-
-.invalid{border:2px solid var(--danger)!important}
-.warn-box{
-  background:#fff5f5;color:#b42318;
-  padding:10px 14px;border-radius:10px;
-  font-weight:600;margin-bottom:10px
-}
+.btn-primary{background:#4f46e5;color:#fff}
+.btn-back{background:none;color:#4f46e5;font-weight:600}
+.warn{background:#fff5f5;color:#b42318;padding:10px;border-radius:10px;margin-bottom:10px}
 </style>
 </head>
 
@@ -53,26 +32,27 @@ textarea{min-height:90px}
 <!-- HOME -->
 <div id="view-home">
   <h1>CICO Vaksinasi</h1>
-  <p class="note">Silakan pilih proses</p>
-  <div class="hero">
-    <button class="big in" onclick="showView('checkin')">CEK-IN</button>
-    <button class="big out" onclick="showView('checkout')">CEK-OUT</button>
-  </div>
+  <button class="btn btn-primary" onclick="show('checkin')">CEK-IN</button>
+  <button class="btn btn-primary" onclick="show('checkout')">CEK-OUT</button>
 </div>
 
 <!-- CEK IN -->
 <div id="view-checkin" class="hidden">
-  <div class="bar">
-    <button class="btn-link" onclick="showView('home')">← Kembali</button>
-    <h2>Form Cek-In</h2><span></span>
-  </div>
+  <button class="btn-back" onclick="show('home')">← Kembali</button>
+  <h2>Form Cek-In</h2>
 
-  <div id="ci_warn" class="warn-box hidden"></div>
+  <div id="ci_warn" class="warn hidden"></div>
 
-  <div class="card stack">
+  <div class="card">
     <input id="ci_order" placeholder="Nomor Order *">
     <input id="ci_nama" placeholder="Nama Vaksinator *">
-    <input id="ci_time" readonly placeholder="Waktu Server *">
+
+    <div class="row">
+      <input id="ci_tanggal" readonly placeholder="Tanggal *">
+      <input id="ci_jam" readonly placeholder="Jam (24 Jam) *">
+    </div>
+
+    <input id="ci_lokasi" readonly placeholder="Nama Lokasi *">
 
     <div class="row">
       <input id="ci_lat" readonly placeholder="Latitude *">
@@ -84,30 +64,38 @@ textarea{min-height:90px}
       <option>Baik</option>
       <option>Perlu Pendinginan</option>
       <option>Rusak</option>
+      <option>Thawing</option>
+      <option>Tidak Thawing</option>
     </select>
 
-    <label>Foto Bukti Cek-In *</label>
+    <input id="ci_batch" placeholder="Nomor Batch Vaksin *">
+
+    <label>Foto Bukti *</label>
     <input type="file" id="ci_foto" accept="image/*">
 
     <textarea id="ci_catatan" placeholder="Catatan *"></textarea>
 
-    <button class="btn btn-primary" onclick="submitCheckIn()">Kirim</button>
+    <button class="btn btn-primary" onclick="submitCI()">Kirim</button>
   </div>
 </div>
 
 <!-- CEK OUT -->
 <div id="view-checkout" class="hidden">
-  <div class="bar">
-    <button class="btn-link" onclick="showView('home')">← Kembali</button>
-    <h2>Form Cek-Out</h2><span></span>
-  </div>
+  <button class="btn-back" onclick="show('home')">← Kembali</button>
+  <h2>Form Cek-Out</h2>
 
-  <div id="co_warn" class="warn-box hidden"></div>
+  <div id="co_warn" class="warn hidden"></div>
 
-  <div class="card stack">
+  <div class="card">
     <input id="co_order" placeholder="Nomor Order *">
     <input id="co_nama" placeholder="Nama Vaksinator *">
-    <input id="co_time" readonly placeholder="Waktu Server *">
+
+    <div class="row">
+      <input id="co_tanggal" readonly placeholder="Tanggal *">
+      <input id="co_jam" readonly placeholder="Jam (24 Jam) *">
+    </div>
+
+    <input id="co_lokasi" readonly placeholder="Nama Lokasi *">
 
     <div class="row">
       <input id="co_lat" readonly placeholder="Latitude *">
@@ -115,100 +103,80 @@ textarea{min-height:90px}
     </div>
 
     <input id="co_kandang" placeholder="No Kandang *">
-    <input type="number" id="co_jmlAyam" placeholder="Jumlah Ayam Tervaksin *">
-    <input type="number" id="co_jmlVaksin" placeholder="Jumlah Vaksin Terpakai *">
+    <input id="co_ayam" type="number" placeholder="Jumlah Ayam Tervaksin *">
+    <input id="co_vaksin" type="number" placeholder="Jumlah Vaksin Terpakai *">
 
-    <label>Foto Bukti Cek-Out *</label>
+    <label>Foto Bukti *</label>
     <input type="file" id="co_foto" accept="image/*">
 
     <textarea id="co_catatan" placeholder="Catatan *"></textarea>
 
-    <button class="btn btn-primary" onclick="submitCheckOut()">Kirim</button>
+    <button class="btn btn-primary" onclick="submitCO()">Kirim</button>
   </div>
 </div>
 
 </div>
 
 <script>
-function showView(v){
-  ['home','checkin','checkout'].forEach(id=>{
-    document.getElementById('view-'+id).classList.toggle('hidden',v!==id)
+function show(v){
+  ['home','checkin','checkout'].forEach(x=>{
+    document.getElementById('view-'+x).classList.toggle('hidden',v!==x)
   })
   if(v==='checkin') initCI()
   if(v==='checkout') initCO()
 }
 
-async function initCI(){time('ci_time');gps('ci_lat','ci_lng')}
-async function initCO(){time('co_time');gps('co_lat','co_lng')}
-
-async function time(id){
-  try{
-    const r=await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta')
-    const j=await r.json()
-    document.getElementById(id).value=j.datetime
-  }catch{
-    document.getElementById(id).value=new Date().toISOString()
-  }
+function formatTanggal(d){
+  return d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+}
+function formatJam(d){
+  return d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false})
 }
 
-function gps(lat,lng){
-  if(!navigator.geolocation) return
-  navigator.geolocation.getCurrentPosition(p=>{
-    document.getElementById(lat).value=p.coords.latitude.toFixed(6)
-    document.getElementById(lng).value=p.coords.longitude.toFixed(6)
+function initCI(){initTime('ci');initLoc('ci')}
+function initCO(){initTime('co');initLoc('co')}
+
+function initTime(p){
+  const now=new Date()
+  document.getElementById(p+'_tanggal').value=formatTanggal(now)
+  document.getElementById(p+'_jam').value=formatJam(now)
+}
+
+function initLoc(p){
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    document.getElementById(p+'_lat').value=pos.coords.latitude.toFixed(6)
+    document.getElementById(p+'_lng').value=pos.coords.longitude.toFixed(6)
+
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+      const j=await r.json()
+      document.getElementById(p+'_lokasi').value=j.display_name
+    }catch{
+      document.getElementById(p+'_lokasi').value='Lokasi tidak tersedia'
+    }
   })
 }
 
-/* ===== ORDER LOCK ===== */
-function alreadyDone(type, order){
-  return localStorage.getItem(type+'_'+order)
-}
-function markDone(type, order){
-  localStorage.setItem(type+'_'+order,'1')
-}
-
-/* ===== SUBMIT ===== */
-function submitCheckIn(){
-  const warn=document.getElementById('ci_warn')
-  warn.classList.add('hidden')
-
-  const order=ci_order.value.trim()
-  if(alreadyDone('CI',order)){
-    warn.textContent='❌ Nomor Order ini sudah pernah CEK-IN'
-    return warn.classList.remove('hidden')
+function submitCI(){
+  const req=['ci_order','ci_nama','ci_tanggal','ci_jam','ci_lokasi','ci_lat','ci_lng','ci_kondisi','ci_batch','ci_catatan']
+  if(req.some(id=>!document.getElementById(id).value)||ci_foto.files.length===0){
+    ci_warn.textContent='⚠️ Semua kolom wajib diisi'
+    ci_warn.classList.remove('hidden');return
   }
-
-  const required=['ci_order','ci_nama','ci_time','ci_lat','ci_lng','ci_kondisi','ci_catatan']
-  if(required.some(id=>!document.getElementById(id).value)||ci_foto.files.length===0){
-    warn.textContent='⚠️ Semua kolom & foto bukti wajib diisi'
-    return warn.classList.remove('hidden')
-  }
-
-  markDone('CI',order)
-  alert('✅ Cek-In berhasil (tersimpan di browser)')
-  showView('home')
+  alert('✅ Cek-In berhasil')
+  show('home')
 }
 
-function submitCheckOut(){
-  const warn=document.getElementById('co_warn')
-  warn.classList.add('hidden')
-
-  const order=co_order.value.trim()
-  if(alreadyDone('CO',order)){
-    warn.textContent='❌ Nomor Order ini sudah pernah CEK-OUT'
-    return warn.classList.remove('hidden')
+function submitCO(){
+  const req=['co_order','co_nama','co_tanggal','co_jam','co_lokasi','co_lat','co_lng','co_kandang','co_ayam','co_vaksin','co_catatan']
+  if(req.some(id=>!document.getElementById(id).value)||co_foto.files.length===0){
+    co_warn.textContent='⚠️ Semua kolom wajib diisi'
+    co_warn.classList.remove('hidden');return
   }
-
-  const required=['co_order','co_nama','co_time','co_lat','co_lng','co_kandang','co_jmlAyam','co_jmlVaksin','co_catatan']
-  if(required.some(id=>!document.getElementById(id).value)||co_foto.files.length===0){
-    warn.textContent='⚠️ Semua kolom & foto bukti wajib diisi'
-    return warn.classList.remove('hidden')
-  }
-
-  markDone('CO',order)
-  alert('✅ Cek-Out berhasil (tersimpan di browser)')
-  showView('home')
+  alert('✅ Cek-Out berhasil')
+  show('home')
 }
 </script>
+
 </body>
 </html>
