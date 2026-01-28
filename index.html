@@ -25,7 +25,7 @@ body{
 
 /* ===== LAYOUT ===== */
 .container{max-width:960px;margin:28px auto;padding:0 16px}
-.hidden{display:none}
+.hidden{display:none !important}
 
 /* ===== CARD ===== */
 .card{
@@ -239,11 +239,16 @@ textarea{min-height:90px}
 
 <script>
 function show(v){
-  ['home','checkin','checkout'].forEach(x=>{
-    document.getElementById('view-'+x).classList.toggle('hidden',v!==x)
-  })
+  document.getElementById('view-home').classList.add('hidden')
+  document.getElementById('view-checkin').classList.add('hidden')
+  document.getElementById('view-checkout').classList.add('hidden')
+
+  document.getElementById('view-'+v).classList.remove('hidden')
+
+  window.scrollTo({top:0,behavior:'instant'})
+
   if(v==='checkin'){init('ci');initBatch()}
-  if(v==='checkout') init('co')
+  if(v==='checkout'){init('co')}
 }
 
 function init(p){
