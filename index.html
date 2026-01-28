@@ -1,141 +1,164 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CICO Vaksinasi</title>
+  <!-- ================= META ================= -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-:root{
-  --bg:#eef2f7;
-  --card:#ffffff;
-  --primary:#1e40af;
-  --secondary:#6366f1;
-  --border:#dbe2f1;
-  --muted:#64748b;
-  --danger:#b91c1c;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto;
-  background:linear-gradient(180deg,#f4f7fb,#e9eef7);
-  color:#0f172a;
-}
+  <!-- ================= TITLE ================= -->
+  <title>CICO Vaksinasi</title>
 
-/* ===== LAYOUT ===== */
-.container{max-width:960px;margin:28px auto;padding:0 16px}
-.hidden{display:none !important}
+  <!-- ================= STYLE ================= -->
+  <style>
+    /* ===== VARIABLE WARNA (AMAN DIUBAH) ===== */
+    :root{
+      --bg:#eef2f7;
+      --card:#ffffff;
+      --primary:#1e40af;
+      --secondary:#6366f1;
+      --border:#dbe2f1;
+      --muted:#64748b;
+      --danger:#b91c1c;
+    }
 
-/* ===== CARD ===== */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:22px;
-  margin-bottom:18px;
-  box-shadow:0 10px 30px rgba(15,23,42,.08);
-}
-.section-title{
-  font-weight:700;
-  color:#1e3a8a;
-  margin-bottom:12px;
-}
+    *{box-sizing:border-box}
 
-/* ===== FORM ===== */
-label{font-weight:600;display:block;margin:12px 0 6px}
-input,select,textarea{
-  width:100%;
-  padding:12px 14px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  font-size:15px;
-}
-input[readonly]{background:#f5f7fb}
-textarea{min-height:90px}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto;
+      background:linear-gradient(180deg,#f4f7fb,#e9eef7);
+      color:#0f172a;
+    }
 
-.row{display:flex;gap:12px;flex-wrap:wrap}
-.row>div{flex:1}
+    /* ===== LAYOUT ===== */
+    .container{max-width:960px;margin:28px auto;padding:0 16px}
+    .hidden{display:none !important}
 
-/* ===== BUTTON ===== */
-.btn{
-  padding:14px 18px;
-  border-radius:12px;
-  border:none;
-  font-weight:600;
-  cursor:pointer;
-}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-ghost{background:#eef2ff;color:#1e3a8a}
-.btn-back{background:none;color:#2563eb;margin-bottom:12px}
+    /* ===== CARD ===== */
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:22px;
+      margin-bottom:18px;
+      box-shadow:0 10px 30px rgba(15,23,42,.08);
+    }
 
-/* ===== BADGE & WARN ===== */
-.warn{
-  background:#fff1f2;
-  color:var(--danger);
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:12px;
-}
-.badge{
-  display:inline-block;
-  padding:6px 12px;
-  border-radius:999px;
-  background:#eef2ff;
-  color:#1e3a8a;
-  font-size:13px;
-  margin-top:6px;
-}
+    .section-title{
+      font-weight:700;
+      color:#1e3a8a;
+      margin-bottom:12px;
+    }
 
-/* ===== LANDING ===== */
-.landing-wrap{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:radial-gradient(circle at top,#e0e7ff,#eef2f7);
-}
-.landing-card{
-  background:linear-gradient(180deg,#ffffff,#f8fafc);
-  border-radius:22px;
-  padding:40px 28px;
-  max-width:420px;
-  width:100%;
-  text-align:center;
-  box-shadow:0 24px 50px rgba(30,64,175,.2);
-  border:1px solid var(--border);
-}
-.landing-card h1{
-  font-size:30px;
-  margin:6px 0;
-  color:#1e3a8a;
-}
-.landing-card p{
-  font-size:15px;
-  color:var(--muted);
-  margin-bottom:28px;
-}
-.landing-actions{
-  display:grid;
-  gap:14px;
-}
-.footer-note{
-  margin-top:22px;
-  font-size:13px;
-  color:#64748b;
-}
-</style>
+    /* ===== FORM ===== */
+    label{font-weight:600;display:block;margin:12px 0 6px}
+
+    input,select,textarea{
+      width:100%;
+      padding:12px 14px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      font-size:15px;
+    }
+
+    input[readonly]{background:#f5f7fb}
+    textarea{min-height:90px}
+
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row>div{flex:1}
+
+    /* ===== BUTTON ===== */
+    .btn{
+      padding:14px 18px;
+      border-radius:12px;
+      border:none;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-ghost{background:#eef2ff;color:#1e3a8a}
+    .btn-back{background:none;color:#2563eb;margin-bottom:12px}
+
+    /* ===== BADGE & WARNING ===== */
+    .warn{
+      background:#fff1f2;
+      color:var(--danger);
+      padding:12px;
+      border-radius:10px;
+      margin-bottom:12px;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#1e3a8a;
+      font-size:13px;
+      margin-top:6px;
+    }
+
+    /* ===== LANDING PAGE ===== */
+    .landing-wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle at top,#e0e7ff,#eef2f7);
+    }
+
+    .landing-card{
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      border-radius:22px;
+      padding:40px 28px;
+      max-width:420px;
+      width:100%;
+      text-align:center;
+      box-shadow:0 24px 50px rgba(30,64,175,.2);
+      border:1px solid var(--border);
+    }
+
+    .landing-card h1{
+      font-size:30px;
+      margin:6px 0;
+      color:#1e3a8a;
+    }
+
+    .landing-card p{
+      font-size:15px;
+      color:var(--muted);
+      margin-bottom:28px;
+    }
+
+    .landing-actions{display:grid;gap:14px}
+
+    .footer-note{
+      margin-top:22px;
+      font-size:13px;
+      color:#64748b;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ================= HOME ================= -->
+<!-- ========================================================= -->
+<!-- ========================= HOME ========================== -->
+<!-- ========================================================= -->
 <div id="view-home" class="landing-wrap">
   <div class="landing-card">
     <div style="font-size:44px">💉</div>
+
+    <!-- UBAH NAMA APLIKASI DI SINI -->
     <h1>CICO Vaksinasi</h1>
-    <p>Sistem Check-In & Check-Out Vaksinasi<br>
-       Dengan Lokasi & Waktu Otomatis</p>
+
+    <!-- UBAH DESKRIPSI DI SINI -->
+    <p>
+      Sistem Check-In &amp; Check-Out Vaksinasi<br>
+      Dengan Lokasi &amp; Waktu Otomatis
+    </p>
 
     <div class="landing-actions">
       <button class="btn btn-primary" onclick="show('checkin')">
@@ -152,167 +175,333 @@ textarea{min-height:90px}
   </div>
 </div>
 
-<!-- ================= CEK IN ================= -->
+<!-- ========================================================= -->
+<!-- ======================== CEK IN ========================= -->
+<!-- ========================================================= -->
 <div id="view-checkin" class="container hidden">
-<button class="btn-back" onclick="show('home')">← Kembali</button>
-<h2>Form Cek-In</h2>
+  <button class="btn-back" onclick="show('home')">← Kembali</button>
+  <h2>Form Cek-In</h2>
 
-<div id="ci_warn" class="warn hidden"></div>
+  <div id="ci_warn" class="warn hidden"></div>
 
-<div class="card">
-  <div class="section-title">Data Otomatis (Sistem)</div>
-  <div class="row">
-    <div><label>Tanggal</label><input id="ci_tanggal" readonly></div>
-    <div><label>Jam</label><input id="ci_jam" readonly></div>
+  <!-- ===== DATA OTOMATIS ===== -->
+  <div class="card">
+    <div class="section-title">Data Otomatis (Sistem)</div>
+
+    <div class="row">
+      <div>
+        <label>Tanggal</label>
+        <input id="ci_tanggal" readonly>
+      </div>
+      <div>
+        <label>Jam</label>
+        <input id="ci_jam" readonly>
+      </div>
+    </div>
+
+    <label>Nama Lokasi</label>
+    <input id="ci_lokasi" readonly>
+    <span id="ci_src" class="badge">Lokasi: -</span>
+
+    <div class="row">
+      <div>
+        <label>Latitude</label>
+        <input id="ci_lat" readonly>
+      </div>
+      <div>
+        <label>Longitude</label>
+        <input id="ci_lng" readonly>
+      </div>
+    </div>
   </div>
-  <label>Nama Lokasi</label>
-  <input id="ci_lokasi" readonly>
-  <span id="ci_src" class="badge">Lokasi: -</span>
-  <div class="row">
-    <div><label>Latitude</label><input id="ci_lat" readonly></div>
-    <div><label>Longitude</label><input id="ci_lng" readonly></div>
+
+  <!-- ===== DATA DIISI PETUGAS ===== -->
+  <div class="card">
+    <div class="section-title">Data Diisi Petugas</div>
+
+    <!-- Nomor Order -->
+    <label>Nomor Order</label>
+    <select id="ci_order">
+      <option value="">⏳ Memuat...</option>
+    </select>
+
+    <label>Nama Vaksinator</label>
+    <input id="ci_nama">
+
+    <label>Kondisi Vaksin</label>
+    <select id="ci_kondisi">
+      <option value="">-- Pilih --</option>
+      <option>Baik</option>
+      <option>Perlu Pendinginan</option>
+      <option>Rusak</option>
+      <option>Thawing</option>
+      <option>Tidak Thawing</option>
+    </select>
+
+    <label>Nomor Batch Vaksin</label>
+    <div id="ci_batch_wrap"></div>
+    <button class="btn btn-ghost" type="button" onclick="addBatch()">➕ Tambah Batch</button>
+
+    <label>Foto Bukti</label>
+    <input type="file" id="ci_foto" accept="image/*">
+
+    <label>Catatan</label>
+    <textarea id="ci_catatan"></textarea>
+
+    <button class="btn btn-primary" type="button" onclick="submitCI()">
+      Kirim Cek-In
+    </button>
   </div>
 </div>
 
-<div class="card">
-  <div class="section-title">Data Diisi Petugas</div>
-  <label>Nomor Order</label><input id="ci_order">
-  <label>Nama Vaksinator</label><input id="ci_nama">
-  <label>Kondisi Vaksin</label>
-  <select id="ci_kondisi">
-    <option value="">-- Pilih --</option>
-    <option>Baik</option>
-    <option>Perlu Pendinginan</option>
-    <option>Rusak</option>
-    <option>Thawing</option>
-    <option>Tidak Thawing</option>
-  </select>
-
-  <label>Nomor Batch Vaksin</label>
-  <div id="ci_batch_wrap"></div>
-  <button class="btn btn-ghost" onclick="addBatch()">➕ Tambah Batch</button>
-
-  <label>Foto Bukti</label>
-  <input type="file" id="ci_foto" accept="image/*">
-
-  <label>Catatan</label>
-  <textarea id="ci_catatan"></textarea>
-
-  <button class="btn btn-primary" onclick="submitCI()">Kirim Cek-In</button>
-</div>
-</div>
-
-<!-- ================= CEK OUT ================= -->
+<!-- ========================================================= -->
+<!-- ======================= CEK OUT ========================= -->
+<!-- ========================================================= -->
 <div id="view-checkout" class="container hidden">
-<button class="btn-back" onclick="show('home')">← Kembali</button>
-<h2>Form Cek-Out</h2>
+  <button class="btn-back" onclick="show('home')">← Kembali</button>
+  <h2>Form Cek-Out</h2>
 
-<div id="co_warn" class="warn hidden"></div>
+  <div id="co_warn" class="warn hidden"></div>
 
-<div class="card">
-  <div class="section-title">Data Otomatis (Sistem)</div>
-  <div class="row">
-    <div><label>Tanggal</label><input id="co_tanggal" readonly></div>
-    <div><label>Jam</label><input id="co_jam" readonly></div>
+  <!-- ===== DATA OTOMATIS ===== -->
+  <div class="card">
+    <div class="section-title">Data Otomatis (Sistem)</div>
+
+    <div class="row">
+      <div>
+        <label>Tanggal</label>
+        <input id="co_tanggal" readonly>
+      </div>
+      <div>
+        <label>Jam</label>
+        <input id="co_jam" readonly>
+      </div>
+    </div>
+
+    <label>Nama Lokasi</label>
+    <input id="co_lokasi" readonly>
+    <span id="co_src" class="badge">Lokasi: -</span>
+
+    <div class="row">
+      <div>
+        <label>Latitude</label>
+        <input id="co_lat" readonly>
+      </div>
+      <div>
+        <label>Longitude</label>
+        <input id="co_lng" readonly>
+      </div>
+    </div>
   </div>
-  <label>Nama Lokasi</label>
-  <input id="co_lokasi" readonly>
-  <span id="co_src" class="badge">Lokasi: -</span>
-  <div class="row">
-    <div><label>Latitude</label><input id="co_lat" readonly></div>
-    <div><label>Longitude</label><input id="co_lng" readonly></div>
+
+  <!-- ===== DATA DIISI PETUGAS ===== -->
+  <div class="card">
+    <div class="section-title">Data Diisi Petugas</div>
+
+    <label>Nomor Order</label>
+    <!-- FIX: gunakan co_order, bukan ci_order -->
+    <select id="co_order">
+      <option value="">⏳ Memuat...</option>
+    </select>
+
+    <label>Nama Vaksinator</label>
+    <input id="co_nama">
+
+    <label>No Kandang</label>
+    <input id="co_kandang">
+
+    <label>Jumlah Ayam Tervaksin</label>
+    <input type="number" id="co_ayam">
+
+    <label>Jumlah Vaksin Terpakai</label>
+    <input type="number" id="co_vaksin">
+
+    <label>Foto Bukti</label>
+    <input type="file" id="co_foto" accept="image/*">
+
+    <label>Catatan</label>
+    <textarea id="co_catatan"></textarea>
+
+    <button class="btn btn-primary" type="button" onclick="submitCO()">
+      Kirim Cek-Out
+    </button>
   </div>
 </div>
 
-<div class="card">
-  <div class="section-title">Data Diisi Petugas</div>
-  <label>Nomor Order</label><input id="co_order">
-  <label>Nama Vaksinator</label><input id="co_nama">
-  <label>No Kandang</label><input id="co_kandang">
-  <label>Jumlah Ayam Tervaksin</label><input type="number" id="co_ayam">
-  <label>Jumlah Vaksin Terpakai</label><input type="number" id="co_vaksin">
-  <label>Foto Bukti</label><input type="file" id="co_foto" accept="image/*">
-  <label>Catatan</label><textarea id="co_catatan"></textarea>
-  <button class="btn btn-primary" onclick="submitCO()">Kirim Cek-Out</button>
-</div>
-</div>
-
+<!-- ========================================================= -->
+<!-- ======================= SCRIPT ========================== -->
+<!-- ========================================================= -->
 <script>
-function show(v){
-  document.getElementById('view-home').classList.add('hidden')
-  document.getElementById('view-checkin').classList.add('hidden')
-  document.getElementById('view-checkout').classList.add('hidden')
+  /* ===== FLOW CONFIG (GANTI URL JIKA PERLU) ===== */
+  const FLOW_GET_ORDER_URL =
+  "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4d31684f653446e286f83fcea2294ab1/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Iw6sf_iQ4yO6JgSCoY1e3HXKi2Gtd5CRTfzbOWMMwvw";
 
-  document.getElementById('view-'+v).classList.remove('hidden')
+  /* ===== NAVIGASI VIEW ===== */
+  function show(v){
+    document.getElementById('view-home').classList.add('hidden');
+    document.getElementById('view-checkin').classList.add('hidden');
+    document.getElementById('view-checkout').classList.add('hidden');
 
-  window.scrollTo({top:0,behavior:'instant'})
+    document.getElementById('view-'+v).classList.remove('hidden');
+    window.scrollTo({top:0,behavior:'instant'});
 
-  if(v==='checkin'){init('ci');initBatch()}
-  if(v==='checkout'){init('co')}
-}
-
-function init(p){
-  const d=new Date()
-  document.getElementById(p+'_tanggal').value=
-    d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
-  document.getElementById(p+'_jam').value=
-    d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false})
-  loadLocation(p)
-}
-
-function simplifyAddress(a){
-  const p=a.split(',')
-  return p.slice(1).join(',').trim()
-}
-
-async function loadLocation(p){
-  const src=document.getElementById(p+'_src')
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    document.getElementById(p+'_lat').value=pos.coords.latitude.toFixed(6)
-    document.getElementById(p+'_lng').value=pos.coords.longitude.toFixed(6)
-    src.textContent='Lokasi: GPS'
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
-    const j=await r.json()
-    document.getElementById(p+'_lokasi').value=simplifyAddress(j.display_name)
-  },async ()=>{
-    const r=await fetch('https://ipapi.co/json/')
-    const j=await r.json()
-    document.getElementById(p+'_lat').value=j.latitude
-    document.getElementById(p+'_lng').value=j.longitude
-    document.getElementById(p+'_lokasi').value=`${j.city}, ${j.region}, ${j.country_name}`
-    src.textContent='Lokasi: Perkiraan IP'
-  })
-}
-
-function initBatch(){
-  ci_batch_wrap.innerHTML=''
-  addBatch()
-}
-function addBatch(){
-  const i=document.createElement('input')
-  i.placeholder='Nomor Batch'
-  i.style.marginBottom='8px'
-  ci_batch_wrap.appendChild(i)
-}
-
-function submitCI(){
-  if(ci_batch_wrap.children.length===0||ci_foto.files.length===0){
-    ci_warn.textContent='⚠️ Semua kolom wajib diisi'
-    ci_warn.classList.remove('hidden');return
+    if(v==='checkin'){ init('ci'); initBatch(); loadOrders('ci_order'); }
+    if(v==='checkout'){ init('co'); loadOrders('co_order'); }
   }
-  alert('✅ Cek-In berhasil')
-  show('home')
-}
 
-function submitCO(){
-  if(co_foto.files.length===0){
-    co_warn.textContent='⚠️ Semua kolom wajib diisi'
-    co_warn.classList.remove('hidden');return
+  /* ===== INIT TANGGAL & JAM ===== */
+  function init(p){
+    const d=new Date();
+    document.getElementById(p+'_tanggal').value =
+      d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+    document.getElementById(p+'_jam').value =
+      d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false});
+    loadLocation(p);
   }
-  alert('✅ Cek-Out berhasil')
-  show('home')
-}
+
+  /* ===== LOKASI ===== */
+  function simplifyAddress(a){
+    const p=a.split(',');
+    return p.slice(1).join(',').trim();
+  }
+
+  async function loadLocation(p){
+    const src=document.getElementById(p+'_src');
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      document.getElementById(p+'_lat').value=pos.coords.latitude.toFixed(6);
+      document.getElementById(p+'_lng').value=pos.coords.longitude.toFixed(6);
+      src.textContent='Lokasi: GPS';
+      try{
+        const r=await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
+        );
+        const j=await r.json();
+        if(j?.display_name){
+          document.getElementById(p+'_lokasi').value=simplifyAddress(j.display_name);
+        }
+      }catch(e){
+        console.warn('Gagal reverse geocode', e);
+      }
+    }, async ()=>{
+      try{
+        const r=await fetch('https://ipapi.co/json/');
+        const j=await r.json();
+        document.getElementById(p+'_lat').value=j.latitude ?? '';
+        document.getElementById(p+'_lng').value=j.longitude ?? '';
+        document.getElementById(p+'_lokasi').value=
+          `${j.city ?? '-'}, ${j.region ?? '-'}, ${j.country_name ?? '-'}`;
+        src.textContent='Lokasi: Perkiraan IP';
+      }catch(e){
+        console.warn('Gagal ambil lokasi via IP', e);
+        src.textContent='Lokasi: Tidak tersedia';
+      }
+    });
+  }
+
+  /* ===== BATCH ===== */
+  function initBatch(){
+    ci_batch_wrap.innerHTML='';
+    addBatch();
+  }
+
+  function addBatch(){
+    const i=document.createElement('input');
+    i.placeholder='Nomor Batch';
+    i.style.marginBottom='8px';
+    ci_batch_wrap.appendChild(i);
+  }
+
+  /* ===== SUBMIT ===== */
+  function submitCI(){
+    if(ci_order.value === '' || ci_nama.value.trim()==='' || ci_kondisi.value==='' ||
+       ci_batch_wrap.children.length===0 || ci_foto.files.length===0){
+      ci_warn.textContent='⚠️ Semua kolom wajib diisi (termasuk Nomor Order & Foto)';
+      ci_warn.classList.remove('hidden');
+      return;
+    }
+    ci_warn.classList.add('hidden');
+    alert('✅ Cek-In berhasil');
+    show('home');
+  }
+
+  function submitCO(){
+    if(co_order.value === '' || co_nama.value.trim()==='' ||
+       co_kandang.value.trim()==='' || co_ayam.value==='' || co_vaksin.value==='' ||
+       co_foto.files.length===0){
+      co_warn.textContent='⚠️ Semua kolom wajib diisi (termasuk Nomor Order & Foto)';
+      co_warn.classList.remove('hidden');
+      return;
+    }
+    co_warn.classList.add('hidden');
+    alert('✅ Cek-Out berhasil');
+    show('home');
+  }
+
+  /* ===== LOADING ===== */
+  function showLoading(){
+    document.getElementById('loading').classList.remove('hidden');
+  }
+  function hideLoading(){
+    document.getElementById('loading').classList.add('hidden');
+  }
+
+  /* ===== LOAD ORDERS ===== */
+  async function loadOrders(selectId){
+    showLoading();
+    const sel=document.getElementById(selectId);
+    sel.innerHTML='<option value="">-- Pilih Nomor Order --</option>';
+
+    try{
+      const r=await fetch(FLOW_GET_ORDER_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'}
+      });
+      if(!r.ok){
+        throw new Error(`HTTP ${r.status}`);
+      }
+      const j=await r.json();
+      const list = Array.isArray(j?.orders) ? j.orders : [];
+
+      if(list.length===0){
+        const opt=document.createElement('option');
+        opt.value='';
+        opt.textContent='(Tidak ada data order)';
+        sel.appendChild(opt);
+      }else{
+        list.forEach(o=>{
+          const val = o?.orderNumber ?? o?.order_no ?? o?.id ?? '';
+          if(!val) return;
+          const opt=document.createElement('option');
+          opt.value=val;
+          opt.textContent=val;
+          sel.appendChild(opt);
+        });
+      }
+    }catch(e){
+      console.error('Gagal mengambil data order', e);
+      alert('Gagal mengambil data order. Pastikan URL Flow benar, Flow diizinkan untuk diakses publik/anonym atau melalui mekanisme auth yang sesuai, serta tidak diblokir CORS.');
+    }finally{
+      hideLoading();
+    }
+  }
 </script>
+
+<!-- ================= LOADING OVERLAY ================= -->
+<div id="loading" class="hidden"
+  style="
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.85);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    font-weight:600;
+    font-size:18px;
+  ">
+  ⏳ Mengambil data order...
+</div>
 
 </body>
 </html>
+``
