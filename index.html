@@ -144,7 +144,8 @@
   =============== [D] VIEW: CEK-IN ==============================
   ========================================================== -->
   <div id="view-checkin" class="container hidden">
-    <button class="btn btn-ghost" onclick="show('home')">← Kembali</button>
+    <!-- DIUBAH: tombol kembali sekarang reset dulu baru ke Home -->
+    <button class="btn btn-ghost" onclick="goHome('ci')">← Kembali</button>
     <h2>Form Cek-In</h2>
 
     <div id="ci_warn" class="warn hidden"></div>
@@ -221,6 +222,7 @@
 
       <div class="btn-group">
         <button class="btn btn-primary" type="button" onclick="submitCI()">Kirim Cek-In</button>
+        <!-- Reset di dalam form: tetap refresh otomatis -->
         <button class="btn btn-ghost" type="button" onclick="resetForm('ci')">↺ Reset Form</button>
       </div>
     </div>
@@ -230,7 +232,8 @@
   =============== [E] VIEW: CEK-OUT =============================
   ========================================================== -->
   <div id="view-checkout" class="container hidden">
-    <button class="btn btn-ghost" onclick="show('home')">← Kembali</button>
+    <!-- DIUBAH: tombol kembali sekarang reset dulu baru ke Home -->
+    <button class="btn btn-ghost" onclick="goHome('co')">← Kembali</button>
     <h2>Form Cek-Out</h2>
 
     <div id="co_warn" class="warn hidden"></div>
@@ -294,13 +297,12 @@
         <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
 
-      <!-- (Signature pad removed as requested) -->
-
       <label>Catatan</label>
       <textarea id="co_catatan" placeholder="Opsional"></textarea>
 
       <div class="btn-group">
         <button class="btn btn-primary" type="button" onclick="submitCO()">Kirim Cek-Out</button>
+        <!-- Reset di dalam form: tetap refresh otomatis -->
         <button class="btn btn-ghost" type="button" onclick="resetForm('co')">↺ Reset Form</button>
       </div>
     </div>
@@ -326,615 +328,649 @@
   <!-- =========================================================
   =============== [G] SCRIPT / LOGIC ===========================
   ========================================================== -->
+  <script>
+    /* =========================================================
+    =============== [G1] KONFIGURASI ENDPOINT ==================
+    ========================================================== */
+    const FLOW_GET_ORDER_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/0b8ea542919749eeabb66e27e32c1b5a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ly_DAybOG8S6gwh03EPU-jGikDyD084xiN_-M-Kaa0I";
 
-<script>
-  /* =========================================================
-  =============== [G1] KONFIGURASI ENDPOINT ==================
-  ========================================================== */
+    const FLOW_SUBMIT_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fbda6accf77d48cbbaf3b879ff63287d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r3rqKUO_yBMlf-9D8L1uQsF4re6EuUC-gK11I6cY29g";
 
-  const FLOW_GET_ORDER_URL =
-    "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/0b8ea542919749eeabb66e27e32c1b5a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ly_DAybOG8S6gwh03EPU-jGikDyD084xiN_-M-Kaa0I";
+    const MAX_PHOTOS = 5;
+    const REQUIRE_SIGNATURE_CO = false; // Signature pad removed
+    const $ = (id) => document.getElementById(id);
 
-  const FLOW_SUBMIT_URL =
-    "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fbda6accf77d48cbbaf3b879ff63287d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r3rqKUO_yBMlf-9D8L1uQsF4re6EuUC-gK11I6cY29g";
-
-  const MAX_PHOTOS = 5;
-
-  // Signature requirement disabled (signature pad removed)
-  const REQUIRE_SIGNATURE_CO = false;
-
-  const $ = (id) => document.getElementById(id);
-
-  /* =========================================================
-  =============== [G2] LOADING UI ============================
-  ========================================================== */
-  function showLoading(msg) {
-    const el = $("loading");
-    if (msg) el.textContent = msg;
-    el.classList.remove("hidden");
-  }
-  function hideLoading() {
-    const el = $("loading");
-    el.classList.add("hidden");
-    el.textContent = "⏳ Memproses...";
-  }
-
-  /* =========================================================
-  =============== [G3] NAVIGASI VIEW =========================
-  ========================================================== */
-  function show(v) {
-    $("view-home").classList.add("hidden");
-    $("view-checkin").classList.add("hidden");
-    $("view-checkout").classList.add("hidden");
-
-    const target = $("view-" + v);
-    if (target) target.classList.remove("hidden");
-
-    window.scrollTo({ top: 0, behavior: "auto" });
-
-    if (v === "checkin") {
-      init("ci");
-      initBatches();
-      loadOrders("ci_order");
-      attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
+    /* =========================================================
+    =============== [G2] LOADING UI ============================
+    ========================================================== */
+    function showLoading(msg) {
+      const el = $("loading");
+      if (msg) el.textContent = msg;
+      el.classList.remove("hidden");
     }
-    if (v === "checkout") {
-      init("co");
-      loadOrders("co_order");
-      // initSignatureOnce("co"); // removed
-      attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
-    }
-  }
-
-  /* =========================================================
-  =============== [G4] INIT TANGGAL & JAM ====================
-  ========================================================== */
-  function init(p) {
-    const d = new Date();
-    $(p + "_tanggal").value = d.toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-    $(p + "_jam").value = d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-    loadLocation(p);
-  }
-
-  /* =========================================================
-  =============== [G5] LOKASI (GPS -> IP fallback) ===========
-  ========================================================== */
-  function simplifyAddress(a) {
-    const parts = (a || "").split(",");
-    return parts.slice(1).join(",").trim() || (a || "");
-  }
-
-  async function loadLocation(p) {
-    const src = $(p + "_src");
-
-    if (!navigator.geolocation) {
-      src.textContent = "Lokasi: Tidak tersedia";
-      return;
+    function hideLoading() {
+      const el = $("loading");
+      el.classList.add("hidden");
+      el.textContent = "⏳ Memproses...";
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        $(p + "_lat").value = pos.coords.latitude.toFixed(6);
-        $(p + "_lng").value = pos.coords.longitude.toFixed(6);
-        src.textContent = "Lokasi: GPS";
+    /* =========================================================
+    =============== [G3] NAVIGASI VIEW =========================
+    ========================================================== */
+    function show(v) {
+      $("view-home").classList.add("hidden");
+      $("view-checkin").classList.add("hidden");
+      $("view-checkout").classList.add("hidden");
 
-        try {
-          const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
-          const r = await fetch(url, { headers: { "Accept": "application/json" } });
-          const j = await r.json();
-          if (j?.display_name) {
-            $(p + "_lokasi").value = simplifyAddress(j.display_name);
-          }
-        } catch (e) {
-          console.warn("Gagal reverse geocode", e);
-        }
-      },
-      async () => {
-        try {
-          const r = await fetch("https://ipapi.co/json/");
-          const j = await r.json();
-          $(p + "_lat").value = j.latitude ?? "";
-          $(p + "_lng").value = j.longitude ?? "";
-          $(p + "_lokasi").value = `${j.city ?? "-"}, ${j.region ?? "-"}, ${j.country_name ?? "-"}`;
-          src.textContent = "Lokasi: Perkiraan IP";
-        } catch (e) {
-          console.warn("Gagal ambil lokasi via IP", e);
-          src.textContent = "Lokasi: Tidak tersedia";
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  }
+      const target = $("view-" + v);
+      if (target) target.classList.remove("hidden");
 
-  /* =========================================================
-  =============== [G6] BATCHES (CEK-IN) ======================
-  ========================================================== */
-  function initBatches() {
-    $("ci_batch_wrap").innerHTML = "";
-    addBatch();
-  }
-  function addBatch() {
-    const wrap = $("ci_batch_wrap");
-    const i = document.createElement("input");
-    i.placeholder = "Nomor Batch";
-    i.style.marginBottom = "8px";
-    wrap.appendChild(i);
-  }
-  function resetBatches() {
-    initBatches();
-  }
-  function getBatchValues() {
-    const inputs = Array.from($("ci_batch_wrap").querySelectorAll("input"));
-    return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
-  }
+      window.scrollTo({ top: 0, behavior: "auto" });
 
-  /* =========================================================
-  =============== [G7] FOTO: PREVIEW + DELETE =================
-  ========================================================== */
-  const photoHandlers = {}; // per inputId: {urls:[], clear, render, removeAt}
-
-  function attachMultiPhotoHandler(inputId, previewId, clearBtnId) {
-    const inp = $(inputId);
-    const preview = $(previewId);
-    const clearBtn = clearBtnId ? $(clearBtnId) : null;
-
-    if (!photoHandlers[inputId]) {
-      photoHandlers[inputId] = { urls: [] };
-    }
-    const state = photoHandlers[inputId];
-
-    function revokeAll() {
-      (state.urls || []).forEach((u) => URL.revokeObjectURL(u));
-      state.urls = [];
-    }
-
-    function syncLimit() {
-      let files = Array.from(inp.files || []);
-      if (files.length > MAX_PHOTOS) {
-        alert(`Maksimal ${MAX_PHOTOS} foto. Hanya ${MAX_PHOTOS} pertama yang digunakan.`);
-        const dt = new DataTransfer();
-        files.slice(0, MAX_PHOTOS).forEach((f) => dt.items.add(f));
-        inp.files = dt.files;
-        files = Array.from(inp.files);
+      if (v === "checkin") {
+        init("ci");
+        initBatches();
+        loadOrders("ci_order");
+        attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
       }
-      return files;
-    }
-
-    function render() {
-      const files = syncLimit();
-      revokeAll();
-      preview.innerHTML = "";
-
-      files.forEach((f, idx) => {
-        if (!f.type.startsWith("image/")) return;
-
-        const item = document.createElement("div");
-        item.className = "photo-item";
-
-        const img = document.createElement("img");
-        img.alt = f.name;
-
-        const url = URL.createObjectURL(f);
-        state.urls.push(url);
-        img.src = url;
-
-        const del = document.createElement("button");
-        del.className = "photo-del";
-        del.type = "button";
-        del.textContent = "×";
-        del.title = "Hapus foto ini";
-        del.onclick = () => removeAt(idx);
-
-        item.appendChild(img);
-        item.appendChild(del);
-        preview.appendChild(item);
-      });
-    }
-
-    function clearAll() {
-      try {
-        const dt = new DataTransfer();
-        inp.files = dt.files;
-      } catch {
-        inp.value = "";
+      if (v === "checkout") {
+        init("co");
+        loadOrders("co_order");
+        attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
       }
-      revokeAll();
-      preview.innerHTML = "";
     }
 
-    function removeAt(idx) {
-      const files = Array.from(inp.files || []);
-      const dt = new DataTransfer();
-      files.forEach((f, i) => {
-        if (i !== idx) dt.items.add(f);
-      });
-      inp.files = dt.files;
-      render();
+    /* =========================================================
+    =============== [G3b] KEMBALI KE HOME + RESET ===============
+    ========================================================== */
+    function goHome(prefix) {
+      // Saat klik kembali: reset form dulu supaya saat nanti dibuka lagi, bersih.
+      resetForm(prefix, false); // false = tidak refresh auto field (akan diisi saat buka form lagi)
+      show("home");
     }
 
-    if (clearBtn) clearBtn.onclick = clearAll;
-    inp.onchange = render;
-
-    state.clear = clearAll;
-    state.render = render;
-    state.removeAt = removeAt;
-  }
-
-  /* =========================================================
-  =============== [G8] LOAD ORDERS (DARI FLOW GET ORDER) ======
-  ========================================================== */
-  async function loadOrders(selectId) {
-    console.log("loadOrders called:", selectId);
-
-    const sel = $(selectId);
-    sel.innerHTML = '<option value="">-- Pilih Nomor Order --</option>';
-
-    const type = selectId.startsWith("ci") ? "checkin" : "checkout";
-
-    try {
-      showLoading("⏳ Mengambil data order...");
-
-      const r = await fetch(FLOW_GET_ORDER_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain; charset=UTF-8",
-          Accept: "application/json",
-        },
-        body: type,
+    /* =========================================================
+    =============== [G4] INIT TANGGAL & JAM ====================
+    ========================================================== */
+    function init(p) {
+      const d = new Date();
+      $(p + "_tanggal").value = d.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
       });
+      $(p + "_jam").value = d.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      loadLocation(p);
+    }
 
-      const raw = await r.text();
-      console.log("[FLOW] HTTP:", r.status);
-      console.log("[FLOW] RAW:", raw);
+    /* =========================================================
+    =============== [G5] LOKASI (GPS -> IP fallback) ===========
+    ========================================================== */
+    function simplifyAddress(a) {
+      const parts = (a || "").split(",");
+      return parts.slice(1).join(",").trim() || (a || "");
+    }
 
-      if (!r.ok) {
-        throw new Error(`HTTP ${r.status} - ${raw.slice(0, 300)}`);
+    async function loadLocation(p) {
+      const src = $(p + "_src");
+
+      if (!navigator.geolocation) {
+        src.textContent = "Lokasi: Tidak tersedia";
+        return;
       }
 
-      const safeJson = (x) => {
-        if (x == null) return null;
-        if (typeof x === "object") return x;
-        if (typeof x !== "string") return null;
-        try {
-          const p1 = JSON.parse(x);
-          if (typeof p1 === "string") {
-            try {
-              return JSON.parse(p1);
-            } catch {
-              return p1;
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          $(p + "_lat").value = pos.coords.latitude.toFixed(6);
+          $(p + "_lng").value = pos.coords.longitude.toFixed(6);
+          src.textContent = "Lokasi: GPS";
+
+          try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
+            const r = await fetch(url, { headers: { "Accept": "application/json" } });
+            const j = await r.json();
+            if (j?.display_name) {
+              $(p + "_lokasi").value = simplifyAddress(j.display_name);
             }
+          } catch (e) {
+            console.warn("Gagal reverse geocode", e);
           }
-          return p1;
+        },
+        async () => {
+          try {
+            const r = await fetch("https://ipapi.co/json/");
+            const j = await r.json();
+            $(p + "_lat").value = j.latitude ?? "";
+            $(p + "_lng").value = j.longitude ?? "";
+            $(p + "_lokasi").value = `${j.city ?? "-"}, ${j.region ?? "-"}, ${j.country_name ?? "-"}`;
+            src.textContent = "Lokasi: Perkiraan IP";
+          } catch (e) {
+            console.warn("Gagal ambil lokasi via IP", e);
+            src.textContent = "Lokasi: Tidak tersedia";
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    /* =========================================================
+    =============== [G6] BATCHES (CEK-IN) ======================
+    ========================================================== */
+    function initBatches() {
+      $("ci_batch_wrap").innerHTML = "";
+      addBatch();
+    }
+    function addBatch() {
+      const wrap = $("ci_batch_wrap");
+      const i = document.createElement("input");
+      i.placeholder = "Nomor Batch";
+      i.style.marginBottom = "8px";
+      wrap.appendChild(i);
+    }
+    function resetBatches() {
+      initBatches();
+    }
+    function getBatchValues() {
+      const inputs = Array.from($("ci_batch_wrap").querySelectorAll("input"));
+      return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
+    }
+
+    /* =========================================================
+    =============== [G7] FOTO: PREVIEW + DELETE =================
+    ========================================================== */
+    const photoHandlers = {}; // per inputId: {urls:[], clear, render, removeAt}
+
+    function attachMultiPhotoHandler(inputId, previewId, clearBtnId) {
+      const inp = $(inputId);
+      const preview = $(previewId);
+      const clearBtn = clearBtnId ? $(clearBtnId) : null;
+
+      if (!photoHandlers[inputId]) {
+        photoHandlers[inputId] = { urls: [] };
+      }
+      const state = photoHandlers[inputId];
+
+      function revokeAll() {
+        (state.urls || []).forEach((u) => URL.revokeObjectURL(u));
+        state.urls = [];
+      }
+
+      function syncLimit() {
+        let files = Array.from(inp.files || []);
+        if (files.length > MAX_PHOTOS) {
+          alert(`Maksimal ${MAX_PHOTOS} foto. Hanya ${MAX_PHOTOS} pertama yang digunakan.`);
+          const dt = new DataTransfer();
+          files.slice(0, MAX_PHOTOS).forEach((f) => dt.items.add(f));
+          inp.files = dt.files;
+          files = Array.from(inp.files);
+        }
+        return files;
+      }
+
+      function render() {
+        const files = syncLimit();
+        revokeAll();
+        preview.innerHTML = "";
+
+        files.forEach((f, idx) => {
+          if (!f.type.startsWith("image/")) return;
+
+          const item = document.createElement("div");
+          item.className = "photo-item";
+
+          const img = document.createElement("img");
+          img.alt = f.name;
+
+          const url = URL.createObjectURL(f);
+          state.urls.push(url);
+          img.src = url;
+
+          const del = document.createElement("button");
+          del.className = "photo-del";
+          del.type = "button";
+          del.textContent = "×";
+          del.title = "Hapus foto ini";
+          del.onclick = () => removeAt(idx);
+
+          item.appendChild(img);
+          item.appendChild(del);
+          preview.appendChild(item);
+        });
+      }
+
+      function clearAll() {
+        try {
+          const dt = new DataTransfer();
+          inp.files = dt.files;
         } catch {
-          return null;
+          inp.value = "";
         }
-      };
-
-      let j = safeJson(raw);
-      if (!j) throw new Error("Response tidak bisa diparse JSON.");
-
-      if (j.body) {
-        const bodyParsed = safeJson(j.body) || j.body;
-        if (typeof bodyParsed === "object") j = { ...j, body: bodyParsed };
+        revokeAll();
+        preview.innerHTML = "";
       }
 
-      let list =
-        (Array.isArray(j?.body?.orders) ? j.body.orders : null) ||
-        (Array.isArray(j?.orders) ? j.orders : null) ||
-        (Array.isArray(j?.body) ? j.body : null) ||
-        (Array.isArray(j?.value) ? j.value : null) ||
-        [];
+      function removeAt(idx) {
+        const files = Array.from(inp.files || []);
+        const dt = new DataTransfer();
+        files.forEach((f, i) => {
+          if (i !== idx) dt.items.add(f);
+        });
+        inp.files = dt.files;
+        render();
+      }
 
-      console.log("[FLOW] parsed:", j);
-      console.log("[FLOW] list length:", list.length);
+      if (clearBtn) clearBtn.onclick = clearAll;
+      inp.onchange = render;
 
-      if (!Array.isArray(list) || list.length === 0) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "(Tidak ada data order / struktur response tidak sesuai)";
-        sel.appendChild(opt);
+      state.clear = clearAll;
+      state.render = render;
+      state.removeAt = removeAt;
+    }
+
+    /* =========================================================
+    =============== [G8] LOAD ORDERS (DARI FLOW GET ORDER) ======
+    ========================================================== */
+    async function loadOrders(selectId) {
+      console.log("loadOrders called:", selectId);
+
+      const sel = $(selectId);
+      sel.innerHTML = '<option value="">-- Pilih Nomor Order --</option>';
+
+      const type = selectId.startsWith("ci") ? "checkin" : "checkout";
+
+      try {
+        showLoading("⏳ Mengambil data order...");
+
+        const r = await fetch(FLOW_GET_ORDER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain; charset=UTF-8",
+            Accept: "application/json",
+          },
+          body: type,
+        });
+
+        const raw = await r.text();
+        console.log("[FLOW] HTTP:", r.status);
+        console.log("[FLOW] RAW:", raw);
+
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status} - ${raw.slice(0, 300)}`);
+        }
+
+        const safeJson = (x) => {
+          if (x == null) return null;
+          if (typeof x === "object") return x;
+          if (typeof x !== "string") return null;
+          try {
+            const p1 = JSON.parse(x);
+            if (typeof p1 === "string") {
+              try {
+                return JSON.parse(p1);
+              } catch {
+                return p1;
+              }
+            }
+            return p1;
+          } catch {
+            return null;
+          }
+        };
+
+        let j = safeJson(raw);
+        if (!j) throw new Error("Response tidak bisa diparse JSON.");
+
+        if (j.body) {
+          const bodyParsed = safeJson(j.body) || j.body;
+          if (typeof bodyParsed === "object") j = { ...j, body: bodyParsed };
+        }
+
+        let list =
+          (Array.isArray(j?.body?.orders) ? j.body.orders : null) ||
+          (Array.isArray(j?.orders) ? j.orders : null) ||
+          (Array.isArray(j?.body) ? j.body : null) ||
+          (Array.isArray(j?.value) ? j.value : null) ||
+          [];
+
+        console.log("[FLOW] parsed:", j);
+        console.log("[FLOW] list length:", list.length);
+
+        if (!Array.isArray(list) || list.length === 0) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "(Tidak ada data order / struktur response tidak sesuai)";
+          sel.appendChild(opt);
+          return;
+        }
+
+        list.forEach((o) => {
+          let val = "";
+          if (typeof o === "string") {
+            val = o;
+          } else {
+            val = (o?.Value ?? o?.value ?? o?.orderNumber ?? o?.OrderNumber ?? "").toString();
+          }
+
+          val = val.replace(/\s+/g, " ").trim();
+          if (!val) return;
+
+          const opt = document.createElement("option");
+          opt.value = val;
+          opt.textContent = val;
+          sel.appendChild(opt);
+        });
+
+        if (sel.options.length <= 1) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "(Data ada, tapi field Value/orderNumber tidak ditemukan)";
+          sel.appendChild(opt);
+        }
+      } catch (e) {
+        console.error("Gagal mengambil data order", e);
+        alert("Gagal mengambil data order.\n\nDETAIL:\n" + (e?.message || e));
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /* =========================================================
+    =============== [G9] HELPERS: BASE64 FOTO & SUBMIT JSON =====
+    ========================================================== */
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => {
+          const result = String(r.result || "");
+          const base64 = result.includes(",") ? result.split(",")[1] : result;
+          resolve(base64);
+        };
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function buildPhotosPayload(inputId, prefix) {
+      const files = Array.from($(inputId).files || []).slice(0, MAX_PHOTOS);
+      const photos = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (!f.type.startsWith("image/")) continue;
+
+        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
+
+        photos.push({
+          fileName: safeName,
+          contentType: f.type || "application/octet-stream",
+          contentBytes: await fileToBase64(f),
+        });
+      }
+      return photos;
+    }
+
+    async function sendJson(url, payload) {
+      if (!url) {
+        console.log("[DEBUG payload submit JSON]", payload);
+        await new Promise((r) => setTimeout(r, 400));
+        return { ok: true, debug: true };
+      }
+
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await resp.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { raw: text };
+      }
+
+      return { ok: resp.ok, status: resp.status, data };
+    }
+
+    /* =========================================================
+    =============== [G10] SUBMIT: CEK-IN (JSON) =================
+    ========================================================== */
+    async function submitCI() {
+      const warn = $("ci_warn");
+      warn.classList.add("hidden");
+      warn.textContent = "";
+
+      const order = $("ci_order").value;
+      const nama = $("ci_nama").value.trim();
+      const kondisi = $("ci_kondisi").value;
+      const batches = getBatchValues();
+      const fotos = $("ci_fotos").files;
+
+      if (!order || !nama || !kondisi) {
+        warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan Kondisi wajib diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+      if (batches.length === 0) {
+        warn.textContent = "⚠️ Minimal 1 Nomor Batch diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+      if (!fotos || fotos.length === 0) {
+        warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
+        warn.classList.remove("hidden");
+        return;
+      }
+      if (fotos.length > MAX_PHOTOS) {
+        warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
+        warn.classList.remove("hidden");
         return;
       }
 
-      list.forEach((o) => {
-        let val = "";
-        if (typeof o === "string") {
-          val = o;
+      try {
+        showLoading("⏳ Menyiapkan foto (base64)...");
+
+        const payload = {
+          formType: "checkin",
+          orderNumber: order,
+          namaVaksinator: nama,
+          kondisiVaksin: kondisi,
+          tanggal: $("ci_tanggal").value,
+          jam: $("ci_jam").value,
+          lokasi: $("ci_lokasi").value,
+          latitude: $("ci_lat").value,
+          longitude: $("ci_lng").value,
+          catatan: $("ci_catatan").value || "",
+          batches: batches,
+          photos: await buildPhotosPayload("ci_fotos", "ci"),
+        };
+
+        showLoading("⏳ Mengirim Cek-In...");
+        const resp = await sendJson(FLOW_SUBMIT_URL, payload);
+        hideLoading();
+
+        if (resp.ok) {
+          // Penting: alert dulu. Setelah user klik OK baru lanjut.
+          alert("✅ Cek-In berhasil");
+
+          // Kembali ke Home dulu
+          show("home");
+
+          // Baru bersihkan form supaya next open benar-benar clean
+          resetForm("ci", false);
         } else {
-          val = (o?.Value ?? o?.value ?? o?.orderNumber ?? o?.OrderNumber ?? "").toString();
+          console.error(resp);
+          alert(`❌ Gagal submit Cek-In (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        }
+      } catch (e) {
+        hideLoading();
+        console.error(e);
+        alert("❌ Terjadi kesalahan saat submit Cek-In: " + (e?.message || e));
+      }
+    }
+
+    /* =========================================================
+    =============== [G11] SUBMIT: CEK-OUT (JSON) =================
+    ========================================================== */
+    async function submitCO() {
+      const warn = $("co_warn");
+      warn.classList.add("hidden");
+      warn.textContent = "";
+
+      const order = $("co_order").value;
+      const nama = $("co_nama").value.trim();
+      const kandang = $("co_kandang").value.trim();
+      const ayam = $("co_ayam").value;
+      const vaksin = $("co_vaksin").value;
+      const fotos = $("co_fotos").files;
+
+      if (!order || !nama || !kandang) {
+        warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+      if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
+        warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0.";
+        warn.classList.remove("hidden");
+        return;
+      }
+      if (!fotos || fotos.length === 0) {
+        warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
+        warn.classList.remove("hidden");
+        return;
+      }
+      if (fotos.length > MAX_PHOTOS) {
+        warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
+        warn.classList.remove("hidden");
+        return;
+      }
+
+      if (REQUIRE_SIGNATURE_CO) {
+        // signature validation removed (signature pad removed)
+      }
+
+      try {
+        showLoading("⏳ Menyiapkan foto...");
+
+        const payload = {
+          formType: "checkout",
+          orderNumber: order,
+          namaVaksinator: nama,
+          noKandang: kandang,
+          jumlahAyam: Number(ayam),
+          jumlahVaksin: Number(vaksin),
+          tanggal: $("co_tanggal").value,
+          jam: $("co_jam").value,
+          lokasi: $("co_lokasi").value,
+          latitude: $("co_lat").value,
+          longitude: $("co_lng").value,
+          catatan: $("co_catatan").value || "",
+          photos: await buildPhotosPayload("co_fotos", "co"),
+        };
+
+        showLoading("⏳ Mengirim Cek-Out...");
+        const resp = await sendJson(FLOW_SUBMIT_URL, payload);
+        hideLoading();
+
+        if (resp.ok) {
+          // alert dulu. Setelah user klik OK baru lanjut.
+          alert("✅ Cek-Out berhasil");
+
+          // Kembali ke Home dulu
+          show("home");
+
+          // Baru bersihkan form supaya next open benar-benar clean
+          resetForm("co", false);
+        } else {
+          console.error(resp);
+          alert(`❌ Gagal submit Cek-Out (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        }
+      } catch (e) {
+        hideLoading();
+        console.error(e);
+        alert("❌ Terjadi kesalahan saat submit Cek-Out: " + (e?.message || e));
+      }
+    }
+
+    /* =========================================================
+    =============== [G12] RESET FORM ============================
+    ========================================================== */
+    // DIUBAH: resetForm(prefix, refreshAuto = true)
+    // - refreshAuto=true  : reset + isi ulang tanggal/jam/lokasi
+    // - refreshAuto=false : reset "kosong bersih" (dipakai saat kembali / setelah submit sukses)
+    function resetForm(prefix, refreshAuto = true) {
+      const warnEl = $(prefix + "_warn");
+      if (warnEl) {
+        warnEl.classList.add("hidden");
+        warnEl.textContent = "";
+      }
+
+      const viewId = prefix === "ci" ? "checkin" : "checkout";
+
+      // reset order select
+      const selOrder = $(prefix + "_order");
+      if (selOrder) selOrder.selectedIndex = 0;
+
+      // reset field di view terkait
+      const fields = Array.from(
+        document.querySelectorAll(
+          `#view-${viewId} input, #view-${viewId} textarea, #view-${viewId} select`
+        )
+      );
+
+      fields.forEach((el) => {
+        // Skip auto field, akan di-handle di bawah (refreshAuto)
+        if (
+          el.id.endsWith("_tanggal") ||
+          el.id.endsWith("_jam") ||
+          el.id.endsWith("_lokasi") ||
+          el.id.endsWith("_lat") ||
+          el.id.endsWith("_lng")
+        ) {
+          return;
         }
 
-        val = val.replace(/\s+/g, " ").trim();
-        if (!val) return;
-
-        const opt = document.createElement("option");
-        opt.value = val;
-        opt.textContent = val;
-        sel.appendChild(opt);
+        if (el.tagName === "SELECT") {
+          if (el.id !== prefix + "_order") el.selectedIndex = 0;
+        } else if (el.type === "hidden") {
+          el.value = "";
+        } else if (el.type === "file") {
+          // clear via handler
+        } else {
+          el.value = "";
+        }
       });
 
-      if (sel.options.length <= 1) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "(Data ada, tapi field Value/orderNumber tidak ditemukan)";
-        sel.appendChild(opt);
-      }
-    } catch (e) {
-      console.error("Gagal mengambil data order", e);
-      alert("Gagal mengambil data order.\n\nDETAIL:\n" + (e?.message || e));
-    } finally {
-      hideLoading();
-    }
-  }
+      // reset batches untuk checkin
+      if (prefix === "ci") initBatches();
 
-  /* =========================================================
-  =============== [G9] HELPERS: BASE64 FOTO & SUBMIT JSON =====
-  ========================================================== */
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => {
-        const result = String(r.result || "");
-        const base64 = result.includes(",") ? result.split(",")[1] : result;
-        resolve(base64);
-      };
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
-  }
+      // reset foto via handler
+      const photoId = prefix + "_fotos";
+      if (photoHandlers[photoId]?.clear) photoHandlers[photoId].clear();
 
-  async function buildPhotosPayload(inputId, prefix) {
-    const files = Array.from($(inputId).files || []).slice(0, MAX_PHOTOS);
-    const photos = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i];
-      if (!f.type.startsWith("image/")) continue;
-
-      const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
-      const safeName = `${prefix}_photo_${i + 1}.${ext}`;
-
-      photos.push({
-        fileName: safeName,
-        contentType: f.type || "application/octet-stream",
-        contentBytes: await fileToBase64(f),
-      });
-    }
-    return photos;
-  }
-
-  async function sendJson(url, payload) {
-    if (!url) {
-      console.log("[DEBUG payload submit JSON]", payload);
-      await new Promise((r) => setTimeout(r, 400));
-      return { ok: true, debug: true };
-    }
-
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const text = await resp.text();
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { raw: text };
-    }
-
-    return { ok: resp.ok, status: resp.status, data };
-  }
-
-  /* =========================================================
-  =============== [G10] SUBMIT: CEK-IN (JSON) =================
-  ========================================================== */
-  async function submitCI() {
-    const warn = $("ci_warn");
-    warn.classList.add("hidden");
-    warn.textContent = "";
-
-    const order = $("ci_order").value;
-    const nama = $("ci_nama").value.trim();
-    const kondisi = $("ci_kondisi").value;
-    const batches = getBatchValues();
-    const fotos = $("ci_fotos").files;
-
-    if (!order || !nama || !kondisi) {
-      warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan Kondisi wajib diisi.";
-      warn.classList.remove("hidden");
-      return;
-    }
-    if (batches.length === 0) {
-      warn.textContent = "⚠️ Minimal 1 Nomor Batch diisi.";
-      warn.classList.remove("hidden");
-      return;
-    }
-    if (!fotos || fotos.length === 0) {
-      warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
-      warn.classList.remove("hidden");
-      return;
-    }
-    if (fotos.length > MAX_PHOTOS) {
-      warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
-      warn.classList.remove("hidden");
-      return;
-    }
-
-    try {
-      showLoading("⏳ Menyiapkan foto (base64)...");
-
-      const payload = {
-        formType: "checkin",
-        orderNumber: order,
-        namaVaksinator: nama,
-        kondisiVaksin: kondisi,
-        tanggal: $("ci_tanggal").value,
-        jam: $("ci_jam").value,
-        lokasi: $("ci_lokasi").value,
-        latitude: $("ci_lat").value,
-        longitude: $("ci_lng").value,
-        catatan: $("ci_catatan").value || "",
-        batches: batches,
-        photos: await buildPhotosPayload("ci_fotos", "ci"),
-      };
-
-      showLoading("⏳ Mengirim Cek-In...");
-      const resp = await sendJson(FLOW_SUBMIT_URL, payload);
-      hideLoading();
-
-      if (resp.ok) {
-        alert("✅ Cek-In berhasil");
-        show("home");
+      // handle auto fields
+      if (refreshAuto) {
+        init(prefix); // refresh tanggal/jam/lokasi
       } else {
-        console.error(resp);
-        alert(`❌ Gagal submit Cek-In (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        // kosongkan auto field (opsional, bikin benar-benar blank)
+        $(prefix + "_tanggal").value = "";
+        $(prefix + "_jam").value = "";
+        $(prefix + "_lokasi").value = "";
+        $(prefix + "_lat").value = "";
+        $(prefix + "_lng").value = "";
+        const src = $(prefix + "_src");
+        if (src) src.textContent = "Lokasi: -";
       }
-    } catch (e) {
-      hideLoading();
-      console.error(e);
-      alert("❌ Terjadi kesalahan saat submit Cek-In: " + (e?.message || e));
     }
-  }
-
-  /* =========================================================
-  =============== [G11] SUBMIT: CEK-OUT (JSON) =================
-  ========================================================== */
-  async function submitCO() {
-    const warn = $("co_warn");
-    warn.classList.add("hidden");
-    warn.textContent = "";
-
-    const order = $("co_order").value;
-    const nama = $("co_nama").value.trim();
-    const kandang = $("co_kandang").value.trim();
-    const ayam = $("co_ayam").value;
-    const vaksin = $("co_vaksin").value;
-    const fotos = $("co_fotos").files;
-
-    if (!order || !nama || !kandang) {
-      warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
-      warn.classList.remove("hidden");
-      return;
-    }
-    if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
-      warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0.";
-      warn.classList.remove("hidden");
-      return;
-    }
-    if (!fotos || fotos.length === 0) {
-      warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
-      warn.classList.remove("hidden");
-      return;
-    }
-    if (fotos.length > MAX_PHOTOS) {
-      warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
-      warn.classList.remove("hidden");
-      return;
-    }
-
-    // signature validation removed (signature pad removed)
-    if (REQUIRE_SIGNATURE_CO) {
-      // kept for compatibility, but disabled by config
-    }
-
-    try {
-      showLoading("⏳ Menyiapkan foto...");
-
-      const payload = {
-        formType: "checkout",
-        orderNumber: order,
-        namaVaksinator: nama,
-        noKandang: kandang,
-        jumlahAyam: Number(ayam),
-        jumlahVaksin: Number(vaksin),
-        tanggal: $("co_tanggal").value,
-        jam: $("co_jam").value,
-        lokasi: $("co_lokasi").value,
-        latitude: $("co_lat").value,
-        longitude: $("co_lng").value,
-        catatan: $("co_catatan").value || "",
-        photos: await buildPhotosPayload("co_fotos", "co"),
-      };
-
-      showLoading("⏳ Mengirim Cek-Out...");
-      const resp = await sendJson(FLOW_SUBMIT_URL, payload);
-      hideLoading();
-
-      if (resp.ok) {
-        alert("✅ Cek-Out berhasil");
-        show("home");
-      } else {
-        console.error(resp);
-        alert(`❌ Gagal submit Cek-Out (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
-      }
-    } catch (e) {
-      hideLoading();
-      console.error(e);
-      alert("❌ Terjadi kesalahan saat submit Cek-Out: " + (e?.message || e));
-    }
-  }
-
-  /* =========================================================
-  =============== [G12] RESET FORM ============================
-  ========================================================== */
-  function resetForm(prefix) {
-    const warnEl = $(prefix + "_warn");
-    if (warnEl) {
-      warnEl.classList.add("hidden");
-      warnEl.textContent = "";
-    }
-
-    const viewId = prefix === "ci" ? "checkin" : "checkout";
-
-    const selOrder = $(prefix + "_order");
-    if (selOrder) selOrder.selectedIndex = 0;
-
-    const fields = Array.from(
-      document.querySelectorAll(
-        `#view-${viewId} input, #view-${viewId} textarea, #view-${viewId} select`
-      )
-    );
-
-    fields.forEach((el) => {
-      if (
-        el.id.endsWith("_tanggal") ||
-        el.id.endsWith("_jam") ||
-        el.id.endsWith("_lokasi") ||
-        el.id.endsWith("_lat") ||
-        el.id.endsWith("_lng")
-      )
-        return;
-
-      if (el.tagName === "SELECT") {
-        if (el.id !== prefix + "_order") el.selectedIndex = 0;
-      } else if (el.type === "hidden") {
-        el.value = "";
-      } else if (el.type === "file") {
-        // clear via handler
-      } else {
-        el.value = "";
-      }
-    });
-
-    if (prefix === "ci") initBatches();
-
-    const photoId = prefix + "_fotos";
-    if (photoHandlers[photoId]?.clear) photoHandlers[photoId].clear();
-
-    // signature clear removed (signature pad removed)
-
-    init(prefix); // refresh tanggal/jam/lokasi
-  }
-</script>
+  </script>
 </body>
 </html>
+``
