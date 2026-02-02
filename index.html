@@ -1,4 +1,4 @@
- 
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -119,20 +119,6 @@
       width:20px;height:20px;line-height:20px;text-align:center;font-size:13px;cursor:pointer
     }
     .hint{color:#64748b;font-size:12px;margin-top:4px}
-
-    /* =============== Signature Pad (Cek-Out only) =============== */
-    .sig-wrap{
-      border:1px dashed var(--border);
-      border-radius:12px;
-      background:#f8fafc;
-      padding:10px;
-      margin-top:14px;
-    }
-    .sig-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .sig-toolbar .title{font-weight:600;color:#1e3a8a;font-size:14px}
-    canvas.sig{
-      width:100%;height:180px;border-radius:8px;background:#fff;border:1px solid var(--border)
-    }
   </style>
 </head>
 
@@ -150,7 +136,7 @@
         <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN VAKSIN</button>
         <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT VAKSIN</button>
       </div>
-      <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto • ✍️ Tanda Tangan Digital (Cek-Out)</div>
+      <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto</div>
     </div>
   </div>
 
@@ -308,15 +294,7 @@
         <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
 
-      <!-- ===== [E3] Signature Pad (Cek-Out) ===== -->
-      <div class="sig-wrap">
-        <div class="sig-toolbar">
-          <div class="title">Tanda Tangan Digital (Petugas Farm)</div>
-          <button type="button" class="btn btn-ghost" onclick="clearSignature('co')">Hapus TTD</button>
-        </div>
-        <canvas id="co_sig_canvas" class="sig"></canvas>
-        <input type="hidden" id="co_signature_data" />
-      </div>
+      <!-- (Signature pad removed as requested) -->
 
       <label>Catatan</label>
       <textarea id="co_catatan" placeholder="Opsional"></textarea>
@@ -361,7 +339,9 @@
     "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fbda6accf77d48cbbaf3b879ff63287d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r3rqKUO_yBMlf-9D8L1uQsF4re6EuUC-gK11I6cY29g";
 
   const MAX_PHOTOS = 5;
-  const REQUIRE_SIGNATURE_CO = true;
+
+  // Signature requirement disabled (signature pad removed)
+  const REQUIRE_SIGNATURE_CO = false;
 
   const $ = (id) => document.getElementById(id);
 
@@ -401,7 +381,7 @@
     if (v === "checkout") {
       init("co");
       loadOrders("co_order");
-      initSignatureOnce("co");
+      // initSignatureOnce("co"); // removed
       attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
     }
   }
@@ -589,110 +569,7 @@
   }
 
   /* =========================================================
-  =============== [G8] SIGNATURE PAD (CEK-OUT) ================
-  ========================================================== */
-  const sigPads = {}; // {co:{initialized, canvas, ctx, signed, clear}}
-
-  function initSignatureOnce(prefix) {
-    if (sigPads[prefix]?.initialized) return;
-
-    const canvas = $(prefix + "_sig_canvas");
-    const hidden = $(prefix + "_signature_data");
-
-    const pad = { initialized: true, canvas, ctx: null, signed: false, clear: null };
-    sigPads[prefix] = pad;
-
-    function setupCanvas() {
-      const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      const rect = canvas.getBoundingClientRect();
-
-      canvas.width = Math.floor(rect.width * ratio);
-      canvas.height = Math.floor(rect.height * ratio);
-
-      const ctx = canvas.getContext("2d");
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "#0f172a";
-
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.restore();
-
-      pad.ctx = ctx;
-      return ctx;
-    }
-
-    const ctx = setupCanvas();
-    let drawing = false,
-      last = { x: 0, y: 0 };
-
-    function getPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      if (e.touches && e.touches.length) {
-        return {
-          x: e.touches[0].clientX - rect.left,
-          y: e.touches[0].clientY - rect.top,
-        };
-      }
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-
-    function start(e) {
-      e.preventDefault();
-      drawing = true;
-      last = getPos(e);
-    }
-    function move(e) {
-      if (!drawing) return;
-      e.preventDefault();
-      const p = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(last.x, last.y);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      last = p;
-      pad.signed = true;
-    }
-    function end() {
-      if (!drawing) return;
-      drawing = false;
-      if (pad.signed) hidden.value = canvas.toDataURL("image/png");
-    }
-
-    canvas.addEventListener("mousedown", start);
-    canvas.addEventListener("mousemove", move);
-    canvas.addEventListener("mouseup", end);
-    canvas.addEventListener("mouseleave", end);
-
-    canvas.addEventListener("touchstart", start, { passive: false });
-    canvas.addEventListener("touchmove", move, { passive: false });
-    canvas.addEventListener("touchend", end);
-
-    pad.clear = () => {
-      const cctx = pad.ctx;
-      cctx.save();
-      cctx.setTransform(1, 0, 0, 1, 0, 0);
-      cctx.clearRect(0, 0, canvas.width, canvas.height);
-      cctx.fillStyle = "#fff";
-      cctx.fillRect(0, 0, canvas.width, canvas.height);
-      cctx.restore();
-
-      pad.signed = false;
-      hidden.value = "";
-    };
-  }
-
-  function clearSignature(prefix) {
-    sigPads[prefix]?.clear?.();
-  }
-
-  /* =========================================================
-  =============== [G9] LOAD ORDERS (DARI FLOW GET ORDER) ======
+  =============== [G8] LOAD ORDERS (DARI FLOW GET ORDER) ======
   ========================================================== */
   async function loadOrders(selectId) {
     console.log("loadOrders called:", selectId);
@@ -799,7 +676,7 @@
   }
 
   /* =========================================================
-  =============== [G10] HELPERS: BASE64 FOTO & SUBMIT JSON =====
+  =============== [G9] HELPERS: BASE64 FOTO & SUBMIT JSON =====
   ========================================================== */
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -859,7 +736,7 @@
   }
 
   /* =========================================================
-  =============== [G11] SUBMIT: CEK-IN (JSON) =================
+  =============== [G10] SUBMIT: CEK-IN (JSON) =================
   ========================================================== */
   async function submitCI() {
     const warn = $("ci_warn");
@@ -930,7 +807,7 @@
   }
 
   /* =========================================================
-  =============== [G12] SUBMIT: CEK-OUT (JSON + SIGNATURE) =====
+  =============== [G11] SUBMIT: CEK-OUT (JSON) =================
   ========================================================== */
   async function submitCO() {
     const warn = $("co_warn");
@@ -943,7 +820,6 @@
     const ayam = $("co_ayam").value;
     const vaksin = $("co_vaksin").value;
     const fotos = $("co_fotos").files;
-    const sigDataURL = $("co_signature_data").value;
 
     if (!order || !nama || !kandang) {
       warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
@@ -965,14 +841,14 @@
       warn.classList.remove("hidden");
       return;
     }
-    if (REQUIRE_SIGNATURE_CO && !sigDataURL) {
-      warn.textContent = "⚠️ Tanda tangan digital wajib.";
-      warn.classList.remove("hidden");
-      return;
+
+    // signature validation removed (signature pad removed)
+    if (REQUIRE_SIGNATURE_CO) {
+      // kept for compatibility, but disabled by config
     }
 
     try {
-      showLoading("⏳ Menyiapkan foto & signature...");
+      showLoading("⏳ Menyiapkan foto...");
 
       const payload = {
         formType: "checkout",
@@ -989,15 +865,6 @@
         catatan: $("co_catatan").value || "",
         photos: await buildPhotosPayload("co_fotos", "co"),
       };
-
-      if (sigDataURL) {
-        const base64Sig = String(sigDataURL).split(",")[1] || "";
-        payload.signature = {
-          fileName: "signature_co.png",
-          contentType: "image/png",
-          contentBytes: base64Sig,
-        };
-      }
 
       showLoading("⏳ Mengirim Cek-Out...");
       const resp = await sendJson(FLOW_SUBMIT_URL, payload);
@@ -1018,7 +885,7 @@
   }
 
   /* =========================================================
-  =============== [G13] RESET FORM ============================
+  =============== [G12] RESET FORM ============================
   ========================================================== */
   function resetForm(prefix) {
     const warnEl = $(prefix + "_warn");
@@ -1064,7 +931,7 @@
     const photoId = prefix + "_fotos";
     if (photoHandlers[photoId]?.clear) photoHandlers[photoId].clear();
 
-    if (prefix === "co") clearSignature("co");
+    // signature clear removed (signature pad removed)
 
     init(prefix); // refresh tanggal/jam/lokasi
   }
