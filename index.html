@@ -337,6 +337,10 @@
 
     const FLOW_SUBMIT_URL =
       "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fbda6accf77d48cbbaf3b879ff63287d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r3rqKUO_yBMlf-9D8L1uQsF4re6EuUC-gK11I6cY29g";
+    
+    
+// ===== [SECURITY] App Key (ganti dengan punyamu) =====
+const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
 
     const MAX_PHOTOS = 5;
     const REQUIRE_SIGNATURE_CO = false; // Signature pad removed
@@ -779,6 +783,7 @@
         showLoading("⏳ Menyiapkan foto (base64)...");
 
         const payload = {
+          appKey: APP_KEY,
           formType: "checkin",
           orderNumber: order,
           namaVaksinator: nama,
@@ -861,6 +866,7 @@
         showLoading("⏳ Menyiapkan foto...");
 
         const payload = {
+          appKey: APP_KEY,
           formType: "checkout",
           orderNumber: order,
           namaVaksinator: nama,
