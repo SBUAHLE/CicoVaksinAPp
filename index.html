@@ -2,16 +2,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <!-- =========================================================
-  =============== [A] META & TITLE =============================
-  ========================================================== -->
+  <!-- ====================== META & TITLE ====================== -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CICO Vaksinasi</title>
 
-  <!-- =========================================================
-  =============== [B] STYLES / UI THEME =======================
-  ========================================================== -->
+  <!-- ====================== STYLES / THEME ==================== -->
   <style>
     :root{
       --bg:#eef2f7;
@@ -81,7 +77,6 @@
       margin-top:6px;
     }
 
-    /* =============== Landing =============== */
     .landing-wrap{
       min-height:100vh;
       display:flex;
@@ -104,7 +99,6 @@
     .landing-actions{display:grid;gap:14px}
     .footer-note{margin-top:22px;font-size:13px;color:#64748b}
 
-    /* =============== Foto preview =============== */
     .photos-preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
     .photo-item{
       position:relative;
@@ -124,9 +118,7 @@
 
 <body>
 
-  <!-- =========================================================
-  =============== [C] VIEW: HOME / LANDING =====================
-  ========================================================== -->
+  <!-- ====================== VIEW: HOME ======================== -->
   <div id="view-home" class="landing-wrap">
     <div class="landing-card">
       <div style="font-size:44px">💉</div>
@@ -140,17 +132,13 @@
     </div>
   </div>
 
-  <!-- =========================================================
-  =============== [D] VIEW: CEK-IN ==============================
-  ========================================================== -->
+  <!-- ====================== VIEW: CEK-IN ====================== -->
   <div id="view-checkin" class="container hidden">
-    <!-- DIUBAH: tombol kembali sekarang reset dulu baru ke Home -->
     <button class="btn btn-ghost" onclick="goHome('ci')">← Kembali</button>
     <h2>Form Cek-In</h2>
 
     <div id="ci_warn" class="warn hidden"></div>
 
-    <!-- ===== [D1] Data Otomatis (Sistem) ===== -->
     <div class="card">
       <div class="section-title">Data Otomatis (Sistem)</div>
       <div class="row">
@@ -180,13 +168,12 @@
       </div>
     </div>
 
-    <!-- ===== [D2] Data Diisi Petugas ===== -->
     <div class="card">
       <div class="section-title">Data Diisi Petugas</div>
 
       <label>Nomor Order</label>
       <select id="ci_order">
-        <option value="">⏳ Memuat...</option>
+        <option value="">-- Pilih Nomor Order --</option>
       </select>
 
       <label>Nama Vaksinator</label>
@@ -222,23 +209,18 @@
 
       <div class="btn-group">
         <button class="btn btn-primary" type="button" onclick="submitCI()">Kirim Cek-In</button>
-        <!-- Reset di dalam form: tetap refresh otomatis -->
         <button class="btn btn-ghost" type="button" onclick="resetForm('ci')">↺ Reset Form</button>
       </div>
     </div>
   </div>
 
-  <!-- =========================================================
-  =============== [E] VIEW: CEK-OUT =============================
-  ========================================================== -->
+  <!-- ====================== VIEW: CEK-OUT ===================== -->
   <div id="view-checkout" class="container hidden">
-    <!-- DIUBAH: tombol kembali sekarang reset dulu baru ke Home -->
     <button class="btn btn-ghost" onclick="goHome('co')">← Kembali</button>
     <h2>Form Cek-Out</h2>
 
     <div id="co_warn" class="warn hidden"></div>
 
-    <!-- ===== [E1] Data Otomatis (Sistem) ===== -->
     <div class="card">
       <div class="section-title">Data Otomatis (Sistem)</div>
       <div class="row">
@@ -268,13 +250,12 @@
       </div>
     </div>
 
-    <!-- ===== [E2] Data Diisi Petugas ===== -->
     <div class="card">
       <div class="section-title">Data Diisi Petugas</div>
 
       <label>Nomor Order</label>
       <select id="co_order">
-        <option value="">⏳ Memuat...</option>
+        <option value="">-- Pilih Nomor Order --</option>
       </select>
 
       <label>Nama Vaksinator</label>
@@ -302,15 +283,12 @@
 
       <div class="btn-group">
         <button class="btn btn-primary" type="button" onclick="submitCO()">Kirim Cek-Out</button>
-        <!-- Reset di dalam form: tetap refresh otomatis -->
         <button class="btn btn-ghost" type="button" onclick="resetForm('co')">↺ Reset Form</button>
       </div>
     </div>
   </div>
 
-  <!-- =========================================================
-  =============== [F] LOADING OVERLAY ==========================
-  ========================================================== -->
+  <!-- ====================== LOADING OVERLAY =================== -->
   <div id="loading" class="hidden"
     style="
       position:fixed;
@@ -325,30 +303,21 @@
     ⏳ Memproses...
   </div>
 
-  <!-- =========================================================
-  =============== [G] SCRIPT / LOGIC ===========================
-  ========================================================== -->
+  <!-- ====================== SCRIPT / LOGIC ==================== -->
   <script>
-    /* =========================================================
-    =============== [G1] KONFIGURASI ENDPOINT ==================
-    ========================================================== */
+    /* ===================== KONFIGURASI ENDPOINT =============== */
     const FLOW_GET_ORDER_URL =
       "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/0b8ea542919749eeabb66e27e32c1b5a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ly_DAybOG8S6gwh03EPU-jGikDyD084xiN_-M-Kaa0I";
 
     const FLOW_SUBMIT_URL =
-      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fbda6accf77d48cbbaf3b879ff63287d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r3rqKUO_yBMlf-9D8L1uQsF4re6EuUC-gK11I6cY29g";
-    
-    
-// ===== [SECURITY] App Key (ganti dengan punyamu) =====
-const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
+      "https://cico-gateway.agia-barriyadi.workers.dev/submit";
 
+    const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
     const MAX_PHOTOS = 5;
-    const REQUIRE_SIGNATURE_CO = false; // Signature pad removed
+    const REQUIRE_SIGNATURE_CO = false;
     const $ = (id) => document.getElementById(id);
 
-    /* =========================================================
-    =============== [G2] LOADING UI ============================
-    ========================================================== */
+    /* ===================== LOADING UI ========================= */
     function showLoading(msg) {
       const el = $("loading");
       if (msg) el.textContent = msg;
@@ -360,9 +329,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       el.textContent = "⏳ Memproses...";
     }
 
-    /* =========================================================
-    =============== [G3] NAVIGASI VIEW =========================
-    ========================================================== */
+    /* ===================== NAVIGASI VIEW ====================== */
     function show(v) {
       $("view-home").classList.add("hidden");
       $("view-checkin").classList.add("hidden");
@@ -386,18 +353,12 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       }
     }
 
-    /* =========================================================
-    =============== [G3b] KEMBALI KE HOME + RESET ===============
-    ========================================================== */
     function goHome(prefix) {
-      // Saat klik kembali: reset form dulu supaya saat nanti dibuka lagi, bersih.
-      resetForm(prefix, false); // false = tidak refresh auto field (akan diisi saat buka form lagi)
+      resetForm(prefix, false);
       show("home");
     }
 
-    /* =========================================================
-    =============== [G4] INIT TANGGAL & JAM ====================
-    ========================================================== */
+    /* ===================== INIT TANGGAL & JAM ================= */
     function init(p) {
       const d = new Date();
       $(p + "_tanggal").value = d.toLocaleDateString("id-ID", {
@@ -413,9 +374,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       loadLocation(p);
     }
 
-    /* =========================================================
-    =============== [G5] LOKASI (GPS -> IP fallback) ===========
-    ========================================================== */
+    /* ===================== LOKASI (GPS/IP) ==================== */
     function simplifyAddress(a) {
       const parts = (a || "").split(",");
       return parts.slice(1).join(",").trim() || (a || "");
@@ -463,9 +422,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       );
     }
 
-    /* =========================================================
-    =============== [G6] BATCHES (CEK-IN) ======================
-    ========================================================== */
+    /* ===================== BATCHES (CEK-IN) =================== */
     function initBatches() {
       $("ci_batch_wrap").innerHTML = "";
       addBatch();
@@ -485,9 +442,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
     }
 
-    /* =========================================================
-    =============== [G7] FOTO: PREVIEW + DELETE =================
-    ========================================================== */
+    /* ===================== FOTO PREVIEW/DELETE ================ */
     const photoHandlers = {}; // per inputId: {urls:[], clear, render, removeAt}
 
     function attachMultiPhotoHandler(inputId, previewId, clearBtnId) {
@@ -577,15 +532,10 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       state.removeAt = removeAt;
     }
 
-    /* =========================================================
-    =============== [G8] LOAD ORDERS (DARI FLOW GET ORDER) ======
-    ========================================================== */
+    /* ===================== LOAD ORDERS (FLOW) ================= */
     async function loadOrders(selectId) {
-      console.log("loadOrders called:", selectId);
-
       const sel = $(selectId);
       sel.innerHTML = '<option value="">-- Pilih Nomor Order --</option>';
-
       const type = selectId.startsWith("ci") ? "checkin" : "checkout";
 
       try {
@@ -601,12 +551,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
         });
 
         const raw = await r.text();
-        console.log("[FLOW] HTTP:", r.status);
-        console.log("[FLOW] RAW:", raw);
-
-        if (!r.ok) {
-          throw new Error(`HTTP ${r.status} - ${raw.slice(0, 300)}`);
-        }
+        if (!r.ok) throw new Error(`HTTP ${r.status} - ${raw.slice(0, 300)}`);
 
         const safeJson = (x) => {
           if (x == null) return null;
@@ -615,16 +560,10 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
           try {
             const p1 = JSON.parse(x);
             if (typeof p1 === "string") {
-              try {
-                return JSON.parse(p1);
-              } catch {
-                return p1;
-              }
+              try { return JSON.parse(p1); } catch { return p1; }
             }
             return p1;
-          } catch {
-            return null;
-          }
+          } catch { return null; }
         };
 
         let j = safeJson(raw);
@@ -642,9 +581,6 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
           (Array.isArray(j?.value) ? j.value : null) ||
           [];
 
-        console.log("[FLOW] parsed:", j);
-        console.log("[FLOW] list length:", list.length);
-
         if (!Array.isArray(list) || list.length === 0) {
           const opt = document.createElement("option");
           opt.value = "";
@@ -660,7 +596,6 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
           } else {
             val = (o?.Value ?? o?.value ?? o?.orderNumber ?? o?.OrderNumber ?? "").toString();
           }
-
           val = val.replace(/\s+/g, " ").trim();
           if (!val) return;
 
@@ -684,9 +619,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       }
     }
 
-    /* =========================================================
-    =============== [G9] HELPERS: BASE64 FOTO & SUBMIT JSON =====
-    ========================================================== */
+    /* ===================== FOTO -> BASE64 & SUBMIT ============ */
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const r = new FileReader();
@@ -720,13 +653,26 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       return photos;
     }
 
-    async function sendJson(url, payload) {
-      if (!url) {
-        console.log("[DEBUG payload submit JSON]", payload);
-        await new Promise((r) => setTimeout(r, 400));
-        return { ok: true, debug: true };
-      }
+    /* ===================== SANITASI RINGAN (client) =========== */
+    function sanitizeText(val) {
+      return String(val ?? "")
+        .replace(/[<>{}\[\]\\\/'"`;&]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
 
+    function cleanPayload(obj) {
+      const copy = { ...obj };
+      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
+      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
+      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
+      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
+      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
+      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+      return copy;
+    }
+
+    async function sendJson(url, payload) {
       const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -735,18 +681,11 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
 
       const text = await resp.text();
       let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { raw: text };
-      }
-
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
       return { ok: resp.ok, status: resp.status, data };
     }
 
-    /* =========================================================
-    =============== [G10] SUBMIT: CEK-IN (JSON) =================
-    ========================================================== */
+    /* ===================== SUBMIT: CEK-IN ===================== */
     async function submitCI() {
       const warn = $("ci_warn");
       warn.classList.add("hidden");
@@ -781,8 +720,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
 
       try {
         showLoading("⏳ Menyiapkan foto (base64)...");
-
-        const payload = {
+        const rawPayload = {
           appKey: APP_KEY,
           formType: "checkin",
           orderNumber: order,
@@ -797,19 +735,15 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
           batches: batches,
           photos: await buildPhotosPayload("ci_fotos", "ci"),
         };
+        const payload = cleanPayload(rawPayload);
 
         showLoading("⏳ Mengirim Cek-In...");
         const resp = await sendJson(FLOW_SUBMIT_URL, payload);
         hideLoading();
 
         if (resp.ok) {
-          // Penting: alert dulu. Setelah user klik OK baru lanjut.
           alert("✅ Cek-In berhasil");
-
-          // Kembali ke Home dulu
           show("home");
-
-          // Baru bersihkan form supaya next open benar-benar clean
           resetForm("ci", false);
         } else {
           console.error(resp);
@@ -822,9 +756,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       }
     }
 
-    /* =========================================================
-    =============== [G11] SUBMIT: CEK-OUT (JSON) =================
-    ========================================================== */
+    /* ===================== SUBMIT: CEK-OUT ==================== */
     async function submitCO() {
       const warn = $("co_warn");
       warn.classList.add("hidden");
@@ -858,14 +790,9 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
         return;
       }
 
-      if (REQUIRE_SIGNATURE_CO) {
-        // signature validation removed (signature pad removed)
-      }
-
       try {
         showLoading("⏳ Menyiapkan foto...");
-
-        const payload = {
+        const rawPayload = {
           appKey: APP_KEY,
           formType: "checkout",
           orderNumber: order,
@@ -881,19 +808,15 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
           catatan: $("co_catatan").value || "",
           photos: await buildPhotosPayload("co_fotos", "co"),
         };
+        const payload = cleanPayload(rawPayload);
 
         showLoading("⏳ Mengirim Cek-Out...");
         const resp = await sendJson(FLOW_SUBMIT_URL, payload);
         hideLoading();
 
         if (resp.ok) {
-          // alert dulu. Setelah user klik OK baru lanjut.
           alert("✅ Cek-Out berhasil");
-
-          // Kembali ke Home dulu
           show("home");
-
-          // Baru bersihkan form supaya next open benar-benar clean
           resetForm("co", false);
         } else {
           console.error(resp);
@@ -906,12 +829,7 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       }
     }
 
-    /* =========================================================
-    =============== [G12] RESET FORM ============================
-    ========================================================== */
-    // DIUBAH: resetForm(prefix, refreshAuto = true)
-    // - refreshAuto=true  : reset + isi ulang tanggal/jam/lokasi
-    // - refreshAuto=false : reset "kosong bersih" (dipakai saat kembali / setelah submit sukses)
+    /* ===================== RESET FORM ========================= */
     function resetForm(prefix, refreshAuto = true) {
       const warnEl = $(prefix + "_warn");
       if (warnEl) {
@@ -921,11 +839,9 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
 
       const viewId = prefix === "ci" ? "checkin" : "checkout";
 
-      // reset order select
       const selOrder = $(prefix + "_order");
       if (selOrder) selOrder.selectedIndex = 0;
 
-      // reset field di view terkait
       const fields = Array.from(
         document.querySelectorAll(
           `#view-${viewId} input, #view-${viewId} textarea, #view-${viewId} select`
@@ -933,7 +849,6 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
       );
 
       fields.forEach((el) => {
-        // Skip auto field, akan di-handle di bawah (refreshAuto)
         if (
           el.id.endsWith("_tanggal") ||
           el.id.endsWith("_jam") ||
@@ -949,24 +864,20 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
         } else if (el.type === "hidden") {
           el.value = "";
         } else if (el.type === "file") {
-          // clear via handler
+          // direset via handler
         } else {
           el.value = "";
         }
       });
 
-      // reset batches untuk checkin
       if (prefix === "ci") initBatches();
 
-      // reset foto via handler
       const photoId = prefix + "_fotos";
       if (photoHandlers[photoId]?.clear) photoHandlers[photoId].clear();
 
-      // handle auto fields
       if (refreshAuto) {
-        init(prefix); // refresh tanggal/jam/lokasi
+        init(prefix);
       } else {
-        // kosongkan auto field (opsional, bikin benar-benar blank)
         $(prefix + "_tanggal").value = "";
         $(prefix + "_jam").value = "";
         $(prefix + "_lokasi").value = "";
@@ -979,4 +890,3 @@ const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
   </script>
 </body>
 </html>
-``
