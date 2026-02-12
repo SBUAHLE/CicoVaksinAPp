@@ -1,0 +1,40 @@
+
+name: Update Orders JSON
+
+on:
+  repository_dispatch:
+    types: [orders_update]
+
+permissions:
+  contents: write
+
+jobs:
+  write-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure data folder exists
+        run: mkdir -p data
+
+      - name: Write JSON file from client payload
+        env:
+          PAYLOAD_CONTENT: ${{ github.event.client_payload.content }}
+          TARGET_PATH:     ${{ github.event.client_payload.path }}
+        run: |
+          echo "$PAYLOAD_CONTENT" > "$TARGET_PATH"
+          echo "Wrote: $TARGET_PATH"
+          ls -lh "$TARGET_PATH" || true
+
+      - name: Commit & push changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$GITHUB_WORKSPACE/${{ github.event.client_payload.path }}"
+            git commit -m "update: ${{ github.event.client_payload.path }} (requestId=${{ github.event.client_payload.requestId }})"
+            git push
+          else
+            echo "No changes to commit."
+          fi
