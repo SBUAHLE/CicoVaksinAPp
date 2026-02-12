@@ -6,34 +6,34 @@ on:
     types: [orders_update]
 
 permissions:
-  contents: write
+  contents: write   # wajib agar git push berhasil
 
 jobs:
-  write-json:
+  update:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Ensure data folder exists
         run: mkdir -p data
 
-      - name: Write JSON file from client payload
+      - name: Write JSON file
         env:
           PAYLOAD_CONTENT: ${{ github.event.client_payload.content }}
-          TARGET_PATH:     ${{ github.event.client_payload.path }}
+          TARGET_PATH: ${{ github.event.client_payload.path }}
         run: |
           echo "$PAYLOAD_CONTENT" > "$TARGET_PATH"
-          echo "Wrote: $TARGET_PATH"
-          ls -lh "$TARGET_PATH" || true
+          echo "Updated: $TARGET_PATH"
 
       - name: Commit & push changes
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          if git status --porcelain | grep .; then
             git config user.name  "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add "$GITHUB_WORKSPACE/${{ github.event.client_payload.path }}"
-            git commit -m "update: ${{ github.event.client_payload.path }} (requestId=${{ github.event.client_payload.requestId }})"
+            git add -A
+            git commit -m "Update: ${{ github.event.client_payload.path }} (requestId=${{ github.event.client_payload.requestId }})"
             git push
           else
             echo "No changes to commit."
