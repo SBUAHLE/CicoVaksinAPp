@@ -179,21 +179,27 @@
       <label>Nama Vaksinator</label>
       <input id="ci_nama" placeholder="Nama lengkap petugas" />
 
-      <label>Kondisi Vaksin</label>
-      <select id="ci_kondisi">
-        <option value="">-- Pilih --</option>
-        <option>Baik</option>
-        <option>Perlu Pendinginan</option>
-        <option>Rusak</option>
-        <option>Thawing</option>
-        <option>Tidak Thawing</option>
-      </select>
+      <!-- === Kondisi Vaksin (disembunyikan jika SPServis) === -->
+      <div id="ci_kondisi_wrap">
+        <label>Kondisi Vaksin</label>
+        <select id="ci_kondisi">
+          <option value="">-- Pilih --</option>
+          <option>Baik</option>
+          <option>Perlu Pendinginan</option>
+          <option>Rusak</option>
+          <option>Thawing</option>
+          <option>Tidak Thawing</option>
+        </select>
+      </div>
 
-      <label>Nomor Batch Vaksin</label>
-      <div id="ci_batch_wrap"></div>
-      <div class="btn-group">
-        <button class="btn btn-ghost" type="button" onclick="addBatch()">➕ Tambah Batch</button>
-        <button class="btn btn-ghost" type="button" onclick="resetBatches()">↺ Reset Batch</button>
+      <!-- === Nomor Batch (disembunyikan jika SPServis) === -->
+      <div id="ci_batch_section">
+        <label>Nomor Batch Vaksin</label>
+        <div id="ci_batch_wrap"></div>
+        <div class="btn-group">
+          <button class="btn btn-ghost" type="button" onclick="addBatch()">➕ Tambah Batch</button>
+          <button class="btn btn-ghost" type="button" onclick="resetBatches()">↺ Reset Batch</button>
+        </div>
       </div>
 
       <label>Upload Foto (maks. 5)</label>
@@ -264,11 +270,17 @@
       <label>No Kandang</label>
       <input id="co_kandang" placeholder="Contoh: A-12" />
 
-      <label>Jumlah Ayam Tervaksin</label>
-      <input type="number" id="co_ayam" min="0" step="1" placeholder="0" />
+      <!-- === Jumlah Ayam (disembunyikan jika SPServis) === -->
+      <div id="co_ayam_wrap">
+        <label>Jumlah Ayam Tervaksin</label>
+        <input type="number" id="co_ayam" min="0" step="1" placeholder="0" />
+      </div>
 
-      <label>Jumlah Vaksin Terpakai</label>
-      <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
+      <!-- === Jumlah Vaksin (disembunyikan jika SPServis) === -->
+      <div id="co_vaksin_wrap">
+        <label>Jumlah Vaksin Terpakai</label>
+        <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
+      </div>
 
       <label>Upload Foto (maks. 5)</label>
       <input type="file" id="co_fotos" accept="image/*" multiple />
@@ -345,11 +357,13 @@
         initBatches();
         loadOrders("ci_order");
         attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
+        attachOrderTypeWatcher("ci_order", "ci");
       }
       if (v === "checkout") {
         init("co");
         loadOrders("co_order");
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
+        attachOrderTypeWatcher("co_order", "co");
       }
     }
 
@@ -619,6 +633,61 @@
       }
     }
 
+    /* ===================== DETEKSI TIPE ORDER ================= */
+    function getOrderTypeFromValue(val) {
+      const v = String(val || "").toLowerCase();
+      if (v.includes("spservis")) return "servis";
+      if (v.includes("spvaksin")) return "vaksin";
+      // default anggap vaksin supaya kompatibel lama
+      return "vaksin";
+    }
+
+    function attachOrderTypeWatcher(selectId, prefix) {
+      const sel = $(selectId);
+      if (!sel) return;
+      // set awal (default tampil vaksin fields)
+      updateFormForOrderType(prefix, getOrderTypeFromValue(sel.value || ""));
+      sel.onchange = () => {
+        updateFormForOrderType(prefix, getOrderTypeFromValue(sel.value || ""));
+      };
+    }
+
+    function updateFormForOrderType(prefix, tipe) {
+      if (prefix === "ci") {
+        const kondWrap = $("ci_kondisi_wrap");
+        const batchSection = $("ci_batch_section");
+        if (tipe === "servis") {
+          // Sembunyikan
+          kondWrap?.classList.add("hidden");
+          batchSection?.classList.add("hidden");
+          // Bersihkan nilai agar tidak terkirim/do-validate
+          const kond = $("ci_kondisi");
+          if (kond) kond.selectedIndex = 0;
+          resetBatches();
+          $("ci_batch_wrap").innerHTML = ""; // kosongkan total
+        } else {
+          // Tampilkan kembali
+          kondWrap?.classList.remove("hidden");
+          batchSection?.classList.remove("hidden");
+          if ($("ci_batch_wrap").children.length === 0) addBatch();
+        }
+      }
+
+      if (prefix === "co") {
+        const ayamWrap = $("co_ayam_wrap");
+        const vaksinWrap = $("co_vaksin_wrap");
+        if (tipe === "servis") {
+          ayamWrap?.classList.add("hidden");
+          vaksinWrap?.classList.add("hidden");
+          const a = $("co_ayam"); if (a) a.value = "";
+          const v = $("co_vaksin"); if (v) v.value = "";
+        } else {
+          ayamWrap?.classList.remove("hidden");
+          vaksinWrap?.classList.remove("hidden");
+        }
+      }
+    }
+
     /* ===================== FOTO -> BASE64 & SUBMIT ============ */
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
@@ -693,20 +762,33 @@
 
       const order = $("ci_order").value;
       const nama = $("ci_nama").value.trim();
+      const tipe = getOrderTypeFromValue(order);
       const kondisi = $("ci_kondisi").value;
       const batches = getBatchValues();
       const fotos = $("ci_fotos").files;
 
-      if (!order || !nama || !kondisi) {
-        warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan Kondisi wajib diisi.";
+      // Validasi dasar
+      if (!order || !nama) {
+        warn.textContent = "⚠️ Nomor Order dan Nama Vaksinator wajib diisi.";
         warn.classList.remove("hidden");
         return;
       }
-      if (batches.length === 0) {
-        warn.textContent = "⚠️ Minimal 1 Nomor Batch diisi.";
-        warn.classList.remove("hidden");
-        return;
+
+      // Validasi khusus vaksin
+      if (tipe !== "servis") {
+        if (!kondisi) {
+          warn.textContent = "⚠️ Kondisi Vaksin wajib diisi (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+        if (batches.length === 0) {
+          warn.textContent = "⚠️ Minimal 1 Nomor Batch diisi (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
       }
+
+      // Validasi foto (tetap wajib keduanya)
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
         warn.classList.remove("hidden");
@@ -720,22 +802,27 @@
 
       try {
         showLoading("⏳ Menyiapkan foto (base64)...");
-        const rawPayload = {
+        const basePayload = {
           appKey: APP_KEY,
           formType: "checkin",
           orderNumber: order,
           namaVaksinator: nama,
-          kondisiVaksin: kondisi,
           tanggal: $("ci_tanggal").value,
           jam: $("ci_jam").value,
           lokasi: $("ci_lokasi").value,
           latitude: $("ci_lat").value,
           longitude: $("ci_lng").value,
           catatan: $("ci_catatan").value || "",
-          batches: batches,
           photos: await buildPhotosPayload("ci_fotos", "ci"),
         };
-        const payload = cleanPayload(rawPayload);
+
+        // Tambah field khusus vaksin saja
+        if (tipe !== "servis") {
+          basePayload.kondisiVaksin = kondisi;
+          basePayload.batches = batches;
+        }
+
+        const payload = cleanPayload(basePayload);
 
         showLoading("⏳ Mengirim Cek-In...");
         const resp = await sendJson(FLOW_SUBMIT_URL, payload);
@@ -765,20 +852,28 @@
       const order = $("co_order").value;
       const nama = $("co_nama").value.trim();
       const kandang = $("co_kandang").value.trim();
+      const tipe = getOrderTypeFromValue(order);
       const ayam = $("co_ayam").value;
       const vaksin = $("co_vaksin").value;
       const fotos = $("co_fotos").files;
 
+      // Validasi dasar
       if (!order || !nama || !kandang) {
         warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
         warn.classList.remove("hidden");
         return;
       }
-      if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
-        warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0.";
-        warn.classList.remove("hidden");
-        return;
+
+      // Validasi khusus vaksin
+      if (tipe !== "servis") {
+        if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
+          warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0 (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
       }
+
+      // Validasi foto (tetap wajib keduanya)
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
         warn.classList.remove("hidden");
@@ -792,14 +887,12 @@
 
       try {
         showLoading("⏳ Menyiapkan foto...");
-        const rawPayload = {
+        const basePayload = {
           appKey: APP_KEY,
           formType: "checkout",
           orderNumber: order,
           namaVaksinator: nama,
           noKandang: kandang,
-          jumlahAyam: Number(ayam),
-          jumlahVaksin: Number(vaksin),
           tanggal: $("co_tanggal").value,
           jam: $("co_jam").value,
           lokasi: $("co_lokasi").value,
@@ -808,7 +901,14 @@
           catatan: $("co_catatan").value || "",
           photos: await buildPhotosPayload("co_fotos", "co"),
         };
-        const payload = cleanPayload(rawPayload);
+
+        // Tambah field khusus vaksin saja
+        if (tipe !== "servis") {
+          basePayload.jumlahAyam = Number(ayam);
+          basePayload.jumlahVaksin = Number(vaksin);
+        }
+
+        const payload = cleanPayload(basePayload);
 
         showLoading("⏳ Mengirim Cek-Out...");
         const resp = await sendJson(FLOW_SUBMIT_URL, payload);
@@ -886,6 +986,9 @@
         const src = $(prefix + "_src");
         if (src) src.textContent = "Lokasi: -";
       }
+
+      // Setelah reset, kembalikan tampilan ke default (anggap vaksin)
+      updateFormForOrderType(prefix, "vaksin");
     }
   </script>
 </body>
