@@ -533,8 +533,9 @@
       }
 
       const cards = items.map(it=>{
-        const type = (it.typeOrder || '').toString().toUpperCase();
-        const isServis = type.includes('SERVIS');
+        // Deteksi tipe berdasarkan SP List: "Vaksinasi" atau "Service"
+        const t = (it.typeOrder || '').toString().trim().toUpperCase();
+        const isService = (t === 'SERVICE' || t.includes('SERVICE'));
 
         // Umum
         const orderNumber = escapeHtml(it.orderNumber || '-');
@@ -551,7 +552,8 @@
         const jenisServis = escapeHtml(it.jenisService || '-');
 
         let extraRows = '';
-        if (isServis) {
+        if (isService) {
+          // Tipe "Service"
           extraRows = `
             <div class="line">
               <div class="label">Jadwal Service</div>
@@ -563,6 +565,7 @@
             </div>
           `;
         } else {
+          // Tipe "Vaksinasi" (default)
           extraRows = `
             <div class="line">
               <div class="label">Jadwal Vaksin</div>
@@ -638,7 +641,7 @@
       // Payload ke Flow
       const payload = {
         mode: 'viewSchedule',
-        branch: isAdminAll ? '' : _vjUser.branch, // biarkan kosong untuk ALL
+        branch: isAdminAll ? '' : _vjUser.branch, // kosong untuk ALL
         startDate,
         endDate,
         allBranches: isAdminAll,                  // flag agar Flow skip filter branch
@@ -763,7 +766,7 @@
         async () => {
           try {
             const r = await fetch("https://ipapi.co/json/");
-            const j = await r.json();
+          const j = await r.json();
             $(p + "_lat").value = j.latitude ?? "";
             $(p + "_lng").value = j.longitude ?? "";
             $(p + "_lokasi").value = `${j.city ?? "-"}, ${j.region ?? "-"}, ${j.country_name ?? "-"}`;
@@ -795,238 +798,6 @@
     function getBatchValues() {
       const inputs = Array.from($("ci_batch_wrap").querySelectorAll("input"));
       return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
-    }
-
-    /* ===================== FOTO PREVIEW/DELETE ================ */
-    const photoHandlers = {}; // per inputId: {urls:[], clear, render, removeAt}
-
-    function attachMultiPhotoHandler(inputId, previewId, clearBtnId) {
-      const inp = $(inputId);
-      const preview = $(previewId);
-      const clearBtn = clearBtnId ? $(clearBtnId) : null;
-
-      if (!photoHandlers[inputId]) {
-        photoHandlers[inputId] = { urls: [] };
-      }
-      const state = photoHandlers[inputId];
-
-      function revokeAll() {
-        (state.urls || []).forEach((u) => URL.revokeObjectURL(u));
-        state.urls = [];
-      }
-
-      function syncLimit() {
-        let files = Array.from(inp.files || []);
-        if (files.length > MAX_PHOTOS) {
-          alert(`Maksimal ${MAX_PHOTOS} foto. Hanya ${MAX_PHOTOS} pertama yang digunakan.`);
-          const dt = new DataTransfer();
-          files.slice(0, MAX_PHOTOS).forEach((f) => dt.items.add(f));
-          inp.files = dt.files;
-          files = Array.from(inp.files);
-        }
-        return files;
-      }
-
-      function render() {
-        const files = syncLimit();
-        revokeAll();
-        preview.innerHTML = "";
-
-        files.forEach((f, idx) => {
-          if (!f.type.startsWith("image/")) return;
-
-          const item = document.createElement("div");
-          item.className = "photo-item";
-
-          const img = document.createElement("img");
-          img.alt = f.name;
-
-          const url = URL.createObjectURL(f);
-          state.urls.push(url);
-          img.src = url;
-
-          const del = document.createElement("button");
-          del.className = "photo-del";
-          del.type = "button";
-          del.textContent = "×";
-          del.title = "Hapus foto ini";
-          del.onclick = () => removeAt(idx);
-
-          item.appendChild(img);
-          item.appendChild(del);
-          preview.appendChild(item);
-        });
-      }
-
-      function clearAll() {
-        try {
-          const dt = new DataTransfer();
-          inp.files = dt.files;
-        } catch {
-          inp.value = "";
-        }
-        revokeAll();
-        preview.innerHTML = "";
-      }
-
-      function removeAt(idx) {
-        const files = Array.from(inp.files || []);
-        const dt = new DataTransfer();
-        files.forEach((f, i) => {
-          if (i !== idx) dt.items.add(f);
-        });
-        inp.files = dt.files;
-        render();
-      }
-
-      if (clearBtn) clearBtn.onclick = clearAll;
-      inp.onchange = render;
-
-      state.clear = clearAll;
-      state.render = render;
-      state.removeAt = removeAt;
-    }
-
-    /* ===================== LOAD ORDERS (FLOW) ================= */
-    async function loadOrders(selectId) {
-      const sel = $(selectId);
-      sel.innerHTML = '<option value="">-- Pilih Nomor Order --</option>';
-      const type = selectId.startsWith("ci") ? "checkin" : "checkout";
-
-      try {
-        showLoading("⏳ Mengambil data order...");
-
-        const r = await fetch(FLOW_GET_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain; charset=UTF-8",
-            Accept: "application/json",
-          },
-          body: type,
-        });
-
-        const raw = await r.text();
-        if (!r.ok) throw new Error(`HTTP ${r.status} - ${raw.slice(0, 300)}`);
-
-        const safeJson = (x) => {
-          if (x == null) return null;
-          if (typeof x === "object") return x;
-          if (typeof x !== "string") return null;
-          try {
-            const p1 = JSON.parse(x);
-            if (typeof p1 === "string") {
-              try { return JSON.parse(p1); } catch { return p1; }
-            }
-            return p1;
-          } catch { return null; }
-        };
-
-        let j = safeJson(raw);
-        if (!j) throw new Error("Response tidak bisa diparse JSON.");
-
-        if (j.body) {
-          const bodyParsed = safeJson(j.body) || j.body;
-          if (typeof bodyParsed === "object") j = { ...j, body: bodyParsed };
-        }
-
-        let list =
-          (Array.isArray(j?.body?.orders) ? j.body.orders : null) ||
-          (Array.isArray(j?.orders) ? j.orders : null) ||
-          (Array.isArray(j?.body) ? j.body : null) ||
-          (Array.isArray(j?.value) ? j.value : null) ||
-          [];
-
-        if (!Array.isArray(list) || list.length === 0) {
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "(Tidak ada data order / struktur response tidak sesuai)";
-          sel.appendChild(opt);
-          return;
-        }
-
-        list.forEach((o) => {
-          let val = "";
-          if (typeof o === "string") {
-            val = o;
-          } else {
-            val = (o?.Value ?? o?.value ?? o?.orderNumber ?? o?.OrderNumber ?? "").toString();
-          }
-          val = val.replace(/\s+/g, " ").trim();
-          if (!val) return;
-
-          const opt = document.createElement("option");
-          opt.value = val;
-          opt.textContent = val;
-          sel.appendChild(opt);
-        });
-
-        if (sel.options.length <= 1) {
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "(Data ada, tapi field Value/orderNumber tidak ditemukan)";
-          sel.appendChild(opt);
-        }
-      } catch (e) {
-        console.error("Gagal mengambil data order", e);
-        alert("Gagal mengambil data order.\n\nDETAIL:\n" + (e?.message || e));
-      } finally {
-        hideLoading();
-      }
-    }
-
-    /* ===================== DETEKSI TIPE ORDER ================= */
-    function getOrderTypeFromValue(val) {
-      const v = String(val || "").toLowerCase();
-      if (v.includes("spservis")) return "servis";
-      if (v.includes("spvaksin")) return "vaksin";
-      // default anggap vaksin supaya kompatibel lama
-      return "vaksin";
-    }
-
-    function attachOrderTypeWatcher(selectId, prefix) {
-      const sel = $(selectId);
-      if (!sel) return;
-      // set awal (default tampil vaksin fields)
-      updateFormForOrderType(prefix, getOrderTypeFromValue(sel.value || ""));
-      sel.onchange = () => {
-        updateFormForOrderType(prefix, getOrderTypeFromValue(sel.value || ""));
-      };
-    }
-
-    function updateFormForOrderType(prefix, tipe) {
-      if (prefix === "ci") {
-        const kondWrap = $("ci_kondisi_wrap");
-        const batchSection = $("ci_batch_section");
-        if (tipe === "servis") {
-          // Sembunyikan
-          kondWrap?.classList.add("hidden");
-          batchSection?.classList.add("hidden");
-          // Bersihkan nilai agar tidak terkirim/do-validate
-          const kond = $("ci_kondisi");
-          if (kond) kond.selectedIndex = 0;
-          resetBatches();
-          $("ci_batch_wrap").innerHTML = ""; // kosongkan total
-        } else {
-          // Tampilkan kembali
-          kondWrap?.classList.remove("hidden");
-          batchSection?.classList.remove("hidden");
-          if ($("ci_batch_wrap").children.length === 0) addBatch();
-        }
-      }
-
-      if (prefix === "co") {
-        const ayamWrap = $("co_ayam_wrap");
-        const vaksinWrap = $("co_vaksin_wrap");
-        if (tipe === "servis") {
-          ayamWrap?.classList.add("hidden");
-          vaksinWrap?.classList.add("hidden");
-          const a = $("co_ayam"); if (a) a.value = "";
-          const v = $("co_vaksin"); if (v) v.value = "";
-        } else {
-          ayamWrap?.classList.remove("hidden");
-          vaksinWrap?.classList.remove("hidden");
-        }
-      }
     }
 
     /* ===================== FOTO -> BASE64 & SUBMIT ============ */
