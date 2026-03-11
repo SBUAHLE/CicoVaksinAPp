@@ -117,7 +117,7 @@
     /* Jadwal: center result text */
     .center-text { text-align:center; }
 
-    /* Cards for jadwal */
+    /* Cards grid */
     .cards-grid{
       display:grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -130,6 +130,7 @@
       background:#fff;
       padding:14px;
       box-shadow:0 4px 16px rgba(15,23,42,.04);
+      cursor:pointer;
     }
     .order-card .line { margin-bottom:8px; }
     .order-card .label{
@@ -140,6 +141,20 @@
     .order-card .value{ font-weight:600; }
     .order-card .muted{ color:var(--muted); font-weight:500; }
     .order-card .sep{ height:8px }
+
+    /* Detail key-value rows */
+    .kv{
+      display:grid;
+      grid-template-columns: 200px 1fr;
+      gap:8px 14px;
+      align-items:start;
+      margin-bottom:8px;
+    }
+    .kv .k{ color:var(--muted); font-size:13px; }
+    .kv .v{ font-weight:600; white-space:pre-wrap; }
+    @media (max-width:600px){
+      .kv{ grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 
@@ -152,10 +167,8 @@
       <h1>CICO VAKSINATOR</h1>
       <p>Sistem Check-In &amp; Check-Out<br>Dengan Lokasi &amp; Waktu Otomatis</p>
       <div class="landing-actions">
-        <!-- Tanpa kata "VAKSIN" -->
         <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN</button>
         <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT</button>
-        <!-- VIEW JADWAL -->
         <button class="btn btn-ghost" onclick="show('jadwal')">📅 VIEW JADWAL</button>
       </div>
       <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto</div>
@@ -209,7 +222,6 @@
       <label>Nama Vaksinator</label>
       <input id="ci_nama" placeholder="Nama lengkap petugas" />
 
-      <!-- === Kondisi Vaksin (disembunyikan jika SPServis) === -->
       <div id="ci_kondisi_wrap">
         <label>Kondisi Vaksin</label>
         <select id="ci_kondisi">
@@ -222,7 +234,6 @@
         </select>
       </div>
 
-      <!-- === Nomor Batch (disembunyikan jika SPServis) === -->
       <div id="ci_batch_section">
         <label>Nomor Batch Vaksin</label>
         <div id="ci_batch_wrap"></div>
@@ -300,13 +311,11 @@
       <label>No Kandang</label>
       <input id="co_kandang" placeholder="Contoh: A-12" />
 
-      <!-- === Jumlah Ayam (disembunyikan jika SPServis) === -->
       <div id="co_ayam_wrap">
         <label>Jumlah Ayam Tervaksin</label>
         <input type="number" id="co_ayam" min="0" step="1" placeholder="0" />
       </div>
 
-      <!-- === Jumlah Vaksin (disembunyikan jika SPServis) === -->
       <div id="co_vaksin_wrap">
         <label>Jumlah Vaksin Terpakai</label>
         <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
@@ -337,7 +346,6 @@
 
     <div id="vj_warn" class="warn hidden"></div>
 
-    <!-- Input email (disembunyikan setelah valid) -->
     <div id="vj_input_card" class="card">
       <div class="section-title">Masukkan alamat email Anda</div>
       <label for="vj_email">Alamat Email</label>
@@ -349,12 +357,10 @@
       <div class="hint">Gunakan email sesuai daftar di <code>data/users.json</code>.</div>
     </div>
 
-    <!-- Sapaan -->
     <div id="vj_result_card" class="card hidden center-text">
       <div id="vj_result" style="font-weight:700;font-size:18px"></div>
     </div>
 
-    <!-- Pilih periode -->
     <div id="vj_range_card" class="card hidden">
       <div class="section-title">Pilih Periode Jadwal</div>
       <div class="row">
@@ -373,11 +379,50 @@
       <div class="hint">Pilih rentang tanggal berdasarkan <b>Tanggal Pembuatan</b>.</div>
     </div>
 
-    <!-- Daftar jadwal (cards) -->
     <div id="vj_list_card" class="card hidden">
       <div class="section-title">Daftar Jadwal</div>
       <div id="vj_list_meta" class="hint"></div>
       <div id="vj_list" class="cards-grid"></div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: DETAIL ====================== -->
+  <div id="view-detail" class="container hidden">
+    <button class="btn btn-ghost" type="button" onclick="show('jadwal')">← Kembali ke Jadwal</button>
+    <h2>Detail Order</h2>
+
+    <div id="vd_warn" class="warn hidden"></div>
+
+    <div id="vd_head" class="card">
+      <div class="section-title" id="vd_title">Nomor Order: -</div>
+      <div class="badge" id="vd_type">Type: -</div>
+      <div class="badge" id="vd_status">Status: -</div>
+      <div class="badge" id="vd_branch">Cabang: -</div>
+    </div>
+
+    <div id="vd_body" class="card">
+      <div class="kv"><div class="k">Tanggal Pembuatan</div><div class="v" id="vd_created">-</div></div>
+
+      <!-- Dinamis: untuk Vaksinasi atau Service -->
+      <div id="vd_block_vaksin">
+        <div class="kv"><div class="k">Jadwal Vaksin</div><div class="v" id="vd_jadwal_vaksin">-</div></div>
+        <div class="kv"><div class="k">Nama Vaksin</div><div class="v" id="vd_nama_vaksin">-</div></div>
+        <div class="kv"><div class="k">Metode Vaksinasi</div><div class="v" id="vd_metode_vaksin">-</div></div>
+        <div class="kv"><div class="k">Dosis Vaksin</div><div class="v" id="vd_dosis_vaksin">-</div></div>
+      </div>
+
+      <div id="vd_block_service" class="hidden">
+        <div class="kv"><div class="k">Jadwal Service</div><div class="v" id="vd_jadwal_service">-</div></div>
+        <div class="kv"><div class="k">Jenis Service</div><div class="v" id="vd_jenis_service">-</div></div>
+      </div>
+
+      <div class="kv"><div class="k">Nama Customer</div><div class="v" id="vd_customer">-</div></div>
+      <div class="kv"><div class="k">Alamat Farm</div><div class="v" id="vd_alamat">-</div></div>
+      <div class="kv"><div class="k">Populasi Kandang</div><div class="v" id="vd_populasi">-</div></div>
+      <div class="kv"><div class="k">Nama Vaksinator</div><div class="v" id="vd_vaksinator">-</div></div>
+      <div class="kv"><div class="k">Koordinator</div><div class="v" id="vd_koordinator">-</div></div>
+      <div class="kv"><div class="k">Nama TSR/AS</div><div class="v" id="vd_tsr_as">-</div></div>
+      <div class="kv"><div class="k">Catatan</div><div class="v" id="vd_catatan">-</div></div>
     </div>
   </div>
 
@@ -405,7 +450,6 @@
     const FLOW_SUBMIT_URL =
       "https://cico-gateway.agia-barriyadi.workers.dev/submit";
 
-    /* URL FLOW VIEW JADWAL — GANTI DENGAN URL FLOW ANDA */
     const FLOW_VIEWJADWAL_URL =
       "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d5235f4bd86f4e4f8694fe5254e12e4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zKCx3gB-sMvcoaKieQaW-BdCtBTVrPRtlIf5YBVth74";
 
@@ -417,7 +461,8 @@
     /* ===================== USERS JSON (jadwal) ================ */
     const USERS_JSON_URL = './data/users.json';
     let userDict = null;
-    let _vjUser = null; // user terverifikasi (hasil lookup users.json)
+    let _vjUser = null;      // user terverifikasi
+    let _vjLastItems = [];   // cache list terakhir (untuk detail)
 
     function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
     function escapeHtml(s){
@@ -432,7 +477,6 @@
         const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
         if(!resp.ok) throw new Error('HTTP '+resp.status);
         userDict = await resp.json();
-        console.log('Users loaded:', Object.keys(userDict||{}).length);
       }catch(e){
         console.error('Gagal memuat users.json', e);
         userDict = {};
@@ -452,6 +496,7 @@
       $('vj_list').innerHTML = '';
       $('vj_list_meta').textContent = '';
       _vjUser = null;
+      _vjLastItems = [];
     }
 
     async function initJadwal(){
@@ -492,8 +537,7 @@
         return;
       }
 
-      _vjUser = u; // simpan user
-
+      _vjUser = u;
       $('vj_input_card').classList.add('hidden');
       const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
       $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
@@ -517,11 +561,10 @@
     }
 
     /* ===================== JADWAL: FETCH & RENDER ============= */
-    // Tanggal saja (tanpa jam)
     function fmtDateOnly(s){
       if(!s) return '-';
       const d = new Date(s);
-      if (isNaN(d.getTime())) return s; // jika bukan ISO
+      if (isNaN(d.getTime())) return s;
       return d.toLocaleDateString('id-ID', { year:'numeric', month:'short', day:'2-digit' });
     }
 
@@ -529,22 +572,23 @@
       const wrap = $('vj_list');
       if(!Array.isArray(items) || items.length===0){
         wrap.innerHTML = '<div class="hint">Tidak ada data untuk periode & cabang yang dipilih.</div>';
+        _vjLastItems = [];
         return;
       }
 
+      _vjLastItems = items.slice(); // cache
+
       const cards = items.map(it=>{
-        // Deteksi tipe berdasarkan SP List: "Vaksinasi" atau "Service"
+        // Tipe: "Vaksinasi" atau "Service"
         const t = (it.typeOrder || '').toString().trim().toUpperCase();
         const isService = (t === 'SERVICE' || t.includes('SERVICE'));
 
-        // Umum
         const orderNumber = escapeHtml(it.orderNumber || '-');
         const tglBuat = fmtDateOnly(it.tanggalPembuatan || it.createdAt);
         const namaCust = escapeHtml(it.namaCustomer || it.customer || '-');
         const populasi = escapeHtml(it.populasiKandang || '-');
         const vaksinator = escapeHtml(it.namaVaksinator || it.vaksinator || '-');
 
-        // Jadwal & bidang khusus tipe
         const jadwalVaksin = fmtDateOnly(it.jadwalVaksin);
         const jadwalServis = fmtDateOnly(it.jadwalService);
         const namaVaksin = escapeHtml(it.namaVaksin || '-');
@@ -553,7 +597,6 @@
 
         let extraRows = '';
         if (isService) {
-          // Tipe "Service"
           extraRows = `
             <div class="line">
               <div class="label">Jadwal Service</div>
@@ -565,7 +608,6 @@
             </div>
           `;
         } else {
-          // Tipe "Vaksinasi" (default)
           extraRows = `
             <div class="line">
               <div class="label">Jadwal Vaksin</div>
@@ -583,7 +625,7 @@
         }
 
         return `
-          <div class="order-card">
+          <div class="order-card" tabindex="0" role="button" aria-label="Buka detail ${orderNumber}" data-id="${Number(it.id)||0}">
             <div class="line">
               <div class="label">Nomor Order</div>
               <div class="value">${orderNumber}</div>
@@ -612,6 +654,71 @@
       wrap.innerHTML = cards;
     }
 
+    // Delegasi klik kartu → buka detail (tanpa API; pakai cache)
+    document.addEventListener('click', (e)=>{
+      const card = e.target.closest('.order-card');
+      if(card && $('view-jadwal') && !$('view-jadwal').classList.contains('hidden')){
+        const id = Number(card.getAttribute('data-id') || '0');
+        if(id) openDetailFromCard(id);
+      }
+    });
+    // Enter/Space aksesibilitas
+    document.addEventListener('keydown', (e)=>{
+      if((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('order-card')){
+        e.preventDefault();
+        const id = Number(e.target.getAttribute('data-id') || '0');
+        if(id) openDetailFromCard(id);
+      }
+    });
+
+    function openDetailFromCard(id){
+      const it = _vjLastItems.find(x => Number(x.id) === Number(id));
+      prefillDetail(it, id);
+      show('detail');
+    }
+
+    function prefillDetail(it, id){
+      const warn = $('vd_warn'); warn.classList.add('hidden'); warn.textContent = '';
+
+      $('vd_title').textContent = 'Nomor Order: ' + (it?.orderNumber || '-');
+      $('vd_type').textContent  = 'Type: ' + (it?.typeOrder || '-');
+      $('vd_status').textContent= 'Status: ' + (it?.status || '-');
+      $('vd_branch').textContent= 'Cabang: ' + (it?.branch || '-');
+
+      const tglBuat = fmtDateOnly(it?.tanggalPembuatan || it?.createdAt);
+      $('vd_created').textContent = tglBuat;
+
+      const t = (it?.typeOrder || '').toString().trim().toUpperCase();
+      const isService = (t === 'SERVICE' || t.includes('SERVICE'));
+      $('vd_block_vaksin').classList.toggle('hidden', isService);
+      $('vd_block_service').classList.toggle('hidden', !isService);
+
+      if(isService){
+        $('vd_jadwal_service').textContent = fmtDateOnly(it?.jadwalService);
+        $('vd_jenis_service').textContent  = it?.jenisService || '-';
+      }else{
+        $('vd_jadwal_vaksin').textContent  = fmtDateOnly(it?.jadwalVaksin);
+        $('vd_nama_vaksin').textContent    = it?.namaVaksin || '-';
+        $('vd_metode_vaksin').textContent  = it?.metodeVaksinasi || '-';
+        $('vd_dosis_vaksin').textContent   = it?.dosisVaksin || '-';
+      }
+
+      $('vd_customer').textContent   = it?.namaCustomer || it?.customer || '-';
+      $('vd_alamat').textContent     = it?.alamatCustomer || it?.alamatFarm || '-';
+      $('vd_populasi').textContent   = it?.populasiKandang || '-';
+      $('vd_vaksinator').textContent = it?.namaVaksinator || it?.vaksinator || '-';
+      $('vd_koordinator').textContent= it?.koordinator || '-';
+      $('vd_tsr_as').textContent     = it?.namaTSRorAS || '-';
+      $('vd_catatan').textContent    = it?.catatan || '-';
+
+      // Jika item tidak ditemukan (mis. reload manual), beri info
+      if(!it){
+        warn.textContent = 'ℹ️ Data detail tidak ada di cache. Silakan kembali ke Jadwal dan muat kembali.';
+        warn.classList.remove('hidden');
+      }
+    }
+
+    /* ===================== LOAD LIST DARI FLOW ================= */
     async function handleTampilkanJadwal(){
       const warn = $('vj_warn');
       warn.classList.add('hidden'); warn.textContent = '';
@@ -635,16 +742,14 @@
         return;
       }
 
-      // Jika admin (branch = ALL) → kirim allBranches=true dan branch kosong
       const isAdminAll = ((_vjUser.branch || '').trim().toUpperCase() === 'ALL');
 
-      // Payload ke Flow
       const payload = {
         mode: 'viewSchedule',
-        branch: isAdminAll ? '' : _vjUser.branch, // kosong untuk ALL
+        branch: isAdminAll ? '' : _vjUser.branch,
         startDate,
         endDate,
-        allBranches: isAdminAll,                  // flag agar Flow skip filter branch
+        allBranches: isAdminAll,
         xApiKey: APP_KEY
       };
 
@@ -687,6 +792,7 @@
       $("view-checkin").classList.add("hidden");
       $("view-checkout").classList.add("hidden");
       $("view-jadwal").classList.add("hidden");
+      $("view-detail").classList.add("hidden");
 
       const target = $("view-" + v);
       if (target) target.classList.remove("hidden");
@@ -766,7 +872,7 @@
         async () => {
           try {
             const r = await fetch("https://ipapi.co/json/");
-          const j = await r.json();
+            const j = await r.json();
             $(p + "_lat").value = j.latitude ?? "";
             $(p + "_lng").value = j.longitude ?? "";
             $(p + "_lokasi").value = `${j.city ?? "-"}, ${j.region ?? "-"}, ${j.country_name ?? "-"}`;
@@ -879,14 +985,12 @@
       const batches = getBatchValues();
       const fotos = $("ci_fotos").files;
 
-      // Validasi dasar
       if (!order || !nama) {
         warn.textContent = "⚠️ Nomor Order dan Nama Vaksinator wajib diisi.";
         warn.classList.remove("hidden");
         return;
       }
 
-      // Validasi khusus vaksin
       if (tipe !== "servis") {
         if (!kondisi) {
           warn.textContent = "⚠️ Kondisi Vaksin wajib diisi (untuk SPVaksin).";
@@ -900,7 +1004,6 @@
         }
       }
 
-      // Validasi foto
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
         warn.classList.remove("hidden");
@@ -968,14 +1071,12 @@
       const vaksin = $("co_vaksin").value;
       const fotos = $("co_fotos").files;
 
-      // Validasi dasar
       if (!order || !nama || !kandang) {
         warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
         warn.classList.remove("hidden");
         return;
       }
 
-      // Validasi khusus vaksin
       if (tipe !== "servis") {
         if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
           warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0 (untuk SPVaksin).";
@@ -984,15 +1085,14 @@
         }
       }
 
-      // Validasi foto
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
-        warn.classList.remove("hidden");
+        warn.classList.remove('hidden');
         return;
       }
       if (fotos.length > MAX_PHOTOS) {
         warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
-        warn.classList.remove("hidden");
+        warn.classList.remove('hidden');
         return;
       }
 
@@ -1039,68 +1139,6 @@
       }
     }
 
-    /* ===================== RESET FORM ========================= */
-    function resetForm(prefix, refreshAuto = true) {
-      const warnEl = $(prefix + "_warn");
-      if (warnEl) {
-        warnEl.classList.add("hidden");
-        warnEl.textContent = "";
-      }
-
-      const viewId = prefix === "ci" ? "checkin" : "checkout";
-
-      const selOrder = $(prefix + "_order");
-      if (selOrder) selOrder.selectedIndex = 0;
-
-      const fields = Array.from(
-        document.querySelectorAll(
-          `#view-${viewId} input, #view-${viewId} textarea, #view-${viewId} select`
-        )
-      );
-
-      fields.forEach((el) => {
-        if (
-          el.id.endsWith("_tanggal") ||
-          el.id.endsWith("_jam") ||
-          el.id.endsWith("_lokasi") ||
-          el.id.endsWith("_lat") ||
-          el.id.endsWith("_lng")
-        ) {
-          return;
-        }
-
-        if (el.tagName === "SELECT") {
-          if (el.id !== prefix + "_order") el.selectedIndex = 0;
-        } else if (el.type === "hidden") {
-          el.value = "";
-        } else if (el.type === "file") {
-          // direset via handler
-        } else {
-          el.value = "";
-        }
-      });
-
-      if (prefix === "ci") initBatches();
-
-      const photoId = prefix + "_fotos";
-      if (photoHandlers[photoId]?.clear) photoHandlers[photoId].clear();
-
-      if (refreshAuto) {
-        init(prefix);
-      } else {
-        $(prefix + "_tanggal").value = "";
-        $(prefix + "_jam").value = "";
-        $(prefix + "_lokasi").value = "";
-        $(prefix + "_lat").value = "";
-        $(prefix + "_lng").value = "";
-        const src = $(prefix + "_src");
-        if (src) src.textContent = "Lokasi: -";
-      }
-
-      // Setelah reset, kembalikan tampilan ke default (anggap vaksin)
-      updateFormForOrderType(prefix, "vaksin");
-    }
-
     // Enter pada input email => Next
     document.addEventListener('DOMContentLoaded', ()=>{
       const emailInput = $('vj_email');
@@ -1110,6 +1148,15 @@
         });
       }
     });
+
+    /* ===================== UTIL: ORDER TYPE (legacy) ========== */
+    function getOrderTypeFromValue(val) {
+      const v = String(val || "").toLowerCase();
+      if (v.includes("spservis")) return "servis";
+      if (v.includes("spvaksin")) return "vaksin";
+      return "vaksin";
+    }
+    function attachOrderTypeWatcher(){/* kept for compatibility */}
   </script>
 </body>
 </html>
