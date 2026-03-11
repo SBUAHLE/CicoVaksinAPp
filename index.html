@@ -152,7 +152,7 @@
       <h1>CICO VAKSINATOR</h1>
       <p>Sistem Check-In &amp; Check-Out<br>Dengan Lokasi &amp; Waktu Otomatis</p>
       <div class="landing-actions">
-        <!-- Ganti label: tanpa kata "VAKSIN" -->
+        <!-- Tanpa kata "VAKSIN" -->
         <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN</button>
         <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT</button>
         <!-- VIEW JADWAL -->
@@ -405,7 +405,7 @@
     const FLOW_SUBMIT_URL =
       "https://cico-gateway.agia-barriyadi.workers.dev/submit";
 
-    /* [ADD] URL FLOW VIEW JADWAL — GANTI DENGAN URL FLOW ANDA */
+    /* URL FLOW VIEW JADWAL — GANTI DENGAN URL FLOW ANDA */
     const FLOW_VIEWJADWAL_URL =
       "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d5235f4bd86f4e4f8694fe5254e12e4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zKCx3gB-sMvcoaKieQaW-BdCtBTVrPRtlIf5YBVth74";
 
@@ -517,14 +517,12 @@
     }
 
     /* ===================== JADWAL: FETCH & RENDER ============= */
-    function fmtDateTime(s){
+    // Tanggal saja (tanpa jam)
+    function fmtDateOnly(s){
       if(!s) return '-';
       const d = new Date(s);
-      if (isNaN(d.getTime())) return s; // biarkan apa adanya jika bukan ISO
-      return d.toLocaleString('id-ID', {
-        year:'numeric', month:'short', day:'2-digit',
-        hour:'2-digit', minute:'2-digit'
-      });
+      if (isNaN(d.getTime())) return s; // jika bukan ISO
+      return d.toLocaleDateString('id-ID', { year:'numeric', month:'short', day:'2-digit' });
     }
 
     function renderJadwal(items){
@@ -538,21 +536,20 @@
         const type = (it.typeOrder || '').toString().toUpperCase();
         const isServis = type.includes('SERVIS');
 
-        // Bidang umum
+        // Umum
         const orderNumber = escapeHtml(it.orderNumber || '-');
-        const tglBuat = fmtDateTime(it.tanggalPembuatan || it.createdAt);
+        const tglBuat = fmtDateOnly(it.tanggalPembuatan || it.createdAt);
         const namaCust = escapeHtml(it.namaCustomer || it.customer || '-');
         const populasi = escapeHtml(it.populasiKandang || '-');
         const vaksinator = escapeHtml(it.namaVaksinator || it.vaksinator || '-');
 
-        // Bidang jadwal & konten khusus tipe
-        const jadwalVaksin = fmtDateTime(it.jadwalVaksin);
-        const jadwalServis = fmtDateTime(it.jadwalService);
+        // Jadwal & bidang khusus tipe
+        const jadwalVaksin = fmtDateOnly(it.jadwalVaksin);
+        const jadwalServis = fmtDateOnly(it.jadwalService);
         const namaVaksin = escapeHtml(it.namaVaksin || '-');
         const metode = escapeHtml(it.metodeVaksinasi || '-');
         const jenisServis = escapeHtml(it.jenisService || '-');
 
-        // Susun konten baris per baris (label di atas, value di bawah)
         let extraRows = '';
         if (isServis) {
           extraRows = `
@@ -635,12 +632,16 @@
         return;
       }
 
-      // Siapkan payload
+      // Jika admin (branch = ALL) → kirim allBranches=true dan branch kosong
+      const isAdminAll = ((_vjUser.branch || '').trim().toUpperCase() === 'ALL');
+
+      // Payload ke Flow
       const payload = {
         mode: 'viewSchedule',
-        branch: _vjUser.branch,
+        branch: isAdminAll ? '' : _vjUser.branch, // biarkan kosong untuk ALL
         startDate,
         endDate,
+        allBranches: isAdminAll,                  // flag agar Flow skip filter branch
         xApiKey: APP_KEY
       };
 
@@ -660,10 +661,11 @@
           throw new Error(`HTTP ${resp.status}: ${data?.message || data?.error || data?.raw || 'Gagal memuat jadwal'}`);
         }
 
-        // Asumsikan struktur sesuai Response Flow kita: { items: [...], count, dateRange, branch, ... }
         const items = Array.isArray(data?.items) ? data.items : [];
+        const cabangLabel = isAdminAll ? 'Semua Cabang (ADMIN)' : (_vjUser.branch || '-');
         $('vj_list_meta').textContent =
-          `Cabang: ${_vjUser.branch} • Periode: ${startDate} s.d. ${endDate} • Jumlah: ${items.length}`;
+          `Cabang: ${cabangLabel} • Periode: ${startDate} s.d. ${endDate} • Jumlah: ${items.length}`;
+
         renderJadwal(items);
         $('vj_list_card').classList.remove('hidden');
       }catch(e){
