@@ -113,6 +113,9 @@
       width:20px;height:20px;line-height:20px;text-align:center;font-size:13px;cursor:pointer
     }
     .hint{color:#64748b;font-size:12px;margin-top:4px}
+
+    /* [ADD] Jadwal: center result text */
+    .center-text { text-align:center; }
   </style>
 </head>
 
@@ -309,7 +312,8 @@
 
     <div id="vj_warn" class="warn hidden"></div>
 
-    <div class="card">
+    <!-- [UPDATE] Card input email (akan di-hide jika ketemu user) -->
+    <div id="vj_input_card" class="card">
       <div class="section-title">Masukkan alamat email Anda</div>
       <label for="vj_email">Alamat Email</label>
       <input id="vj_email" type="email" placeholder="nama@perusahaan.com" autocomplete="email" />
@@ -320,9 +324,26 @@
       <div class="hint">Gunakan email sesuai daftar di <code>data/users.json</code>.</div>
     </div>
 
-    <div id="vj_result_card" class="card hidden">
-      <div class="section-title">Hasil</div>
-      <div id="vj_result" style="font-weight:600"></div>
+    <!-- [UPDATE] Card hasil (judul disembunyikan saat sukses, center) -->
+    <div id="vj_result_card" class="card hidden center-text">
+      <div id="vj_result_title" class="section-title">Hasil</div> <!-- akan di-hide -->
+      <div id="vj_result" style="font-weight:700;font-size:18px"></div>
+    </div>
+
+    <!-- [ADD] Card pilih range tanggal (tampil setelah email valid) -->
+    <div id="vj_range_card" class="card hidden">
+      <div class="section-title">Pilih Periode Jadwal</div>
+      <div class="row">
+        <div>
+          <label for="vj_start_date">Tanggal Mulai Periode</label>
+          <input type="date" id="vj_start_date" />
+        </div>
+        <div>
+          <label for="vj_end_date">Tanggal Akhir Periode</label>
+          <input type="date" id="vj_end_date" />
+        </div>
+      </div>
+      <div class="hint">Silakan pilih rentang tanggal (mulai &amp; akhir). Anda bisa lanjutkan langkah berikutnya setelah menentukan periode.</div>
     </div>
   </div>
 
@@ -384,8 +405,15 @@
       const w = $('vj_warn');
       w.classList.add('hidden'); w.textContent = '';
       $('vj_email').value = '';
-      $('vj_result').innerHTML = '';
+
+      // Tampilkan kembali input email, sembunyikan hasil & range
+      $('vj_input_card').classList.remove('hidden');
       $('vj_result_card').classList.add('hidden');
+      $('vj_range_card').classList.add('hidden');
+
+      // Kembalikan judul "Hasil" jika sebelumnya di-hide
+      $('vj_result_title').classList.remove('hidden');
+      $('vj_result').innerHTML = '';
     }
 
     async function initJadwal(){
@@ -404,6 +432,7 @@
         warn.textContent = '⚠️ Mohon isi alamat email terlebih dahulu.';
         warn.classList.remove('hidden');
         $('vj_result_card').classList.add('hidden');
+        $('vj_range_card').classList.add('hidden');
         return;
       }
 
@@ -412,13 +441,42 @@
         warn.textContent = `⚠️ Email "${key}" tidak ditemukan pada daftar.`;
         warn.classList.remove('hidden');
         $('vj_result_card').classList.add('hidden');
+        $('vj_range_card').classList.add('hidden');
         return;
       }
 
-      const text = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
-      $('vj_result').innerHTML = text + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
+      // [UPDATE] Sembunyikan input email, tampilkan sapaan center tanpa judul "Hasil"
+      $('vj_input_card').classList.add('hidden');
+
+      const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
+      $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
+
+      // Hilangkan judul "Hasil"
+      $('vj_result_title').classList.add('hidden');
+
+      // Tampilkan kartu hasil & range tanggal
       $('vj_result_card').classList.remove('hidden');
+      $('vj_range_card').classList.remove('hidden');
+
+      // (opsional) Set default tanggal mulai & akhir = hari ini
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      if (!$('vj_start_date').value) $('vj_start_date').value = iso;
+      if (!$('vj_end_date').value) $('vj_end_date').value = iso;
     }
+
+    // Enter pada input email => Next
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const emailInput = $('vj_email');
+      if (emailInput){
+        emailInput.addEventListener('keydown', (e)=>{
+          if (e.key === 'Enter'){ e.preventDefault(); handleJadwalNext(); }
+        });
+      }
+    });
 
     /* ===================== LOADING UI ========================= */
     function showLoading(msg) {
@@ -437,8 +495,7 @@
       $("view-home").classList.add("hidden");
       $("view-checkin").classList.add("hidden");
       $("view-checkout").classList.add("hidden");
-      /* [ADD] Sembunyikan view jadwal juga */
-      $("view-jadwal").classList.add("hidden");
+      $("view-jadwal").classList.add("hidden"); /* [ADD] */
 
       const target = $("view-" + v);
       if (target) target.classList.remove("hidden");
@@ -458,7 +515,6 @@
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
         attachOrderTypeWatcher("co_order", "co");
       }
-      /* [ADD] Inisialisasi halaman jadwal */
       if (v === "jadwal") {
         initJadwal();
       }
