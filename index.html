@@ -5,7 +5,7 @@
   <!-- ====================== META & TITLE ====================== -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CICO Vaksinasi</title>
+  <title>CICO</title>
 
   <!-- ====================== STYLES / THEME ==================== -->
   <style>
@@ -114,8 +114,32 @@
     }
     .hint{color:#64748b;font-size:12px;margin-top:4px}
 
-    /* [ADD] Jadwal: center result text */
+    /* Jadwal: center result text */
     .center-text { text-align:center; }
+
+    /* Cards for jadwal */
+    .cards-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap:12px;
+      margin-top:8px;
+    }
+    .order-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      padding:14px;
+      box-shadow:0 4px 16px rgba(15,23,42,.04);
+    }
+    .order-card .line { margin-bottom:8px; }
+    .order-card .label{
+      font-size:12px; color:var(--muted);
+      text-transform:uppercase; letter-spacing:.02em;
+      margin-bottom:2px;
+    }
+    .order-card .value{ font-weight:600; }
+    .order-card .muted{ color:var(--muted); font-weight:500; }
+    .order-card .sep{ height:8px }
   </style>
 </head>
 
@@ -125,12 +149,13 @@
   <div id="view-home" class="landing-wrap">
     <div class="landing-card">
       <div style="font-size:44px">💉</div>
-      <h1>CICO Vaksinasi</h1>
-      <p>Sistem Check-In &amp; Check-Out Vaksinasi<br>Dengan Lokasi &amp; Waktu Otomatis</p>
+      <h1>CICO VAKSINATOR</h1>
+      <p>Sistem Check-In &amp; Check-Out<br>Dengan Lokasi &amp; Waktu Otomatis</p>
       <div class="landing-actions">
-        <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN VAKSIN</button>
-        <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT VAKSIN</button>
-        <!-- [ADD] Tombol menu baru -->
+        <!-- Ganti label: tanpa kata "VAKSIN" -->
+        <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN</button>
+        <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT</button>
+        <!-- VIEW JADWAL -->
         <button class="btn btn-ghost" onclick="show('jadwal')">📅 VIEW JADWAL</button>
       </div>
       <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto</div>
@@ -305,14 +330,14 @@
     </div>
   </div>
 
-  <!-- ====================== [ADD] VIEW: JADWAL ================ -->
+  <!-- ====================== VIEW: JADWAL ====================== -->
   <div id="view-jadwal" class="container hidden">
     <button class="btn btn-ghost" type="button" onclick="show('home')">← Kembali</button>
     <h2>View Jadwal</h2>
 
     <div id="vj_warn" class="warn hidden"></div>
 
-    <!-- [UPDATE] Card input email (akan di-hide jika ketemu user) -->
+    <!-- Input email (disembunyikan setelah valid) -->
     <div id="vj_input_card" class="card">
       <div class="section-title">Masukkan alamat email Anda</div>
       <label for="vj_email">Alamat Email</label>
@@ -324,13 +349,12 @@
       <div class="hint">Gunakan email sesuai daftar di <code>data/users.json</code>.</div>
     </div>
 
-    <!-- [UPDATE] Card hasil (judul disembunyikan saat sukses, center) -->
+    <!-- Sapaan -->
     <div id="vj_result_card" class="card hidden center-text">
-      <div id="vj_result_title" class="section-title">Hasil</div> <!-- akan di-hide -->
       <div id="vj_result" style="font-weight:700;font-size:18px"></div>
     </div>
 
-    <!-- [ADD] Card pilih range tanggal (tampil setelah email valid) -->
+    <!-- Pilih periode -->
     <div id="vj_range_card" class="card hidden">
       <div class="section-title">Pilih Periode Jadwal</div>
       <div class="row">
@@ -343,7 +367,17 @@
           <input type="date" id="vj_end_date" />
         </div>
       </div>
-      <div class="hint">Silakan pilih rentang tanggal (mulai &amp; akhir). Anda bisa lanjutkan langkah berikutnya setelah menentukan periode.</div>
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="handleTampilkanJadwal()">Tampilkan Jadwal</button>
+      </div>
+      <div class="hint">Pilih rentang tanggal berdasarkan <b>Tanggal Pembuatan</b>.</div>
+    </div>
+
+    <!-- Daftar jadwal (cards) -->
+    <div id="vj_list_card" class="card hidden">
+      <div class="section-title">Daftar Jadwal</div>
+      <div id="vj_list_meta" class="hint"></div>
+      <div id="vj_list" class="cards-grid"></div>
     </div>
   </div>
 
@@ -371,14 +405,19 @@
     const FLOW_SUBMIT_URL =
       "https://cico-gateway.agia-barriyadi.workers.dev/submit";
 
+    /* [ADD] URL FLOW VIEW JADWAL — GANTI DENGAN URL FLOW ANDA */
+    const FLOW_VIEWJADWAL_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d5235f4bd86f4e4f8694fe5254e12e4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zKCx3gB-sMvcoaKieQaW-BdCtBTVrPRtlIf5YBVth74";
+
     const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
     const MAX_PHOTOS = 5;
     const REQUIRE_SIGNATURE_CO = false;
     const $ = (id) => document.getElementById(id);
 
-    /* ===================== [ADD] USERS JSON =================== */
+    /* ===================== USERS JSON (jadwal) ================ */
     const USERS_JSON_URL = './data/users.json';
     let userDict = null;
+    let _vjUser = null; // user terverifikasi (hasil lookup users.json)
 
     function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
     function escapeHtml(s){
@@ -406,20 +445,26 @@
       w.classList.add('hidden'); w.textContent = '';
       $('vj_email').value = '';
 
-      // Tampilkan kembali input email, sembunyikan hasil & range
       $('vj_input_card').classList.remove('hidden');
       $('vj_result_card').classList.add('hidden');
       $('vj_range_card').classList.add('hidden');
-
-      // Kembalikan judul "Hasil" jika sebelumnya di-hide
-      $('vj_result_title').classList.remove('hidden');
-      $('vj_result').innerHTML = '';
+      $('vj_list_card').classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
+      _vjUser = null;
     }
 
     async function initJadwal(){
       resetJadwal();
       await ensureUsersLoaded();
       setTimeout(()=>{ $('vj_email')?.focus(); }, 0);
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      $('vj_start_date').value = iso;
+      $('vj_end_date').value = iso;
     }
 
     async function handleJadwalNext(){
@@ -433,6 +478,7 @@
         warn.classList.remove('hidden');
         $('vj_result_card').classList.add('hidden');
         $('vj_range_card').classList.add('hidden');
+        $('vj_list_card').classList.add('hidden');
         return;
       }
 
@@ -442,41 +488,21 @@
         warn.classList.remove('hidden');
         $('vj_result_card').classList.add('hidden');
         $('vj_range_card').classList.add('hidden');
+        $('vj_list_card').classList.add('hidden');
         return;
       }
 
-      // [UPDATE] Sembunyikan input email, tampilkan sapaan center tanpa judul "Hasil"
-      $('vj_input_card').classList.add('hidden');
+      _vjUser = u; // simpan user
 
+      $('vj_input_card').classList.add('hidden');
       const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
       $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
-
-      // Hilangkan judul "Hasil"
-      $('vj_result_title').classList.add('hidden');
-
-      // Tampilkan kartu hasil & range tanggal
       $('vj_result_card').classList.remove('hidden');
       $('vj_range_card').classList.remove('hidden');
-
-      // (opsional) Set default tanggal mulai & akhir = hari ini
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth()+1).padStart(2,'0');
-      const dd = String(today.getDate()).padStart(2,'0');
-      const iso = `${yyyy}-${mm}-${dd}`;
-      if (!$('vj_start_date').value) $('vj_start_date').value = iso;
-      if (!$('vj_end_date').value) $('vj_end_date').value = iso;
+      $('vj_list_card').classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
     }
-
-    // Enter pada input email => Next
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const emailInput = $('vj_email');
-      if (emailInput){
-        emailInput.addEventListener('keydown', (e)=>{
-          if (e.key === 'Enter'){ e.preventDefault(); handleJadwalNext(); }
-        });
-      }
-    });
 
     /* ===================== LOADING UI ========================= */
     function showLoading(msg) {
@@ -490,12 +516,172 @@
       el.textContent = "⏳ Memproses...";
     }
 
+    /* ===================== JADWAL: FETCH & RENDER ============= */
+    function fmtDateTime(s){
+      if(!s) return '-';
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s; // biarkan apa adanya jika bukan ISO
+      return d.toLocaleString('id-ID', {
+        year:'numeric', month:'short', day:'2-digit',
+        hour:'2-digit', minute:'2-digit'
+      });
+    }
+
+    function renderJadwal(items){
+      const wrap = $('vj_list');
+      if(!Array.isArray(items) || items.length===0){
+        wrap.innerHTML = '<div class="hint">Tidak ada data untuk periode & cabang yang dipilih.</div>';
+        return;
+      }
+
+      const cards = items.map(it=>{
+        const type = (it.typeOrder || '').toString().toUpperCase();
+        const isServis = type.includes('SERVIS');
+
+        // Bidang umum
+        const orderNumber = escapeHtml(it.orderNumber || '-');
+        const tglBuat = fmtDateTime(it.tanggalPembuatan || it.createdAt);
+        const namaCust = escapeHtml(it.namaCustomer || it.customer || '-');
+        const populasi = escapeHtml(it.populasiKandang || '-');
+        const vaksinator = escapeHtml(it.namaVaksinator || it.vaksinator || '-');
+
+        // Bidang jadwal & konten khusus tipe
+        const jadwalVaksin = fmtDateTime(it.jadwalVaksin);
+        const jadwalServis = fmtDateTime(it.jadwalService);
+        const namaVaksin = escapeHtml(it.namaVaksin || '-');
+        const metode = escapeHtml(it.metodeVaksinasi || '-');
+        const jenisServis = escapeHtml(it.jenisService || '-');
+
+        // Susun konten baris per baris (label di atas, value di bawah)
+        let extraRows = '';
+        if (isServis) {
+          extraRows = `
+            <div class="line">
+              <div class="label">Jadwal Service</div>
+              <div class="value">${jadwalServis}</div>
+            </div>
+            <div class="line">
+              <div class="label">Jenis Service</div>
+              <div class="value">${jenisServis}</div>
+            </div>
+          `;
+        } else {
+          extraRows = `
+            <div class="line">
+              <div class="label">Jadwal Vaksin</div>
+              <div class="value">${jadwalVaksin}</div>
+            </div>
+            <div class="line">
+              <div class="label">Nama Vaksin</div>
+              <div class="value">${namaVaksin}</div>
+            </div>
+            <div class="line">
+              <div class="label">Metode Vaksinasi</div>
+              <div class="value">${metode}</div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="order-card">
+            <div class="line">
+              <div class="label">Nomor Order</div>
+              <div class="value">${orderNumber}</div>
+            </div>
+            <div class="line">
+              <div class="label">Tanggal Pembuatan</div>
+              <div class="value">${tglBuat}</div>
+            </div>
+            ${extraRows}
+            <div class="line">
+              <div class="label">Nama Customer</div>
+              <div class="value">${namaCust}</div>
+            </div>
+            <div class="line">
+              <div class="label">Populasi Kandang</div>
+              <div class="value">${populasi}</div>
+            </div>
+            <div class="line">
+              <div class="label">Nama Vaksinator</div>
+              <div class="value">${vaksinator}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      wrap.innerHTML = cards;
+    }
+
+    async function handleTampilkanJadwal(){
+      const warn = $('vj_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+
+      if(!_vjUser){
+        warn.textContent = '⚠️ Mohon verifikasi email terlebih dahulu.';
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      const startDate = $('vj_start_date').value;
+      const endDate   = $('vj_end_date').value;
+      if(!startDate || !endDate){
+        warn.textContent = '⚠️ Tanggal mulai & akhir periode wajib diisi.';
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (startDate > endDate){
+        warn.textContent = '⚠️ Tanggal mulai tidak boleh lebih besar dari tanggal akhir.';
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      // Siapkan payload
+      const payload = {
+        mode: 'viewSchedule',
+        branch: _vjUser.branch,
+        startDate,
+        endDate,
+        xApiKey: APP_KEY
+      };
+
+      try{
+        showLoading('⏳ Mengambil jadwal...');
+        const resp = await fetch(FLOW_VIEWJADWAL_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await resp.text();
+        let data;
+        try{ data = JSON.parse(text); }catch{ data = { raw: text }; }
+
+        if(!resp.ok){
+          throw new Error(`HTTP ${resp.status}: ${data?.message || data?.error || data?.raw || 'Gagal memuat jadwal'}`);
+        }
+
+        // Asumsikan struktur sesuai Response Flow kita: { items: [...], count, dateRange, branch, ... }
+        const items = Array.isArray(data?.items) ? data.items : [];
+        $('vj_list_meta').textContent =
+          `Cabang: ${_vjUser.branch} • Periode: ${startDate} s.d. ${endDate} • Jumlah: ${items.length}`;
+        renderJadwal(items);
+        $('vj_list_card').classList.remove('hidden');
+      }catch(e){
+        console.error(e);
+        warn.textContent = '❌ Gagal memuat jadwal: ' + (e?.message || e);
+        warn.classList.remove('hidden');
+        $('vj_list_card').classList.add('hidden');
+      }finally{
+        hideLoading();
+      }
+    }
+
     /* ===================== NAVIGASI VIEW ====================== */
     function show(v) {
       $("view-home").classList.add("hidden");
       $("view-checkin").classList.add("hidden");
       $("view-checkout").classList.add("hidden");
-      $("view-jadwal").classList.add("hidden"); /* [ADD] */
+      $("view-jadwal").classList.add("hidden");
 
       const target = $("view-" + v);
       if (target) target.classList.remove("hidden");
@@ -941,7 +1127,7 @@
         }
       }
 
-      // Validasi foto (tetap wajib keduanya)
+      // Validasi foto
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
         warn.classList.remove("hidden");
@@ -969,7 +1155,6 @@
           photos: await buildPhotosPayload("ci_fotos", "ci"),
         };
 
-        // Tambah field khusus vaksin saja
         if (tipe !== "servis") {
           basePayload.kondisiVaksin = kondisi;
           basePayload.batches = batches;
@@ -1026,7 +1211,7 @@
         }
       }
 
-      // Validasi foto (tetap wajib keduanya)
+      // Validasi foto
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
         warn.classList.remove("hidden");
@@ -1055,7 +1240,6 @@
           photos: await buildPhotosPayload("co_fotos", "co"),
         };
 
-        // Tambah field khusus vaksin saja
         if (tipe !== "servis") {
           basePayload.jumlahAyam = Number(ayam);
           basePayload.jumlahVaksin = Number(vaksin);
@@ -1143,6 +1327,16 @@
       // Setelah reset, kembalikan tampilan ke default (anggap vaksin)
       updateFormForOrderType(prefix, "vaksin");
     }
+
+    // Enter pada input email => Next
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const emailInput = $('vj_email');
+      if (emailInput){
+        emailInput.addEventListener('keydown', (e)=>{
+          if (e.key === 'Enter'){ e.preventDefault(); handleJadwalNext(); }
+        });
+      }
+    });
   </script>
 </body>
 </html>
