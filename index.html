@@ -127,6 +127,8 @@
       <div class="landing-actions">
         <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN VAKSIN</button>
         <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT VAKSIN</button>
+        <!-- [ADD] Tombol menu baru -->
+        <button class="btn btn-ghost" onclick="show('jadwal')">📅 VIEW JADWAL</button>
       </div>
       <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto</div>
     </div>
@@ -300,6 +302,30 @@
     </div>
   </div>
 
+  <!-- ====================== [ADD] VIEW: JADWAL ================ -->
+  <div id="view-jadwal" class="container hidden">
+    <button class="btn btn-ghost" type="button" onclick="show('home')">← Kembali</button>
+    <h2>View Jadwal</h2>
+
+    <div id="vj_warn" class="warn hidden"></div>
+
+    <div class="card">
+      <div class="section-title">Masukkan alamat email Anda</div>
+      <label for="vj_email">Alamat Email</label>
+      <input id="vj_email" type="email" placeholder="nama@perusahaan.com" autocomplete="email" />
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="handleJadwalNext()">Next</button>
+        <button class="btn btn-ghost" type="button" onclick="resetJadwal()">↺ Reset</button>
+      </div>
+      <div class="hint">Gunakan email sesuai daftar di <code>data/users.json</code>.</div>
+    </div>
+
+    <div id="vj_result_card" class="card hidden">
+      <div class="section-title">Hasil</div>
+      <div id="vj_result" style="font-weight:600"></div>
+    </div>
+  </div>
+
   <!-- ====================== LOADING OVERLAY =================== -->
   <div id="loading" class="hidden"
     style="
@@ -329,6 +355,71 @@
     const REQUIRE_SIGNATURE_CO = false;
     const $ = (id) => document.getElementById(id);
 
+    /* ===================== [ADD] USERS JSON =================== */
+    const USERS_JSON_URL = './data/users.json';
+    let userDict = null;
+
+    function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
+    function escapeHtml(s){
+      return (s ?? '').toString().replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
+    }
+
+    async function ensureUsersLoaded(){
+      if (userDict) return userDict;
+      try{
+        const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        userDict = await resp.json();
+        console.log('Users loaded:', Object.keys(userDict||{}).length);
+      }catch(e){
+        console.error('Gagal memuat users.json', e);
+        userDict = {};
+      }
+      return userDict;
+    }
+
+    function resetJadwal(){
+      const w = $('vj_warn');
+      w.classList.add('hidden'); w.textContent = '';
+      $('vj_email').value = '';
+      $('vj_result').innerHTML = '';
+      $('vj_result_card').classList.add('hidden');
+    }
+
+    async function initJadwal(){
+      resetJadwal();
+      await ensureUsersLoaded();
+      setTimeout(()=>{ $('vj_email')?.focus(); }, 0);
+    }
+
+    async function handleJadwalNext(){
+      const warn = $('vj_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+      await ensureUsersLoaded();
+
+      const key = normEmail($('vj_email').value);
+      if(!key){
+        warn.textContent = '⚠️ Mohon isi alamat email terlebih dahulu.';
+        warn.classList.remove('hidden');
+        $('vj_result_card').classList.add('hidden');
+        return;
+      }
+
+      const u = userDict[key];
+      if(!u){
+        warn.textContent = `⚠️ Email "${key}" tidak ditemukan pada daftar.`;
+        warn.classList.remove('hidden');
+        $('vj_result_card').classList.add('hidden');
+        return;
+      }
+
+      const text = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
+      $('vj_result').innerHTML = text + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
+      $('vj_result_card').classList.remove('hidden');
+    }
+
     /* ===================== LOADING UI ========================= */
     function showLoading(msg) {
       const el = $("loading");
@@ -346,6 +437,8 @@
       $("view-home").classList.add("hidden");
       $("view-checkin").classList.add("hidden");
       $("view-checkout").classList.add("hidden");
+      /* [ADD] Sembunyikan view jadwal juga */
+      $("view-jadwal").classList.add("hidden");
 
       const target = $("view-" + v);
       if (target) target.classList.remove("hidden");
@@ -364,6 +457,10 @@
         loadOrders("co_order");
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
         attachOrderTypeWatcher("co_order", "co");
+      }
+      /* [ADD] Inisialisasi halaman jadwal */
+      if (v === "jadwal") {
+        initJadwal();
       }
     }
 
