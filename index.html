@@ -1,10 +1,12 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
+  <!-- ====================== META & TITLE ====================== -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CICO</title>
 
+  <!-- ====================== STYLES / THEME ==================== -->
   <style>
     :root{
       --bg:#eef2f7;
@@ -62,7 +64,6 @@
       padding:12px;
       border-radius:10px;
       margin-bottom:12px;
-      white-space:pre-wrap;
     }
 
     .badge{
@@ -112,8 +113,10 @@
     }
     .hint{color:#64748b;font-size:12px;margin-top:4px}
 
+    /* Jadwal: center result text */
     .center-text { text-align:center; }
 
+    /* Cards grid */
     .cards-grid{
       display:grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -136,7 +139,9 @@
     }
     .order-card .value{ font-weight:600; }
     .order-card .muted{ color:var(--muted); font-weight:500; }
+    .order-card .sep{ height:8px }
 
+    /* Detail key-value rows */
     .kv{
       display:grid;
       grid-template-columns: 200px 1fr;
@@ -153,7 +158,8 @@
 </head>
 
 <body>
-  <!-- HOME -->
+
+  <!-- ====================== VIEW: HOME ======================== -->
   <div id="view-home" class="landing-wrap">
     <div class="landing-card">
       <div style="font-size:44px">💉</div>
@@ -168,17 +174,24 @@
     </div>
   </div>
 
-  <!-- CEK-IN -->
+  <!-- ====================== VIEW: CEK-IN ====================== -->
   <div id="view-checkin" class="container hidden">
     <button class="btn btn-ghost" onclick="goHome('ci')">← Kembali</button>
     <h2>Form Cek-In</h2>
+
     <div id="ci_warn" class="warn hidden"></div>
 
     <div class="card">
       <div class="section-title">Data Otomatis (Sistem)</div>
       <div class="row">
-        <div><label>Tanggal</label><input id="ci_tanggal" readonly /></div>
-        <div><label>Jam</label><input id="ci_jam" readonly /></div>
+        <div>
+          <label>Tanggal</label>
+          <input id="ci_tanggal" readonly />
+        </div>
+        <div>
+          <label>Jam</label>
+          <input id="ci_jam" readonly />
+        </div>
       </div>
 
       <label>Nama Lokasi</label>
@@ -186,8 +199,14 @@
       <span id="ci_src" class="badge">Lokasi: -</span>
 
       <div class="row">
-        <div><label>Latitude</label><input id="ci_lat" readonly /></div>
-        <div><label>Longitude</label><input id="ci_lng" readonly /></div>
+        <div>
+          <label>Latitude</label>
+          <input id="ci_lat" readonly />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="ci_lng" readonly />
+        </div>
       </div>
     </div>
 
@@ -241,17 +260,24 @@
     </div>
   </div>
 
-  <!-- CEK-OUT -->
+  <!-- ====================== VIEW: CEK-OUT ===================== -->
   <div id="view-checkout" class="container hidden">
     <button class="btn btn-ghost" onclick="goHome('co')">← Kembali</button>
     <h2>Form Cek-Out</h2>
+
     <div id="co_warn" class="warn hidden"></div>
 
     <div class="card">
       <div class="section-title">Data Otomatis (Sistem)</div>
       <div class="row">
-        <div><label>Tanggal</label><input id="co_tanggal" readonly /></div>
-        <div><label>Jam</label><input id="co_jam" readonly /></div>
+        <div>
+          <label>Tanggal</label>
+          <input id="co_tanggal" readonly />
+        </div>
+        <div>
+          <label>Jam</label>
+          <input id="co_jam" readonly />
+        </div>
       </div>
 
       <label>Nama Lokasi</label>
@@ -259,8 +285,14 @@
       <span id="co_src" class="badge">Lokasi: -</span>
 
       <div class="row">
-        <div><label>Latitude</label><input id="co_lat" readonly /></div>
-        <div><label>Longitude</label><input id="co_lng" readonly /></div>
+        <div>
+          <label>Latitude</label>
+          <input id="co_lat" readonly />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="co_lng" readonly />
+        </div>
       </div>
     </div>
 
@@ -306,16 +338,109 @@
     </div>
   </div>
 
-  <!-- JADWAL & DETAIL + LOADING: (tetap sama seperti Anda) -->
-  <!-- ... saya tidak ubah bagian jadwal/detail HTML Anda ... -->
+  <!-- ====================== VIEW: JADWAL ====================== -->
+  <div id="view-jadwal" class="container hidden">
+    <button class="btn btn-ghost" type="button" onclick="show('home')">← Kembali</button>
+    <h2>View Jadwal</h2>
 
+    <div id="vj_warn" class="warn hidden"></div>
+
+    <div id="vj_input_card" class="card">
+      <div class="section-title">Masukkan alamat email Anda</div>
+      <label for="vj_email">Alamat Email</label>
+      <input id="vj_email" type="email" placeholder="nama@perusahaan.com" autocomplete="email" />
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="handleJadwalNext()">Next</button>
+        <button class="btn btn-ghost" type="button" onclick="resetJadwal()">↺ Reset</button>
+      </div>
+      <div class="hint">Gunakan email sesuai yang terdaftar.</div>
+    </div>
+
+    <div id="vj_result_card" class="card hidden center-text">
+      <div id="vj_result" style="font-weight:700;font-size:18px"></div>
+    </div>
+
+    <div id="vj_range_card" class="card hidden">
+      <div class="section-title">Pilih Periode Jadwal</div>
+      <div class="row">
+        <div>
+          <label for="vj_start_date">Tanggal Mulai Periode</label>
+          <input type="date" id="vj_start_date" />
+        </div>
+        <div>
+          <label for="vj_end_date">Tanggal Akhir Periode</label>
+          <input type="date" id="vj_end_date" />
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="handleTampilkanJadwal()">Tampilkan Jadwal</button>
+      </div>
+      <div class="hint">Pilih rentang tanggal berdasarkan <b>Tanggal Pembuatan</b>.</div>
+    </div>
+
+    <div id="vj_list_card" class="card hidden">
+      <div class="section-title">Daftar Jadwal</div>
+      <div id="vj_list_meta" class="hint"></div>
+      <div id="vj_list" class="cards-grid"></div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: DETAIL ====================== -->
+  <div id="view-detail" class="container hidden">
+    <button class="btn btn-ghost" type="button" onclick="backToJadwalFromDetail()">← Kembali ke Jadwal</button>
+    <h2>Detail Order</h2>
+
+    <div id="vd_warn" class="warn hidden"></div>
+
+    <div id="vd_head" class="card">
+      <div class="section-title" id="vd_title">Nomor Order: -</div>
+      <div class="badge" id="vd_type">Type: -</div>
+      <div class="badge" id="vd_status">Status: -</div>
+      <div class="badge" id="vd_branch">Cabang: -</div>
+    </div>
+
+    <div id="vd_body" class="card">
+      <div class="kv"><div class="k">Tanggal Pembuatan</div><div class="v" id="vd_created">-</div></div>
+
+      <!-- Dinamis: untuk Vaksinasi atau Service -->
+      <div id="vd_block_vaksin">
+        <div class="kv"><div class="k">Jadwal Vaksin</div><div class="v" id="vd_jadwal_vaksin">-</div></div>
+        <div class="kv"><div class="k">Nama Vaksin</div><div class="v" id="vd_nama_vaksin">-</div></div>
+        <div class="kv"><div class="k">Metode Vaksinasi</div><div class="v" id="vd_metode_vaksin">-</div></div>
+        <div class="kv"><div class="k">Dosis Vaksin</div><div class="v" id="vd_dosis_vaksin">-</div></div>
+      </div>
+
+      <div id="vd_block_service" class="hidden">
+        <div class="kv"><div class="k">Jadwal Service</div><div class="v" id="vd_jadwal_service">-</div></div>
+        <div class="kv"><div class="k">Jenis Service</div><div class="v" id="vd_jenis_service">-</div></div>
+      </div>
+
+      <div class="kv"><div class="k">Nama Customer</div><div class="v" id="vd_customer">-</div></div>
+      <div class="kv"><div class="k">Alamat Farm</div><div class="v" id="vd_alamat">-</div></div>
+      <div class="kv"><div class="k">Populasi Kandang</div><div class="v" id="vd_populasi">-</div></div>
+      <div class="kv"><div class="k">Nama Vaksinator</div><div class="v" id="vd_vaksinator">-</div></div>
+      <div class="kv"><div class="k">Koordinator</div><div class="v" id="vd_koordinator">-</div></div>
+      <div class="kv"><div class="k">Nama TSR/AS</div><div class="v" id="vd_tsr_as">-</div></div>
+      <div class="kv"><div class="k">Catatan</div><div class="v" id="vd_catatan">-</div></div>
+    </div>
+  </div>
+
+  <!-- ====================== LOADING OVERLAY =================== -->
   <div id="loading" class="hidden"
-    style="position:fixed; inset:0; background:rgba(255,255,255,.85);
-      display:flex; align-items:center; justify-content:center;
-      z-index:9999; font-weight:600; font-size:18px;">
+    style="
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.85);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      font-weight:600;
+      font-size:18px;">
     ⏳ Memproses...
   </div>
 
+  <!-- ====================== SCRIPT / LOGIC ==================== -->
   <script>
     /* ===================== KONFIGURASI ENDPOINT =============== */
     const FLOW_GET_ORDER_URL =
@@ -324,12 +449,105 @@
     const FLOW_SUBMIT_URL =
       "https://cico-gateway.agia-barriyadi.workers.dev/submit";
 
+    const FLOW_VIEWJADWAL_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d5235f4bd86f4e4f8694fe5254e12e4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zKCx3gB-sMvcoaKieQaW-BdCtBTVrPRtlIf5YBVth74";
+
     const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
     const MAX_PHOTOS = 5;
+    const REQUIRE_SIGNATURE_CO = false;
     const $ = (id) => document.getElementById(id);
 
-    /* cache tipe order berdasarkan string Title */
-    const ORDER_TYPE_MAP = Object.create(null);
+    /* ===================== USERS JSON (jadwal) ================ */
+    const USERS_JSON_URL = './data/users.json';
+    let userDict = null;
+    let _vjUser = null;      // user terverifikasi
+    let _vjLastItems = [];   // cache list terakhir (untuk detail)
+    let _vjScrollY = 0;      // posisi scroll list sebelum buka detail
+
+    function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
+    function escapeHtml(s){
+      return (s ?? '').toString().replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
+    }
+
+    async function ensureUsersLoaded(){
+      if (userDict) return userDict;
+      try{
+        const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        userDict = await resp.json();
+      }catch(e){
+        console.error('Gagal memuat users.json', e);
+        userDict = {};
+      }
+      return userDict;
+    }
+
+    function resetJadwal(){
+      const w = $('vj_warn');
+      w.classList.add('hidden'); w.textContent = '';
+      $('vj_email').value = '';
+
+      $('vj_input_card').classList.remove('hidden');
+      $('vj_result_card').classList.add('hidden');
+      $('vj_range_card').classList.add('hidden');
+      $('vj_list_card').classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
+      _vjUser = null;
+      _vjLastItems = [];
+      _vjScrollY = 0;
+    }
+
+    async function initJadwal(){
+      resetJadwal();
+      await ensureUsersLoaded();
+      setTimeout(()=>{ $('vj_email')?.focus(); }, 0);
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      $('vj_start_date').value = iso;
+      $('vj_end_date').value = iso;
+    }
+
+    async function handleJadwalNext(){
+      const warn = $('vj_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+      await ensureUsersLoaded();
+
+      const key = normEmail($('vj_email').value);
+      if(!key){
+        warn.textContent = '⚠️ Mohon isi alamat email terlebih dahulu.';
+        warn.classList.remove('hidden');
+        $('vj_result_card').classList.add('hidden');
+        $('vj_range_card').classList.add('hidden');
+        $('vj_list_card').classList.add('hidden');
+        return;
+      }
+
+      const u = userDict[key];
+      if(!u){
+        warn.textContent = `⚠️ Email "${key}" tidak ditemukan pada daftar.`;
+        warn.classList.remove('hidden');
+        $('vj_result_card').classList.add('hidden');
+        $('vj_range_card').classList.add('hidden');
+        $('vj_list_card').classList.add('hidden');
+        return;
+      }
+
+      _vjUser = u;
+      $('vj_input_card').classList.add('hidden');
+      const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
+      $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
+      $('vj_result_card').classList.remove('hidden');
+      $('vj_range_card').classList.remove('hidden');
+      $('vj_list_card').classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
+    }
 
     /* ===================== LOADING UI ========================= */
     function showLoading(msg) {
@@ -343,17 +561,254 @@
       el.textContent = "⏳ Memproses...";
     }
 
-    function setWarn(prefix, msg){
-      const w = $(prefix + "_warn");
-      if(!w) return;
-      w.textContent = msg;
-      w.classList.remove("hidden");
+    /* ===================== JADWAL: FETCH & RENDER ============= */
+    function fmtDateOnly(s){
+      if(!s) return '-';
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s;
+      return d.toLocaleDateString('id-ID', { year:'numeric', month:'short', day:'2-digit' });
     }
-    function clearWarn(prefix){
-      const w = $(prefix + "_warn");
-      if(!w) return;
-      w.textContent = "";
-      w.classList.add("hidden");
+
+    function renderJadwal(items){
+      const wrap = $('vj_list');
+      if(!Array.isArray(items) || items.length===0){
+        wrap.innerHTML = '<div class="hint">Tidak ada data untuk periode & cabang yang dipilih.</div>';
+        _vjLastItems = [];
+        return;
+      }
+
+      _vjLastItems = items.slice(); // cache
+
+      const cards = items.map(it=>{
+        // Tipe: "Vaksinasi" atau "Service"
+        const t = (it.typeOrder || '').toString().trim().toUpperCase();
+        const isService = (t === 'SERVICE' || t.includes('SERVICE'));
+
+        const orderNumber = escapeHtml(it.orderNumber || '-');
+        const tglBuat = fmtDateOnly(it.tanggalPembuatan || it.createdAt);
+        const namaCust = escapeHtml(it.namaCustomer || it.customer || '-');
+        const populasi = escapeHtml(it.populasiKandang || '-');
+        const vaksinator = escapeHtml(it.namaVaksinator || it.vaksinator || '-');
+
+        const jadwalVaksin = fmtDateOnly(it.jadwalVaksin);
+        const jadwalServis = fmtDateOnly(it.jadwalService);
+        const namaVaksin = escapeHtml(it.namaVaksin || '-');
+        const metode = escapeHtml(it.metodeVaksinasi || '-');
+        const jenisServis = escapeHtml(it.jenisService || '-');
+
+        let extraRows = '';
+        if (isService) {
+          extraRows = `
+            <div class="line">
+              <div class="label">Jadwal Service</div>
+              <div class="value">${jadwalServis}</div>
+            </div>
+            <div class="line">
+              <div class="label">Jenis Service</div>
+              <div class="value">${jenisServis}</div>
+            </div>
+          `;
+        } else {
+          extraRows = `
+            <div class="line">
+              <div class="label">Jadwal Vaksin</div>
+              <div class="value">${jadwalVaksin}</div>
+            </div>
+            <div class="line">
+              <div class="label">Nama Vaksin</div>
+              <div class="value">${namaVaksin}</div>
+            </div>
+            <div class="line">
+              <div class="label">Metode Vaksinasi</div>
+              <div class="value">${metode}</div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="order-card" tabindex="0" role="button" aria-label="Buka detail ${orderNumber}" data-id="${Number(it.id)||0}">
+            <div class="line">
+              <div class="label">Nomor Order</div>
+              <div class="value">${orderNumber}</div>
+            </div>
+            <div class="line">
+              <div class="label">Tanggal Pembuatan</div>
+              <div class="value">${tglBuat}</div>
+            </div>
+            ${extraRows}
+            <div class="line">
+              <div class="label">Nama Customer</div>
+              <div class="value">${namaCust}</div>
+            </div>
+            <div class="line">
+              <div class="label">Populasi Kandang</div>
+              <div class="value">${populasi}</div>
+            </div>
+            <div class="line">
+              <div class="label">Nama Vaksinator</div>
+              <div class="value">${vaksinator}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      wrap.innerHTML = cards;
+    }
+
+    // Delegasi klik kartu → buka detail (tanpa API; pakai cache)
+    document.addEventListener('click', (e)=>{
+      const card = e.target.closest('.order-card');
+      if(card && $('view-jadwal') && !$('view-jadwal').classList.contains('hidden')){
+        const id = Number(card.getAttribute('data-id') || '0');
+        if(id) openDetailFromCard(id);
+      }
+    });
+    // Enter/Space aksesibilitas
+    document.addEventListener('keydown', (e)=>{
+      if((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('order-card')){
+        e.preventDefault();
+        const id = Number(e.target.getAttribute('data-id') || '0');
+        if(id) openDetailFromCard(id);
+      }
+    });
+
+    function openDetailFromCard(id){
+      // Simpan posisi scroll list sebelum buka detail
+      _vjScrollY = window.scrollY || 0;
+
+      const it = _vjLastItems.find(x => Number(x.id) === Number(id));
+      prefillDetail(it, id);
+
+      // Tampilkan view detail tanpa memanggil show('detail')? Boleh pakai show
+      // tapi show('detail') tidak akan reset apa-apa (tidak ada init). Kita pakai show agar konsisten.
+      show('detail');
+    }
+
+    function prefillDetail(it, id){
+      const warn = $('vd_warn'); warn.classList.add('hidden'); warn.textContent = '';
+
+      $('vd_title').textContent = 'Nomor Order: ' + (it?.orderNumber || '-');
+      $('vd_type').textContent  = 'Type: ' + (it?.typeOrder || '-');
+      $('vd_status').textContent= 'Status: ' + (it?.status || '-');
+      $('vd_branch').textContent= 'Cabang: ' + (it?.branch || '-');
+
+      const tglBuat = fmtDateOnly(it?.tanggalPembuatan || it?.createdAt);
+      $('vd_created').textContent = tglBuat;
+
+      const t = (it?.typeOrder || '').toString().trim().toUpperCase();
+      const isService = (t === 'SERVICE' || t.includes('SERVICE'));
+      $('vd_block_vaksin').classList.toggle('hidden', isService);
+      $('vd_block_service').classList.toggle('hidden', !isService);
+
+      if(isService){
+        $('vd_jadwal_service').textContent = fmtDateOnly(it?.jadwalService);
+        $('vd_jenis_service').textContent  = it?.jenisService || '-';
+      }else{
+        $('vd_jadwal_vaksin').textContent  = fmtDateOnly(it?.jadwalVaksin);
+        $('vd_nama_vaksin').textContent    = it?.namaVaksin || '-';
+        $('vd_metode_vaksin').textContent  = it?.metodeVaksinasi || '-';
+        $('vd_dosis_vaksin').textContent   = it?.dosisVaksin || '-';
+      }
+
+      $('vd_customer').textContent   = it?.namaCustomer || it?.customer || '-';
+      $('vd_alamat').textContent     = it?.alamatCustomer || it?.alamatFarm || '-';
+      $('vd_populasi').textContent   = it?.populasiKandang || '-';
+      $('vd_vaksinator').textContent = it?.namaVaksinator || it?.vaksinator || '-';
+      $('vd_koordinator').textContent= it?.koordinator || '-';
+      $('vd_tsr_as').textContent     = it?.namaTSRorAS || '-';
+      $('vd_catatan').textContent    = it?.catatan || '-';
+
+      if(!it){
+        warn.textContent = 'ℹ️ Data detail tidak ada di cache. Silakan kembali ke Jadwal dan muat ulang.';
+        warn.classList.remove('hidden');
+      }
+    }
+
+    // Kembali dari Detail ke Jadwal TANPA reset (pakai cache & state)
+    function backToJadwalFromDetail(){
+      // Tampilkan view-jadwal, sembunyikan view-detail (tanpa init ulang)
+      $("view-detail").classList.add("hidden");
+      $("view-jadwal").classList.remove("hidden");
+
+      // Pastikan komponen list tetap terlihat
+      $('vj_result_card').classList.remove('hidden');
+      $('vj_range_card').classList.remove('hidden');
+      if (_vjLastItems.length > 0) {
+        $('vj_list_card').classList.remove('hidden');
+      }
+
+      // Kembalikan scroll ke posisi sebelumnya
+      setTimeout(()=>{
+        window.scrollTo({ top: _vjScrollY || 0, behavior: 'instant' });
+      }, 0);
+    }
+
+    /* ===================== LOAD LIST DARI FLOW ================= */
+    async function handleTampilkanJadwal(){
+      const warn = $('vj_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+
+      if(!_vjUser){
+        warn.textContent = '⚠️ Mohon verifikasi email terlebih dahulu.';
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      const startDate = $('vj_start_date').value;
+      const endDate   = $('vj_end_date').value;
+      if(!startDate || !endDate){
+        warn.textContent = '⚠️ Tanggal mulai & akhir periode wajib diisi.';
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (startDate > endDate){
+        warn.textContent = '⚠️ Tanggal mulai tidak boleh lebih besar dari tanggal akhir.';
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      const isAdminAll = ((_vjUser.branch || '').trim().toUpperCase() === 'ALL');
+
+      const payload = {
+        mode: 'viewSchedule',
+        branch: isAdminAll ? '' : _vjUser.branch,
+        startDate,
+        endDate,
+        allBranches: isAdminAll,
+        xApiKey: APP_KEY
+      };
+
+      try{
+        showLoading('⏳ Mengambil jadwal...');
+        const resp = await fetch(FLOW_VIEWJADWAL_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await resp.text();
+        let data;
+        try{ data = JSON.parse(text); }catch{ data = { raw: text }; }
+
+        if(!resp.ok){
+          throw new Error(`HTTP ${resp.status}: ${data?.message || data?.error || data?.raw || 'Gagal memuat jadwal'}`);
+        }
+
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const cabangLabel = isAdminAll ? 'Semua Cabang (ADMIN)' : (_vjUser.branch || '-');
+        $('vj_list_meta').textContent =
+          `Cabang: ${cabangLabel} • Periode: ${startDate} s.d. ${endDate} • Jumlah: ${items.length}`;
+
+        renderJadwal(items);
+        $('vj_list_card').classList.remove('hidden');
+      }catch(e){
+        console.error(e);
+        warn.textContent = '❌ Gagal memuat jadwal: ' + (e?.message || e);
+        warn.classList.remove('hidden');
+        $('vj_list_card').classList.add('hidden');
+      }finally{
+        hideLoading();
+      }
     }
 
     /* ===================== NAVIGASI VIEW ====================== */
@@ -361,41 +816,108 @@
       $("view-home").classList.add("hidden");
       $("view-checkin").classList.add("hidden");
       $("view-checkout").classList.add("hidden");
+      $("view-jadwal").classList.add("hidden");
+      $("view-detail").classList.add("hidden");
 
       const target = $("view-" + v);
       if (target) target.classList.remove("hidden");
+
       window.scrollTo({ top: 0, behavior: "auto" });
 
       if (v === "checkin") {
         init("ci");
         initBatches();
-        attachMultiPhotoHandlerOnce("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
-        attachOrderTypeWatcherOnce("ci_order", "ci");
-        loadOrders("ci_order", "ci");     // ✅ PENTING: kirim "checkin"
+        loadOrders("ci_order");
+        attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
+        attachOrderTypeWatcher("ci_order", "ci");
       }
       if (v === "checkout") {
         init("co");
-        attachMultiPhotoHandlerOnce("co_fotos", "co_fotos_preview", "co_fotos_clear");
-        attachOrderTypeWatcherOnce("co_order", "co");
-        loadOrders("co_order", "co");     // ✅ PENTING: kirim "checkout"
+        loadOrders("co_order");
+        attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
+        attachOrderTypeWatcher("co_order", "co");
       }
+      if (v === "jadwal") {
+        // HANYA dipakai dari Home → Jadwal (bukan back dari detail)
+        initJadwal();
+      }
+      // v === "detail": tidak ada init; hanya tampilkan view detail.
     }
 
     function goHome(prefix) {
-      try { resetForm(prefix, false); } catch (e) {}
+      resetForm(prefix, false);
       show("home");
     }
 
     /* ===================== INIT TANGGAL & JAM ================= */
     function init(p) {
       const d = new Date();
-      $(p + "_tanggal").value = d.toLocaleDateString("id-ID", { day:"2-digit", month:"long", year:"numeric" });
-      $(p + "_jam").value = d.toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", hour12:false });
-      // lokasi tetap seperti kode Anda (kalau masih ada di file Anda)
+      $(p + "_tanggal").value = d.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+      $(p + "_jam").value = d.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      loadLocation(p);
+    }
+
+    /* ===================== LOKASI (GPS/IP) ==================== */
+    function simplifyAddress(a) {
+      const parts = (a || "").split(",");
+      return parts.slice(1).join(",").trim() || (a || "");
+    }
+
+    async function loadLocation(p) {
+      const src = $(p + "_src");
+
+      if (!navigator.geolocation) {
+        src.textContent = "Lokasi: Tidak tersedia";
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          $(p + "_lat").value = pos.coords.latitude.toFixed(6);
+          $(p + "_lng").value = pos.coords.longitude.toFixed(6);
+          src.textContent = "Lokasi: GPS";
+
+          try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
+            const r = await fetch(url, { headers: { "Accept": "application/json" } });
+            const j = await r.json();
+            if (j?.display_name) {
+              $(p + "_lokasi").value = simplifyAddress(j.display_name);
+            }
+          } catch (e) {
+            console.warn("Gagal reverse geocode", e);
+          }
+        },
+        async () => {
+          try {
+            const r = await fetch("https://ipapi.co/json/");
+            const j = await r.json();
+            $(p + "_lat").value = j.latitude ?? "";
+            $(p + "_lng").value = j.longitude ?? "";
+            $(p + "_lokasi").value = `${j.city ?? "-"}, ${j.region ?? "-"}, ${j.country_name ?? "-"}`;
+            src.textContent = "Lokasi: Perkiraan IP";
+          } catch (e) {
+            console.warn("Gagal ambil lokasi via IP", e);
+            src.textContent = "Lokasi: Tidak tersedia";
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
     }
 
     /* ===================== BATCHES (CEK-IN) =================== */
-    function initBatches() { $("ci_batch_wrap").innerHTML = ""; addBatch(); }
+    function initBatches() {
+      $("ci_batch_wrap").innerHTML = "";
+      addBatch();
+    }
     function addBatch() {
       const wrap = $("ci_batch_wrap");
       const i = document.createElement("input");
@@ -403,197 +925,265 @@
       i.style.marginBottom = "8px";
       wrap.appendChild(i);
     }
-    function resetBatches() { initBatches(); }
+    function resetBatches() {
+      initBatches();
+    }
     function getBatchValues() {
       const inputs = Array.from($("ci_batch_wrap").querySelectorAll("input"));
       return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
     }
 
-    /* ===================== PHOTO HANDLER (bind sekali) ========= */
-    const _photoStore = Object.create(null);
-    function attachMultiPhotoHandlerOnce(inputId, previewId, clearBtnId){
-      const input = $(inputId), preview = $(previewId), clearBtn = $(clearBtnId);
-      if(!input || !preview || !clearBtn) return;
-      if(input.dataset.bound === "1") return;
-      input.dataset.bound = "1";
-      _photoStore[inputId] = [];
-
-      function sync(){
-        const dt = new DataTransfer();
-        (_photoStore[inputId] || []).slice(0, MAX_PHOTOS).forEach(f=>dt.items.add(f));
-        input.files = dt.files;
-      }
-      function render(){
-        preview.innerHTML = "";
-        (_photoStore[inputId] || []).slice(0, MAX_PHOTOS).forEach((file, idx)=>{
-          const item = document.createElement("div");
-          item.className = "photo-item";
-
-          const img = document.createElement("img");
-          const url = URL.createObjectURL(file);
-          img.src = url;
-          img.onload = ()=>URL.revokeObjectURL(url);
-
-          const del = document.createElement("button");
-          del.type = "button";
-          del.className = "photo-del";
-          del.textContent = "×";
-          del.addEventListener("click", ()=>{
-            _photoStore[inputId].splice(idx,1);
-            sync(); render();
-          });
-
-          item.appendChild(img);
-          item.appendChild(del);
-          preview.appendChild(item);
-        });
-      }
-
-      input.addEventListener("change", ()=>{
-        const picked = Array.from(input.files || []).filter(f=>f.type?.startsWith("image/"));
-        _photoStore[inputId] = (_photoStore[inputId] || []).concat(picked).slice(0, MAX_PHOTOS);
-        sync(); render();
+    /* ===================== FOTO -> BASE64 & SUBMIT ============ */
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => {
+          const result = String(r.result || "");
+          const base64 = result.includes(",") ? result.split(",")[1] : result;
+          resolve(base64);
+        };
+        r.onerror = reject;
+        r.readAsDataURL(file);
       });
-
-      clearBtn.addEventListener("click", ()=>{
-        _photoStore[inputId] = [];
-        sync(); render();
-      });
-
-      render();
     }
 
-    /* ===================== FIX UTAMA: LOAD ORDERS ============== */
-    async function loadOrders(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
+    async function buildPhotosPayload(inputId, prefix) {
+      const files = Array.from($(inputId).files || []).slice(0, MAX_PHOTOS);
+      const photos = [];
 
-      clearWarn(prefix);
-      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (!f.type.startsWith("image/")) continue;
 
-      // ✅ sesuai Flow schema: body harus STRING
-      const bodyText = (prefix === "ci") ? "checkin" : "checkout";
+        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
 
-      try{
-        showLoading("⏳ Memuat nomor order...");
-        const resp = await fetch(FLOW_GET_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain",
-            "Accept": "application/json"
-          },
-          body: bodyText
+        photos.push({
+          fileName: safeName,
+          contentType: f.type || "application/octet-stream",
+          contentBytes: await fileToBase64(f),
         });
+      }
+      return photos;
+    }
 
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { data = text; }
+    /* ===================== SANITASI RINGAN (client) =========== */
+    function sanitizeText(val) {
+      return String(val ?? "")
+        .replace(/[<>{}\[\]\\\/'"`;&]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
 
-        if(!resp.ok){
-          throw new Error(`HTTP ${resp.status}\n${text}`);
+    function cleanPayload(obj) {
+      const copy = { ...obj };
+      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
+      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
+      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
+      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
+      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
+      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+      return copy;
+    }
+
+    async function sendJson(url, payload) {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+      return { ok: resp.ok, status: resp.status, data };
+    }
+
+    /* ===================== SUBMIT: CEK-IN ===================== */
+    async function submitCI() {
+      const warn = $("ci_warn");
+      warn.classList.add("hidden");
+      warn.textContent = "";
+
+      const order = $("ci_order").value;
+      const nama = $("ci_nama").value.trim();
+      const tipe = getOrderTypeFromValue(order);
+      const kondisi = $("ci_kondisi").value;
+      const batches = getBatchValues();
+      const fotos = $("ci_fotos").files;
+
+      if (!order || !nama) {
+        warn.textContent = "⚠️ Nomor Order dan Nama Vaksinator wajib diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+
+      if (tipe !== "servis") {
+        if (!kondisi) {
+          warn.textContent = "⚠️ Kondisi Vaksin wajib diisi (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+        if (batches.length === 0) {
+          warn.textContent = "⚠️ Minimal 1 Nomor Batch diisi (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+      }
+
+      if (!fotos || fotos.length === 0) {
+        warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (fotos.length > MAX_PHOTOS) {
+        warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        showLoading("⏳ Menyiapkan foto (base64)...");
+        const basePayload = {
+          appKey: APP_KEY,
+          formType: "checkin",
+          orderNumber: order,
+          namaVaksinator: nama,
+          tanggal: $("ci_tanggal").value,
+          jam: $("ci_jam").value,
+          lokasi: $("ci_lokasi").value,
+          latitude: $("ci_lat").value,
+          longitude: $("ci_lng").value,
+          catatan: $("ci_catatan").value || "",
+          photos: await buildPhotosPayload("ci_fotos", "ci"),
+        };
+
+        if (tipe !== "servis") {
+          basePayload.kondisiVaksin = kondisi;
+          basePayload.batches = batches;
         }
 
-        // ✅ output Flow Anda: array {Name:"orderNumber", Value:"SPVaksin - 2026-02-00008"}
-        const arr = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
-        if(!Array.isArray(arr) || arr.length === 0){
-          throw new Error("Data order kosong / format berbeda.\n" + text);
-        }
+        const payload = cleanPayload(basePayload);
 
-        arr.forEach(it=>{
-          const v = (it?.Value ?? it?.value ?? it?.Title ?? it?.orderNumber ?? "").toString().trim();
-          if(!v) return;
-
-          // simpan tipe dari Title/value: "SPVaksin - ..." atau "SPServis - ..."
-          const lower = v.toLowerCase();
-          ORDER_TYPE_MAP[v] = lower.includes("spservis") ? "servis" : "vaksin";
-
-          const opt = document.createElement("option");
-          opt.value = v;      // ✅ value = string order lengkap seperti Flow
-          opt.textContent = v; // tampil sama
-          sel.appendChild(opt);
-        });
-
-        // apply watcher
-        sel.dispatchEvent(new Event("change"));
-      }catch(e){
-        console.error(e);
-        setWarn(prefix, "❌ Gagal memuat Nomor Order:\n" + (e?.message || e));
-      }finally{
+        showLoading("⏳ Mengirim Cek-In...");
+        const resp = await sendJson(FLOW_SUBMIT_URL, payload);
         hideLoading();
+
+        if (resp.ok) {
+          alert("✅ Cek-In berhasil");
+          show("home");
+          resetForm("ci", false);
+        } else {
+          console.error(resp);
+          alert(`❌ Gagal submit Cek-In (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        }
+      } catch (e) {
+        hideLoading();
+        console.error(e);
+        alert("❌ Terjadi kesalahan saat submit Cek-In: " + (e?.message || e));
       }
     }
 
-    /* ===================== WATCHER TIPE ORDER ================= */
-    function getOrderTypeFromValue(val){
-      const v = String(val||"").trim();
-      if(ORDER_TYPE_MAP[v]) return ORDER_TYPE_MAP[v];
-      const low = v.toLowerCase();
-      if(low.includes("spservis")) return "servis";
+    /* ===================== SUBMIT: CEK-OUT ==================== */
+    async function submitCO() {
+      const warn = $("co_warn");
+      warn.classList.add("hidden");
+      warn.textContent = "";
+
+      const order = $("co_order").value;
+      const nama = $("co_nama").value.trim();
+      const kandang = $("co_kandang").value.trim();
+      const tipe = getOrderTypeFromValue(order);
+      const ayam = $("co_ayam").value;
+      const vaksin = $("co_vaksin").value;
+      const fotos = $("co_fotos").files;
+
+      if (!order || !nama || !kandang) {
+        warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+
+      if (tipe !== "servis") {
+        if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
+          warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0 (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+      }
+
+      if (!fotos || fotos.length === 0) {
+        warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (fotos.length > MAX_PHOTOS) {
+        warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        showLoading("⏳ Menyiapkan foto...");
+        const basePayload = {
+          appKey: APP_KEY,
+          formType: "checkout",
+          orderNumber: order,
+          namaVaksinator: nama,
+          noKandang: kandang,
+          tanggal: $("co_tanggal").value,
+          jam: $("co_jam").value,
+          lokasi: $("co_lokasi").value,
+          latitude: $("co_lat").value,
+          longitude: $("co_lng").value,
+          catatan: $("co_catatan").value || "",
+          photos: await buildPhotosPayload("co_fotos", "co"),
+        };
+
+        if (tipe !== "servis") {
+          basePayload.jumlahAyam = Number(ayam);
+          basePayload.jumlahVaksin = Number(vaksin);
+        }
+
+        const payload = cleanPayload(basePayload);
+
+        showLoading("⏳ Mengirim Cek-Out...");
+        const resp = await sendJson(FLOW_SUBMIT_URL, payload);
+        hideLoading();
+
+        if (resp.ok) {
+          alert("✅ Cek-Out berhasil");
+          show("home");
+          resetForm("co", false);
+        } else {
+          console.error(resp);
+          alert(`❌ Gagal submit Cek-Out (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        }
+      } catch (e) {
+        hideLoading();
+        console.error(e);
+        alert("❌ Terjadi kesalahan saat submit Cek-Out: " + (e?.message || e));
+      }
+    }
+
+    // Enter pada input email => Next
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const emailInput = $('vj_email');
+      if (emailInput){
+        emailInput.addEventListener('keydown', (e)=>{
+          if (e.key === 'Enter'){ e.preventDefault(); handleJadwalNext(); }
+        });
+      }
+    });
+
+    /* ===================== UTIL: ORDER TYPE (legacy) ========== */
+    function getOrderTypeFromValue(val) {
+      const v = String(val || "").toLowerCase();
+      if (v.includes("spservis")) return "servis";
+      if (v.includes("spvaksin")) return "vaksin";
       return "vaksin";
     }
-
-    function attachOrderTypeWatcherOnce(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
-      if(sel.dataset.watched === "1") return;
-      sel.dataset.watched = "1";
-
-      const apply = ()=>{
-        const tipe = getOrderTypeFromValue(sel.value);
-        const isServis = (tipe === "servis");
-
-        if(prefix === "ci"){
-          $("ci_kondisi_wrap")?.classList.toggle("hidden", isServis);
-          $("ci_batch_section")?.classList.toggle("hidden", isServis);
-          if(isServis){ $("ci_kondisi").value=""; resetBatches(); }
-        }
-        if(prefix === "co"){
-          $("co_ayam_wrap")?.classList.toggle("hidden", isServis);
-          $("co_vaksin_wrap")?.classList.toggle("hidden", isServis);
-          if(isServis){ $("co_ayam").value=""; $("co_vaksin").value=""; }
-        }
-      };
-
-      sel.addEventListener("change", apply);
-      apply();
-    }
-
-    /* ===================== RESET FORM ========================= */
-    function resetForm(prefix, reloadOrders = true){
-      clearWarn(prefix);
-
-      $(prefix + "_nama") && ($(prefix + "_nama").value = "");
-      $(prefix + "_catatan") && ($(prefix + "_catatan").value = "");
-
-      const orderSel = $(prefix + "_order");
-      if(orderSel){
-        orderSel.value = "";
-        if(reloadOrders) loadOrders(prefix + "_order", prefix);
-      }
-
-      if(prefix === "ci"){
-        $("ci_kondisi").value = "";
-        resetBatches();
-        _photoStore["ci_fotos"] = [];
-        try{ $("ci_fotos").files = new DataTransfer().files; }catch{}
-        $("ci_fotos_preview").innerHTML = "";
-      }
-
-      if(prefix === "co"){
-        $("co_kandang").value = "";
-        $("co_ayam").value = "";
-        $("co_vaksin").value = "";
-        _photoStore["co_fotos"] = [];
-        try{ $("co_fotos").files = new DataTransfer().files; }catch{}
-        $("co_fotos_preview").innerHTML = "";
-      }
-    }
-
-    /* ===================== SUBMIT ============================= */
-    // submitCI / submitCO bisa tetap seperti kode Anda sebelumnya
-    // (tidak saya ubah di sini karena Anda minta jangan ubah lainnya)
-    // Pastikan fungsi submitCI() dan submitCO() masih ada dari kode Anda.
-
+    function attachOrderTypeWatcher(){/* kept for compatibility */}
   </script>
 </body>
 </html>
