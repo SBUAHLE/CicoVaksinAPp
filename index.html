@@ -354,7 +354,7 @@
         <button class="btn btn-primary" type="button" onclick="handleJadwalNext()">Next</button>
         <button class="btn btn-ghost" type="button" onclick="resetJadwal()">↺ Reset</button>
       </div>
-      <div class="hint">Gunakan email sesuai daftar di <code>data/users.json</code>.</div>
+      <div class="hint">Gunakan email sesuai yang terdaftar.</div>
     </div>
 
     <div id="vj_result_card" class="card hidden center-text">
@@ -388,7 +388,7 @@
 
   <!-- ====================== VIEW: DETAIL ====================== -->
   <div id="view-detail" class="container hidden">
-    <button class="btn btn-ghost" type="button" onclick="show('jadwal')">← Kembali ke Jadwal</button>
+    <button class="btn btn-ghost" type="button" onclick="backToJadwalFromDetail()">← Kembali ke Jadwal</button>
     <h2>Detail Order</h2>
 
     <div id="vd_warn" class="warn hidden"></div>
@@ -463,6 +463,7 @@
     let userDict = null;
     let _vjUser = null;      // user terverifikasi
     let _vjLastItems = [];   // cache list terakhir (untuk detail)
+    let _vjScrollY = 0;      // posisi scroll list sebelum buka detail
 
     function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
     function escapeHtml(s){
@@ -497,6 +498,7 @@
       $('vj_list_meta').textContent = '';
       _vjUser = null;
       _vjLastItems = [];
+      _vjScrollY = 0;
     }
 
     async function initJadwal(){
@@ -672,8 +674,14 @@
     });
 
     function openDetailFromCard(id){
+      // Simpan posisi scroll list sebelum buka detail
+      _vjScrollY = window.scrollY || 0;
+
       const it = _vjLastItems.find(x => Number(x.id) === Number(id));
       prefillDetail(it, id);
+
+      // Tampilkan view detail tanpa memanggil show('detail')? Boleh pakai show
+      // tapi show('detail') tidak akan reset apa-apa (tidak ada init). Kita pakai show agar konsisten.
       show('detail');
     }
 
@@ -711,11 +719,29 @@
       $('vd_tsr_as').textContent     = it?.namaTSRorAS || '-';
       $('vd_catatan').textContent    = it?.catatan || '-';
 
-      // Jika item tidak ditemukan (mis. reload manual), beri info
       if(!it){
-        warn.textContent = 'ℹ️ Data detail tidak ada di cache. Silakan kembali ke Jadwal dan muat kembali.';
+        warn.textContent = 'ℹ️ Data detail tidak ada di cache. Silakan kembali ke Jadwal dan muat ulang.';
         warn.classList.remove('hidden');
       }
+    }
+
+    // Kembali dari Detail ke Jadwal TANPA reset (pakai cache & state)
+    function backToJadwalFromDetail(){
+      // Tampilkan view-jadwal, sembunyikan view-detail (tanpa init ulang)
+      $("view-detail").classList.add("hidden");
+      $("view-jadwal").classList.remove("hidden");
+
+      // Pastikan komponen list tetap terlihat
+      $('vj_result_card').classList.remove('hidden');
+      $('vj_range_card').classList.remove('hidden');
+      if (_vjLastItems.length > 0) {
+        $('vj_list_card').classList.remove('hidden');
+      }
+
+      // Kembalikan scroll ke posisi sebelumnya
+      setTimeout(()=>{
+        window.scrollTo({ top: _vjScrollY || 0, behavior: 'instant' });
+      }, 0);
     }
 
     /* ===================== LOAD LIST DARI FLOW ================= */
@@ -813,8 +839,10 @@
         attachOrderTypeWatcher("co_order", "co");
       }
       if (v === "jadwal") {
+        // HANYA dipakai dari Home → Jadwal (bukan back dari detail)
         initJadwal();
       }
+      // v === "detail": tidak ada init; hanya tampilkan view detail.
     }
 
     function goHome(prefix) {
@@ -1006,12 +1034,12 @@
 
       if (!fotos || fotos.length === 0) {
         warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
-        warn.classList.remove("hidden");
+        warn.classList.remove('hidden');
         return;
       }
       if (fotos.length > MAX_PHOTOS) {
         warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
-        warn.classList.remove("hidden");
+        warn.classList.remove('hidden');
         return;
       }
 
