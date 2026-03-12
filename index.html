@@ -989,71 +989,79 @@
     // Flow Anda minta BODY string (schema: type=string)
     // dan response berupa ARRAY langsung: [{Name:"orderNumber", Value:"SPVaksin - 2026-02-00008"}, ...]
     async function loadOrders(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
+  const sel = $(selectId);
+  if(!sel) return;
 
-      // reset options
-      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+  // reset dropdown
+  sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
 
-      const warnId = prefix + "_warn";
-      const warn = $(warnId);
-      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+  const warn = $(prefix + "_warn");
+  if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
 
-      const bodyText = (prefix === "co") ? "checkout" : "checkin";
+  // Flow trigger schema: type=string → body harus string mentah
+  const bodyText = (prefix === "co") ? "checkout" : "checkin";
 
-      try{
-        showLoading("⏳ Memuat nomor order...");
+  try{
+    showLoading("⏳ Memuat nomor order...");
 
-        const resp = await fetch(FLOW_GET_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain; charset=utf-8",
-            "Accept": "application/json"
-          },
-          body: bodyText
-        });
+    const resp = await fetch(FLOW_GET_ORDER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Accept": "application/json"
+      },
+      body: bodyText
+    });
 
-        const text = await resp.text();
-        let data;
-        try{ data = JSON.parse(text); }catch{ data = null; }
+    const text = await resp.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = null; }
 
-        if(!resp.ok){
-          throw new Error(`HTTP ${resp.status}: ${text}`);
-        }
-
-        if(!Array.isArray(data)){
-          throw new Error("Format response bukan array.\nRaw:\n" + text);
-        }
-
-        // Isi dropdown dengan tampilan FULL
-        data.forEach(it=>{
-          const v = (it?.Value ?? it?.value ?? "").toString().trim();
-          if(!v) return;
-
-          // simpan tipe (servis/vaksin) untuk hide/show field
-          const low = v.toLowerCase();
-          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
-            ? "servis"
-            : "vaksin";
-
-          const opt = document.createElement("option");
-          opt.value = v;        // value = full string
-          opt.textContent = v;  // tampil full
-          sel.appendChild(opt);
-        });
-
-        // trigger watcher
-        sel.dispatchEvent(new Event("change"));
-      }catch(e){
-        console.error("loadOrders error:", e);
-        if(warn){
-          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
-          warn.classList.remove("hidden");
-        }
-      }finally{
-        hideLoading();
-      }
+    if(!resp.ok){
+      throw new Error(`HTTP ${resp.status}: ${text}`);
     }
+
+    // ✅ FIX: ambil array dari data.orders (fallback: data.items / data.value)
+    const arr =
+      Array.isArray(data?.orders) ? data.orders :
+      Array.isArray(data?.items)  ? data.items  :
+      Array.isArray(data?.value)  ? data.value  :
+      Array.isArray(data)         ? data        : null;
+
+    if(!Array.isArray(arr)){
+      throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
+    }
+
+    // isi dropdown (tampil FULL)
+    arr.forEach(it=>{
+      const v = (it?.Value ?? it?.value ?? "").toString().trim();
+      if(!v) return;
+
+      // simpan tipe servis/vaksin agar hide/show field berjalan
+      const low = v.toLowerCase();
+      ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+        ? "servis"
+        : "vaksin";
+
+      const opt = document.createElement("option");
+      opt.value = v;        // ✅ value full
+      opt.textContent = v;  // ✅ tampil full
+      sel.appendChild(opt);
+    });
+
+    // trigger watcher
+    sel.dispatchEvent(new Event("change"));
+
+  }catch(e){
+    console.error("loadOrders error:", e);
+    if(warn){
+      warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
+      warn.classList.remove("hidden");
+    }
+  }finally{
+    hideLoading();
+  }
+}
 
     /* ===================== UTIL: ORDER TYPE ======================= */
     function getOrderTypeFromValue(val) {
