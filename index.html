@@ -1158,6 +1158,70 @@
       try { resetForm(prefix, false); } catch(e) {}
       show("home");
     }
+/* ===================== FOTO -> BASE64 & BUILD PAYLOAD ============ */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const result = String(r.result || "");
+      const base64 = result.includes(",") ? result.split(",")[1] : result;
+      resolve(base64);
+    };
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function buildPhotosPayload(inputId, prefix) {
+  const input = $(inputId);
+  const files = Array.from(input?.files || []).slice(0, MAX_PHOTOS);
+  const photos = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    if (!f || !(f.type || "").startsWith("image/")) continue;
+
+    const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+    const safeName = `${prefix}_photo_${i + 1}.${ext}`;
+
+    photos.push({
+      fileName: safeName,
+      contentType: f.type || "application/octet-stream",
+      contentBytes: await fileToBase64(f),
+    });
+  }
+  return photos;
+}
+function sanitizeText(val) {
+  return String(val ?? "")
+    .replace(/[<>{}$$$$\\\/'"`;&]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function cleanPayload(obj) {
+  const copy = { ...obj };
+  if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
+  if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
+  if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
+  if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
+  if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
+  if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+  return copy;
+}
+async function sendJson(url, payload) {
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await resp.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  return { ok: resp.ok, status: resp.status, data };
+}
+
 
     /* ===================== SUBMIT: CEK-IN (LANJUT KODE ANDA) ====== */
     // NOTE: bagian submitCI/submitCO di bawah ini saya tulis persis mengikuti struktur Anda sebelumnya
