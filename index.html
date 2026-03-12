@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <!-- ====================== META & TITLE ====================== -->
@@ -64,6 +64,7 @@
       padding:12px;
       border-radius:10px;
       margin-bottom:12px;
+      white-space:pre-wrap;
     }
 
     .badge{
@@ -337,7 +338,6 @@
       </div>
     </div>
   </div>
-
   <!-- ====================== VIEW: JADWAL ====================== -->
   <div id="view-jadwal" class="container hidden">
     <button class="btn btn-ghost" type="button" onclick="show('home')">← Kembali</button>
@@ -402,7 +402,6 @@
     <div id="vd_body" class="card">
       <div class="kv"><div class="k">Tanggal Pembuatan</div><div class="v" id="vd_created">-</div></div>
 
-      <!-- Dinamis: untuk Vaksinasi atau Service -->
       <div id="vd_block_vaksin">
         <div class="kv"><div class="k">Jadwal Vaksin</div><div class="v" id="vd_jadwal_vaksin">-</div></div>
         <div class="kv"><div class="k">Nama Vaksin</div><div class="v" id="vd_nama_vaksin">-</div></div>
@@ -439,7 +438,6 @@
       font-size:18px;">
     ⏳ Memproses...
   </div>
-
   <!-- ====================== SCRIPT / LOGIC ==================== -->
   <script>
     /* ===================== KONFIGURASI ENDPOINT =============== */
@@ -457,12 +455,15 @@
     const REQUIRE_SIGNATURE_CO = false;
     const $ = (id) => document.getElementById(id);
 
+    // map tipe order by value full (mis: "SPVaksin - 2026-02-00008")
+    const ORDER_TYPE_MAP = Object.create(null);
+
     /* ===================== USERS JSON (jadwal) ================ */
     const USERS_JSON_URL = './data/users.json';
     let userDict = null;
-    let _vjUser = null;      // user terverifikasi
-    let _vjLastItems = [];   // cache list terakhir (untuk detail)
-    let _vjScrollY = 0;      // posisi scroll list sebelum buka detail
+    let _vjUser = null;
+    let _vjLastItems = [];
+    let _vjScrollY = 0;
 
     function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
     function escapeHtml(s){
@@ -577,10 +578,9 @@
         return;
       }
 
-      _vjLastItems = items.slice(); // cache
+      _vjLastItems = items.slice();
 
       const cards = items.map(it=>{
-        // Tipe: "Vaksinasi" atau "Service"
         const t = (it.typeOrder || '').toString().trim().toUpperCase();
         const isService = (t === 'SERVICE' || t.includes('SERVICE'));
 
@@ -655,7 +655,6 @@
       wrap.innerHTML = cards;
     }
 
-    // Delegasi klik kartu → buka detail (tanpa API; pakai cache)
     document.addEventListener('click', (e)=>{
       const card = e.target.closest('.order-card');
       if(card && $('view-jadwal') && !$('view-jadwal').classList.contains('hidden')){
@@ -663,7 +662,7 @@
         if(id) openDetailFromCard(id);
       }
     });
-    // Enter/Space aksesibilitas
+
     document.addEventListener('keydown', (e)=>{
       if((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('order-card')){
         e.preventDefault();
@@ -673,14 +672,9 @@
     });
 
     function openDetailFromCard(id){
-      // Simpan posisi scroll list sebelum buka detail
       _vjScrollY = window.scrollY || 0;
-
       const it = _vjLastItems.find(x => Number(x.id) === Number(id));
       prefillDetail(it, id);
-
-      // Tampilkan view detail tanpa memanggil show('detail')? Boleh pakai show
-      // tapi show('detail') tidak akan reset apa-apa (tidak ada init). Kita pakai show agar konsisten.
       show('detail');
     }
 
@@ -724,26 +718,19 @@
       }
     }
 
-    // Kembali dari Detail ke Jadwal TANPA reset (pakai cache & state)
     function backToJadwalFromDetail(){
-      // Tampilkan view-jadwal, sembunyikan view-detail (tanpa init ulang)
       $("view-detail").classList.add("hidden");
       $("view-jadwal").classList.remove("hidden");
 
-      // Pastikan komponen list tetap terlihat
       $('vj_result_card').classList.remove('hidden');
       $('vj_range_card').classList.remove('hidden');
-      if (_vjLastItems.length > 0) {
-        $('vj_list_card').classList.remove('hidden');
-      }
+      if (_vjLastItems.length > 0) $('vj_list_card').classList.remove('hidden');
 
-      // Kembalikan scroll ke posisi sebelumnya
       setTimeout(()=>{
         window.scrollTo({ top: _vjScrollY || 0, behavior: 'instant' });
       }, 0);
     }
 
-    /* ===================== LOAD LIST DARI FLOW ================= */
     async function handleTampilkanJadwal(){
       const warn = $('vj_warn');
       warn.classList.add('hidden'); warn.textContent = '';
@@ -827,25 +814,24 @@
       if (v === "checkin") {
         init("ci");
         initBatches();
-        loadOrders("ci_order");
+        loadOrders("ci_order", "ci"); // ✅ FIX: body string "checkin"
         attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
         attachOrderTypeWatcher("ci_order", "ci");
       }
       if (v === "checkout") {
         init("co");
-        loadOrders("co_order");
+        loadOrders("co_order", "co"); // ✅ FIX: body string "checkout"
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
         attachOrderTypeWatcher("co_order", "co");
       }
       if (v === "jadwal") {
-        // HANYA dipakai dari Home → Jadwal (bukan back dari detail)
         initJadwal();
       }
-      // v === "detail": tidak ada init; hanya tampilkan view detail.
+      // detail: tidak init
     }
 
     function goHome(prefix) {
-      resetForm(prefix, false);
+      try { resetForm(prefix, false); } catch(e) {}
       show("home");
     }
 
@@ -933,73 +919,242 @@
       return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
     }
 
-    /* ===================== FOTO -> BASE64 & SUBMIT ============ */
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => {
-          const result = String(r.result || "");
-          const base64 = result.includes(",") ? result.split(",")[1] : result;
-          resolve(base64);
-        };
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-    }
+    /* ===================== FOTO HANDLER (multi + delete) ====== */
+    const _photoStore = Object.create(null);
+    function attachMultiPhotoHandler(inputId, previewId, clearBtnId){
+      const input = $(inputId);
+      const preview = $(previewId);
+      const clearBtn = $(clearBtnId);
+      if(!input || !preview || !clearBtn) return;
 
-    async function buildPhotosPayload(inputId, prefix) {
-      const files = Array.from($(inputId).files || []).slice(0, MAX_PHOTOS);
-      const photos = [];
+      if (input.dataset.bound === "1") return;
+      input.dataset.bound = "1";
 
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (!f.type.startsWith("image/")) continue;
+      _photoStore[inputId] = [];
 
-        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
-        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
+      function syncInputFiles(){
+        const dt = new DataTransfer();
+        (_photoStore[inputId] || []).slice(0, MAX_PHOTOS).forEach(f => dt.items.add(f));
+        try { input.files = dt.files; } catch(e) {}
+      }     function render(){
+        preview.innerHTML = "";
+        const files = (_photoStore[inputId] || []).slice(0, MAX_PHOTOS);
 
-        photos.push({
-          fileName: safeName,
-          contentType: f.type || "application/octet-stream",
-          contentBytes: await fileToBase64(f),
+        files.forEach((file, idx)=>{
+          const item = document.createElement("div");
+          item.className = "photo-item";
+
+          const img = document.createElement("img");
+          img.alt = "foto";
+          const url = URL.createObjectURL(file);
+          img.src = url;
+          img.onload = ()=> URL.revokeObjectURL(url);
+
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "photo-del";
+          del.textContent = "×";
+          del.title = "Hapus foto ini";
+          del.addEventListener("click", ()=>{
+            (_photoStore[inputId] || []).splice(idx, 1);
+            syncInputFiles();
+            render();
+          });
+
+          item.appendChild(img);
+          item.appendChild(del);
+          preview.appendChild(item);
         });
       }
-      return photos;
-    }
 
-    /* ===================== SANITASI RINGAN (client) =========== */
-    function sanitizeText(val) {
-      return String(val ?? "")
-        .replace(/[<>{}\[\]\\\/'"`;&]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function cleanPayload(obj) {
-      const copy = { ...obj };
-      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
-      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
-      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
-      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
-      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
-      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
-      return copy;
-    }
-
-    async function sendJson(url, payload) {
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      input.addEventListener("change", ()=>{
+        const picked = Array.from(input.files || []).filter(f => (f.type || "").startsWith("image/"));
+        const merged = (_photoStore[inputId] || []).concat(picked).slice(0, MAX_PHOTOS);
+        _photoStore[inputId] = merged;
+        syncInputFiles();
+        render();
       });
 
-      const text = await resp.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = { raw: text }; }
-      return { ok: resp.ok, status: resp.status, data };
+      clearBtn.addEventListener("click", ()=>{
+        _photoStore[inputId] = [];
+        syncInputFiles();
+        render();
+      });
+
+      // render awal
+      render();
     }
 
-    /* ===================== SUBMIT: CEK-IN ===================== */
+    /* ===================== FIX: FLOW GET ORDER ==================== */
+    // Flow Anda minta BODY string (schema: type=string)
+    // dan response berupa ARRAY langsung: [{Name:"orderNumber", Value:"SPVaksin - 2026-02-00008"}, ...]
+    async function loadOrders(selectId, prefix){
+      const sel = $(selectId);
+      if(!sel) return;
+
+      // reset options
+      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+
+      const warnId = prefix + "_warn";
+      const warn = $(warnId);
+      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+
+      const bodyText = (prefix === "co") ? "checkout" : "checkin";
+
+      try{
+        showLoading("⏳ Memuat nomor order...");
+
+        const resp = await fetch(FLOW_GET_ORDER_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8",
+            "Accept": "application/json"
+          },
+          body: bodyText
+        });
+
+        const text = await resp.text();
+        let data;
+        try{ data = JSON.parse(text); }catch{ data = null; }
+
+        if(!resp.ok){
+          throw new Error(`HTTP ${resp.status}: ${text}`);
+        }
+
+        if(!Array.isArray(data)){
+          throw new Error("Format response bukan array.\nRaw:\n" + text);
+        }
+
+        // Isi dropdown dengan tampilan FULL
+        data.forEach(it=>{
+          const v = (it?.Value ?? it?.value ?? "").toString().trim();
+          if(!v) return;
+
+          // simpan tipe (servis/vaksin) untuk hide/show field
+          const low = v.toLowerCase();
+          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+            ? "servis"
+            : "vaksin";
+
+          const opt = document.createElement("option");
+          opt.value = v;        // value = full string
+          opt.textContent = v;  // tampil full
+          sel.appendChild(opt);
+        });
+
+        // trigger watcher
+        sel.dispatchEvent(new Event("change"));
+      }catch(e){
+        console.error("loadOrders error:", e);
+        if(warn){
+          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
+          warn.classList.remove("hidden");
+        }
+      }finally{
+        hideLoading();
+      }
+    }
+
+    /* ===================== UTIL: ORDER TYPE ======================= */
+    function getOrderTypeFromValue(val) {
+      const key = String(val || "").trim();
+      if (key && ORDER_TYPE_MAP[key]) return ORDER_TYPE_MAP[key];
+      const v = key.toLowerCase();
+      if (v.includes("spservis") || v.includes("service") || v.includes("servis")) return "servis";
+      return "vaksin";
+    }
+
+    function attachOrderTypeWatcher(selectId, prefix){
+      const sel = $(selectId);
+      if(!sel) return;
+
+      // bind sekali saja
+      if(sel.dataset.watched === "1") return;
+      sel.dataset.watched = "1";
+
+      const apply = ()=>{
+        const tipe = getOrderTypeFromValue(sel.value);
+        const isServis = (tipe === "servis");
+
+        if(prefix === "ci"){
+          $("ci_kondisi_wrap")?.classList.toggle("hidden", isServis);
+          $("ci_batch_section")?.classList.toggle("hidden", isServis);
+
+          if(isServis){
+            $("ci_kondisi").value = "";
+            resetBatches();
+          }
+        }
+
+        if(prefix === "co"){
+          $("co_ayam_wrap")?.classList.toggle("hidden", isServis);
+          $("co_vaksin_wrap")?.classList.toggle("hidden", isServis);
+
+          if(isServis){
+            $("co_ayam").value = "";
+            $("co_vaksin").value = "";
+          }
+        }
+      };
+
+      sel.addEventListener("change", apply);
+      apply();
+    }
+
+    /* ===================== RESET FORM (AMAN BACK) ================== */
+    function resetForm(prefix, reloadOrders = true){
+      const warn = $(prefix + "_warn");
+      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+
+      // umum
+      const nama = $(prefix + "_nama");
+      if(nama) nama.value = "";
+
+      const catatan = $(prefix + "_catatan");
+      if(catatan) catatan.value = "";
+
+      // order
+      const orderSel = $(prefix + "_order");
+      if(orderSel){
+        orderSel.value = "";
+        if(reloadOrders){
+          loadOrders(prefix + "_order", prefix);
+        }else{
+          orderSel.dispatchEvent(new Event("change"));
+        }
+      }
+
+      if(prefix === "ci"){
+        $("ci_kondisi").value = "";
+        resetBatches();
+
+        // reset foto
+        _photoStore["ci_fotos"] = [];
+        try{ $("ci_fotos").files = new DataTransfer().files; }catch(e){}
+        $("ci_fotos_preview").innerHTML = "";
+      }
+
+      if(prefix === "co"){
+        $("co_kandang").value = "";
+        $("co_ayam").value = "";
+        $("co_vaksin").value = "";
+
+        _photoStore["co_fotos"] = [];
+        try{ $("co_fotos").files = new DataTransfer().files; }catch(e){}
+        $("co_fotos_preview").innerHTML = "";
+      }
+    }
+
+    /* ===================== GO HOME (FIX KEMBALI) ================== */
+    function goHome(prefix) {
+      try { resetForm(prefix, false); } catch(e) {}
+      show("home");
+    }
+
+    /* ===================== SUBMIT: CEK-IN (LANJUT KODE ANDA) ====== */
+    // NOTE: bagian submitCI/submitCO di bawah ini saya tulis persis mengikuti struktur Anda sebelumnya
+    // (tidak mengubah field & payload selain memastikan tetap memakai orderNumber dari dropdown)
+
     async function submitCI() {
       const warn = $("ci_warn");
       warn.classList.add("hidden");
@@ -1047,7 +1202,7 @@
         const basePayload = {
           appKey: APP_KEY,
           formType: "checkin",
-          orderNumber: order,
+          orderNumber: order, // FULL string sesuai dropdown
           namaVaksinator: nama,
           tanggal: $("ci_tanggal").value,
           jam: $("ci_jam").value,
@@ -1084,7 +1239,7 @@
       }
     }
 
-    /* ===================== SUBMIT: CEK-OUT ==================== */
+    /* ===================== SUBMIT: CEK-OUT ======================== */
     async function submitCO() {
       const warn = $("co_warn");
       warn.classList.add("hidden");
@@ -1128,7 +1283,7 @@
         const basePayload = {
           appKey: APP_KEY,
           formType: "checkout",
-          orderNumber: order,
+          orderNumber: order, // FULL string sesuai dropdown
           namaVaksinator: nama,
           noKandang: kandang,
           tanggal: $("co_tanggal").value,
@@ -1166,24 +1321,7 @@
       }
     }
 
-    // Enter pada input email => Next
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const emailInput = $('vj_email');
-      if (emailInput){
-        emailInput.addEventListener('keydown', (e)=>{
-          if (e.key === 'Enter'){ e.preventDefault(); handleJadwalNext(); }
-        });
-      }
-    });
-
-    /* ===================== UTIL: ORDER TYPE (legacy) ========== */
-    function getOrderTypeFromValue(val) {
-      const v = String(val || "").toLowerCase();
-      if (v.includes("spservis")) return "servis";
-      if (v.includes("spvaksin")) return "vaksin";
-      return "vaksin";
-    }
-    function attachOrderTypeWatcher(){/* kept for compatibility */}
+    /* ===================== END SCRIPT ============================ */
   </script>
 </body>
 </html>
