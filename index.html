@@ -1124,77 +1124,95 @@
       render();
     }
 
-    /* ===================== FIX: FLOW GET ORDER ==================== */
-    async function loadOrders(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
 
-      // reset dropdown
-      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+/* ===================== FIX: FLOW GET ORDER (v2 JSON + Branch) ==================== */
+async function loadOrders(selectId, prefix){
+  const sel = $(selectId);
+  if(!sel) return;
 
-      const warn = $(prefix + "_warn");
-      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+  // reset dropdown
+  sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
 
-      const bodyText = (prefix === "co") ? "checkout" : "checkin";
+  const warn = $(prefix + "_warn");
+  if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
 
-      try{
-        showLoading("⏳ Memuat nomor order...");
+  // "checkin" / "checkout"
+  const formType = (prefix === "co") ? "checkout" : "checkin";
 
-        const resp = await fetch(FLOW_GET_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain; charset=utf-8",
-            "Accept": "application/json"
-          },
-          body: bodyText
-        });
+  // Ambil user login
+  const user = getAuthedUser?.() || null;
+  const isAdminAll = ((user?.branch || '').trim().toUpperCase() === 'ALL');
 
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { data = null; }
+  // Payload JSON baru ke Flow (menyerahkan filter cabang ke Flow)
+  const payload = {
+    mode: 'getOrders',
+    form: formType,
+    branch: isAdminAll ? '' : (user?.branch || ''),
+    allBranches: isAdminAll,
+    xApiKey: APP_KEY
+  };
 
-        if(!resp.ok){
-          throw new Error(`HTTP ${resp.status}: ${text}`);
-        }
+  try{
+    showLoading("⏳ Memuat nomor order...");
 
-        const arr =
-          Array.isArray(data?.orders) ? data.orders :
-          Array.isArray(data?.items)  ? data.items  :
-          Array.isArray(data?.value)  ? data.value  :
-          Array.isArray(data)         ? data        : null;
+    const resp = await fetch(FLOW_GET_ORDER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-        if(!Array.isArray(arr)){
-          throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
-        }
+    const text = await resp.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = null; }
 
-        arr.forEach(it=>{
-          const v = (it?.Value ?? it?.value ?? "").toString().trim();
-          if(!v) return;
-
-          const low = v.toLowerCase();
-          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
-            ? "servis"
-            : "vaksin";
-
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          sel.appendChild(opt);
-        });
-
-        // trigger watcher
-        sel.dispatchEvent(new Event("change"));
-
-      }catch(e){
-        console.error("loadOrders error:", e);
-        if(warn){
-          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
-          warn.classList.remove("hidden");
-        }
-      }finally{
-        hideLoading();
-      }
+    if(!resp.ok){
+      throw new Error(`HTTP ${resp.status}: ${text}`);
     }
+
+    // Normalisasi array hasil Flow (kompatibel berbagai bentuk)
+    const arr =
+      Array.isArray(data?.orders) ? data.orders :
+      Array.isArray(data?.items)  ? data.items  :
+      Array.isArray(data?.value)  ? data.value  :
+      Array.isArray(data)         ? data        : null;
+
+    if(!Array.isArray(arr)){
+      throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
+    }
+
+    // Isi dropdown + map tipe (servis/vaksin)
+    arr.forEach(it=>{
+      // Ambil nomor order dari beberapa kemungkinan properti
+      const v = (it?.Value ?? it?.value ?? it?.orderNumber ?? "").toString().trim();
+      if(!v) return;
+
+      const low = v.toLowerCase();
+      ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+        ? "servis"
+        : "vaksin";
+
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      sel.appendChild(opt);
+    });
+
+    // trigger watcher (untuk hide/show field sesuai tipe order)
+    sel.dispatchEvent(new Event("change"));
+
+  }catch(e){
+    console.error("loadOrders error:", e);
+    if(warn){
+      warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
+      warn.classList.remove("hidden");
+    }
+  }finally{
+    hideLoading();
+  }
+}
 
     /* ===================== UTIL: ORDER TYPE ======================= */
     function getOrderTypeFromValue(val) {
