@@ -473,34 +473,87 @@
     // map tipe order by value full (mis: "SPVaksin - 2026-02-00008")
     const ORDER_TYPE_MAP = Object.create(null);
 
-    /* ===================== USERS JSON (jadwal) ================ */
-    const USERS_JSON_URL = './data/users.json';
-    let userDict = null;
 
-    // ====== Auth session (baru)
-    const AUTH_STORAGE_KEY = 'cico_user';
-    let _authUser = null;
+/* ===================== USERS JSON (jadwal) ================ */
+/**
+ * Path yang robust untuk berbagai skenario hosting (root, subfolder, GitHub Pages).
+ * - Kalau index.html di root repo dan data/users.json di /data → akan resolve benar.
+ * - Kalau index.html di /docs dan data di /data (satu level di atas) → gunakan '../data/users.json'.
+ *   → Kalau struktur repo Anda seperti ini, GANTI baris di bawah menjadi '../data/users.json'
+ */
+const USERS_JSON_URL = new URL('data/users.json', document.baseURI).toString();
+// Jika file Anda sebenarnya berada di '../data/users.json', gunakan:
+// const USERS_JSON_URL = new URL('../data/users.json', document.baseURI).toString();
 
-    function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
-    function escapeHtml(s){
-      return (s ?? '').toString().replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-      }[c]));
+let userDict = null;
+
+function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
+function escapeHtml(s){
+  return (s ?? '').toString().replace(/[&<>\"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[c]));
+}
+
+/**
+ * Perbaikan:
+ * - Tangani error fetch dengan pesan jelas (path/CORS).
+ * - Validasi bahwa object terisi; kalau kosong, tampilkan hint agar mudah debug.
+ * - Hanya terima user yang active === true (opsional, bisa dihapus jika tidak perlu).
+ */
+async function ensureUsersLoaded(){
+  if (userDict) return userDict;
+
+  const warn = document.getElementById('login_warn');
+  try{
+    const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const raw = await resp.json();
+
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      // Untuk Mas Agia, struktur users.json Anda dictionary, jadi harus object.
+      throw new Error('Struktur users.json tidak sesuai (harus object keyed-by-email).');
     }
 
-    async function ensureUsersLoaded(){
-      if (userDict) return userDict;
-      try{
-        const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
-        if(!resp.ok) throw new Error('HTTP '+resp.status);
-        userDict = await resp.json();
-      }catch(e){
-        console.error('Gagal memuat users.json', e);
-        userDict = {};
+    const dict = Object.create(null);
+    for (const [k, v] of Object.entries(raw)) {
+      const emailKey = normEmail(k);
+      if (!emailKey || !v || typeof v !== 'object') continue;
+      // (opsional) hanya user yang aktif
+      if (v.active === false) continue;
+
+      dict[emailKey] = {
+        email: normEmail(v.email ?? emailKey),
+        name: v.name ?? '',
+        branch: v.branch ?? '',
+        branchCode: v.branchCode ?? '',
+        role: v.role ?? '',
+        notes: v.notes ?? '',
+        active: v.active !== false
+      };
+    }
+
+    userDict = dict;
+
+    if (Object.keys(userDict).length === 0) {
+      console.warn('users.json termuat tetapi kosong/tidak ada user aktif.');
+      if (warn) {
+        warn.innerHTML = `⚠️ users.json termuat, tetapi tidak ada user yang tervalidasi/aktif.<br>
+          Cek konten <code>${escapeHtml(USERS_JSON_URL)}</code> dan field <code>active</code>.`;
+        warn.classList.remove('hidden');
       }
-      return userDict;
     }
-
+  } catch (e) {
+    console.error('Gagal memuat users.json:', e);
+    userDict = {};
+    if (warn) {
+      warn.innerHTML = `❌ Gagal memuat <code>${escapeHtml(USERS_JSON_URL)}</code>.<br>
+        Kemungkinan: path salah, dibuka via <code>file://</code> (CORS), atau 404/JSON invalid.<br>
+        Saran: jalankan lewat server lokal (mis. <code>python -m http.server</code>) atau pastikan path benar.`;
+      warn.classList.remove('hidden');
+    }
+  }
+  return userDict;
+}
     /* ===================== AUTH HELPERS ======================= */
     function setAuthedUser(u){
       _authUser = u ? { ...u } : null;
