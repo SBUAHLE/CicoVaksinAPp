@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -161,38 +160,18 @@
 
 <body>
 
-  <!-- ====================== VIEW: LOGIN (BARU) ================== -->
-  <div id="view-login" class="landing-wrap">
-    <div class="landing-card">
-      <div style="font-size:44px">🔐</div>
-      <h1>CICO VAKSINATOR</h1>
-      <p>Masuk dengan email yang terdaftar</p>
-      <div id="login_warn" class="warn hidden"></div>
-      <label for="login_email">Alamat Email</label>
-      <input id="login_email" type="email" placeholder="nama@perusahaan.com" autocomplete="email" />
-      <div class="btn-group" style="justify-content:center">
-        <button class="btn btn-primary" type="button" onclick="handleLogin()">Masuk</button>
-      </div>
-      <div class="hint">Gunakan email sesuai yang terdaftar di sistem.</div>
-      <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto • ⚙️ Ver1.0</div>
-    </div>
-  </div>
-
   <!-- ====================== VIEW: HOME ======================== -->
-  <div id="view-home" class="landing-wrap hidden">
+  <div id="view-home" class="landing-wrap">
     <div class="landing-card">
       <div style="font-size:44px">💉</div>
       <h1>CICO VAKSINATOR</h1>
-      <div id="home_greet" class="hint" style="margin:-6px 0 14px 0"></div>
       <p>Sistem Check-In &amp; Check-Out<br>Dengan Lokasi &amp; Waktu Otomatis</p>
       <div class="landing-actions">
         <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN</button>
         <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT</button>
         <button class="btn btn-ghost" onclick="show('jadwal')">📅 VIEW JADWAL</button>
       </div>
-      <div class="footer-note">
-        <button class="btn btn-danger" type="button" onclick="logout()">Keluar (Logout)</button>
-      </div>
+      <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto • ⚙️ Ver1.0</div>
     </div>
   </div>
 
@@ -359,7 +338,6 @@
       </div>
     </div>
   </div>
-
   <!-- ====================== VIEW: JADWAL ====================== -->
   <div id="view-jadwal" class="container hidden">
     <button class="btn btn-ghost" type="button" onclick="show('home')">← Kembali</button>
@@ -367,14 +345,22 @@
 
     <div id="vj_warn" class="warn hidden"></div>
 
-    <!-- LOGIN EMAIL DIPINDAHKAN KE AWAL, JADI KARTU INI DIHILANGKAN -->
-    <!-- <div id="vj_input_card" ...> ... </div> -->
+    <div id="vj_input_card" class="card">
+      <div class="section-title">Masukkan alamat email Anda</div>
+      <label for="vj_email">Alamat Email</label>
+      <input id="vj_email" type="email" placeholder="nama@perusahaan.com" autocomplete="email" />
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="handleJadwalNext()">Next</button>
+        <button class="btn btn-ghost" type="button" onclick="resetJadwal()">↺ Reset</button>
+      </div>
+      <div class="hint">Gunakan email sesuai yang terdaftar.</div>
+    </div>
 
-    <div id="vj_result_card" class="card center-text">
+    <div id="vj_result_card" class="card hidden center-text">
       <div id="vj_result" style="font-weight:700;font-size:18px"></div>
     </div>
 
-    <div id="vj_range_card" class="card">
+    <div id="vj_range_card" class="card hidden">
       <div class="section-title">Pilih Periode Jadwal</div>
       <div class="row">
         <div>
@@ -452,7 +438,6 @@
       font-size:18px;">
     ⏳ Memproses...
   </div>
-
   <!-- ====================== SCRIPT / LOGIC ==================== -->
   <script>
     /* ===================== KONFIGURASI ENDPOINT =============== */
@@ -473,156 +458,96 @@
     // map tipe order by value full (mis: "SPVaksin - 2026-02-00008")
     const ORDER_TYPE_MAP = Object.create(null);
 
+    /* ===================== USERS JSON (jadwal) ================ */
+    const USERS_JSON_URL = './data/users.json';
+    let userDict = null;
+    let _vjUser = null;
+    let _vjLastItems = [];
+    let _vjScrollY = 0;
 
-/* ===================== USERS JSON (jadwal) ================ */
-/**
- * Path yang robust untuk berbagai skenario hosting (root, subfolder, GitHub Pages).
- * - Kalau index.html di root repo dan data/users.json di /data → akan resolve benar.
- * - Kalau index.html di /docs dan data di /data (satu level di atas) → gunakan '../data/users.json'.
- *   → Kalau struktur repo Anda seperti ini, GANTI baris di bawah menjadi '../data/users.json'
- */
-const USERS_JSON_URL = new URL('data/users.json', document.baseURI).toString();
-// Jika file Anda sebenarnya berada di '../data/users.json', gunakan:
-// const USERS_JSON_URL = new URL('../data/users.json', document.baseURI).toString();
-
-let userDict = null;
-
-function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
-function escapeHtml(s){
-  return (s ?? '').toString().replace(/[&<>\"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-  }[c]));
-}
-
-/**
- * Perbaikan:
- * - Tangani error fetch dengan pesan jelas (path/CORS).
- * - Validasi bahwa object terisi; kalau kosong, tampilkan hint agar mudah debug.
- * - Hanya terima user yang active === true (opsional, bisa dihapus jika tidak perlu).
- */
-async function ensureUsersLoaded(){
-  if (userDict) return userDict;
-
-  const warn = document.getElementById('login_warn');
-  try{
-    const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const raw = await resp.json();
-
-    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-      // Untuk Mas Agia, struktur users.json Anda dictionary, jadi harus object.
-      throw new Error('Struktur users.json tidak sesuai (harus object keyed-by-email).');
+    function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
+    function escapeHtml(s){
+      return (s ?? '').toString().replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
     }
 
-    const dict = Object.create(null);
-    for (const [k, v] of Object.entries(raw)) {
-      const emailKey = normEmail(k);
-      if (!emailKey || !v || typeof v !== 'object') continue;
-      // (opsional) hanya user yang aktif
-      if (v.active === false) continue;
-
-      dict[emailKey] = {
-        email: normEmail(v.email ?? emailKey),
-        name: v.name ?? '',
-        branch: v.branch ?? '',
-        branchCode: v.branchCode ?? '',
-        role: v.role ?? '',
-        notes: v.notes ?? '',
-        active: v.active !== false
-      };
-    }
-
-    userDict = dict;
-
-    if (Object.keys(userDict).length === 0) {
-      console.warn('users.json termuat tetapi kosong/tidak ada user aktif.');
-      if (warn) {
-        warn.innerHTML = `⚠️ users.json termuat, tetapi tidak ada user yang tervalidasi/aktif.<br>
-          Cek konten <code>${escapeHtml(USERS_JSON_URL)}</code> dan field <code>active</code>.`;
-        warn.classList.remove('hidden');
-      }
-    }
-  } catch (e) {
-    console.error('Gagal memuat users.json:', e);
-    userDict = {};
-    if (warn) {
-      warn.innerHTML = `❌ Gagal memuat <code>${escapeHtml(USERS_JSON_URL)}</code>.<br>
-        Kemungkinan: path salah, dibuka via <code>file://</code> (CORS), atau 404/JSON invalid.<br>
-        Saran: jalankan lewat server lokal (mis. <code>python -m http.server</code>) atau pastikan path benar.`;
-      warn.classList.remove('hidden');
-    }
-  }
-  return userDict;
-}
-    /* ===================== AUTH HELPERS ======================= */
-    function setAuthedUser(u){
-      _authUser = u ? { ...u } : null;
+    async function ensureUsersLoaded(){
+      if (userDict) return userDict;
       try{
-        if (u) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(_authUser));
-        else localStorage.removeItem(AUTH_STORAGE_KEY);
-      }catch(e){}
-      updateHomeGreeting();
-    }
-    function getAuthedUser(){
-      if (_authUser) return _authUser;
-      try{
-        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (raw) _authUser = JSON.parse(raw);
-      }catch(e){ _authUser = null; }
-      return _authUser;
-    }
-    function requireAuthOrGoLogin(){
-      const u = getAuthedUser();
-      if (!u){
-        showOnly('login');
-        setTimeout(()=>{ $('login_email')?.focus(); },0);
-        return null;
+        const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        userDict = await resp.json();
+      }catch(e){
+        console.error('Gagal memuat users.json', e);
+        userDict = {};
       }
-      return u;
-    }
-    function logout(){
-      setAuthedUser(null);
-      // bersihkan tampilan
-      resetForm('ci', false);
-      resetForm('co', false);
-      resetJadwal(true);
-      show('login');
+      return userDict;
     }
 
-    async function handleLogin(){
-      const warn = $('login_warn');
-      warn.classList.add('hidden'); warn.textContent = '';
+    function resetJadwal(){
+      const w = $('vj_warn');
+      w.classList.add('hidden'); w.textContent = '';
+      $('vj_email').value = '';
 
+      $('vj_input_card').classList.remove('hidden');
+      $('vj_result_card').classList.add('hidden');
+      $('vj_range_card').classList.add('hidden');
+      $('vj_list_card').classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
+      _vjUser = null;
+      _vjLastItems = [];
+      _vjScrollY = 0;
+    }
+
+    async function initJadwal(){
+      resetJadwal();
       await ensureUsersLoaded();
-      const email = normEmail($('login_email').value);
-      if (!email){
+      setTimeout(()=>{ $('vj_email')?.focus(); }, 0);
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      $('vj_start_date').value = iso;
+      $('vj_end_date').value = iso;
+    }
+
+    async function handleJadwalNext(){
+      const warn = $('vj_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+      await ensureUsersLoaded();
+
+      const key = normEmail($('vj_email').value);
+      if(!key){
         warn.textContent = '⚠️ Mohon isi alamat email terlebih dahulu.';
         warn.classList.remove('hidden');
+        $('vj_result_card').classList.add('hidden');
+        $('vj_range_card').classList.add('hidden');
+        $('vj_list_card').classList.add('hidden');
         return;
       }
-      const u = userDict[email];
-      if (!u){
-        warn.textContent = `⚠️ Email "${email}" tidak ditemukan pada daftar.`;
+
+      const u = userDict[key];
+      if(!u){
+        warn.textContent = `⚠️ Email "${key}" tidak ditemukan pada daftar.`;
         warn.classList.remove('hidden');
+        $('vj_result_card').classList.add('hidden');
+        $('vj_range_card').classList.add('hidden');
+        $('vj_list_card').classList.add('hidden');
         return;
       }
 
-      setAuthedUser({ ...u, email });
-      $('login_email').value = '';
-
-      // Masuk ke HOME
-      show('home');
-    }
-
-    function updateHomeGreeting(){
-      const u = getAuthedUser();
-      const el = $('home_greet');
-      if (!el) return;
-      if (!u){
-        el.textContent = '';
-        return;
-      }
-      el.textContent = `Masuk sebagai: ${u?.name || '-'} • Cabang: ${u?.branch || '-'} • Role: ${u?.role || '-'}`;
+      _vjUser = u;
+      $('vj_input_card').classList.add('hidden');
+      const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
+      $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
+      $('vj_result_card').classList.remove('hidden');
+      $('vj_range_card').classList.remove('hidden');
+      $('vj_list_card').classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
     }
 
     /* ===================== LOADING UI ========================= */
@@ -637,51 +562,7 @@ async function ensureUsersLoaded(){
       el.textContent = "⏳ Memproses...";
     }
 
-    /* ===================== JADWAL HELPERS ===================== */
-    let _vjUser = null;
-    let _vjLastItems = [];
-    let _vjScrollY = 0;
-
-    function resetJadwal(hideAll = false){
-      const w = $('vj_warn');
-      w.classList.add('hidden'); w.textContent = '';
-
-      if (hideAll){
-        $('vj_result_card')?.classList.add('hidden');
-        $('vj_range_card')?.classList.add('hidden');
-      }else{
-        $('vj_result_card')?.classList.remove('hidden');
-        $('vj_range_card')?.classList.remove('hidden');
-      }
-
-      $('vj_list_card')?.classList.add('hidden');
-      $('vj_list')?.innerHTML = '';
-      $('vj_list_meta').textContent = '';
-      _vjLastItems = [];
-      _vjScrollY = 0;
-    }
-
-    async function initJadwal(){
-      const u = requireAuthOrGoLogin();
-      if (!u) return;
-
-      resetJadwal();
-      await ensureUsersLoaded();
-
-      _vjUser = u; // gunakan user yang sudah login
-      const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
-      $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
-
-      // set default range = hari ini
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth()+1).padStart(2,'0');
-      const dd = String(today.getDate()).padStart(2,'0');
-      const iso = `${yyyy}-${mm}-${dd}`;
-      $('vj_start_date').value = iso;
-      $('vj_end_date').value = iso;
-    }
-
+    /* ===================== JADWAL: FETCH & RENDER ============= */
     function fmtDateOnly(s){
       if(!s) return '-';
       const d = new Date(s);
@@ -854,14 +735,11 @@ async function ensureUsersLoaded(){
       const warn = $('vj_warn');
       warn.classList.add('hidden'); warn.textContent = '';
 
-      const user = getAuthedUser();
-      if(!user){
-        warn.textContent = '⚠️ Mohon login terlebih dahulu.';
+      if(!_vjUser){
+        warn.textContent = '⚠️ Mohon verifikasi email terlebih dahulu.';
         warn.classList.remove('hidden');
-        show('login');
         return;
       }
-      _vjUser = user;
 
       const startDate = $('vj_start_date').value;
       const endDate   = $('vj_end_date').value;
@@ -876,11 +754,11 @@ async function ensureUsersLoaded(){
         return;
       }
 
-      const isAdminAll = ((user.branch || '').trim().toUpperCase() === 'ALL');
+      const isAdminAll = ((_vjUser.branch || '').trim().toUpperCase() === 'ALL');
 
       const payload = {
         mode: 'viewSchedule',
-        branch: isAdminAll ? '' : user.branch,
+        branch: isAdminAll ? '' : _vjUser.branch,
         startDate,
         endDate,
         allBranches: isAdminAll,
@@ -904,7 +782,7 @@ async function ensureUsersLoaded(){
         }
 
         const items = Array.isArray(data?.items) ? data.items : [];
-        const cabangLabel = isAdminAll ? 'Semua Cabang (ADMIN)' : (user.branch || '-');
+        const cabangLabel = isAdminAll ? 'Semua Cabang (ADMIN)' : (_vjUser.branch || '-');
         $('vj_list_meta').textContent =
           `Cabang: ${cabangLabel} • Periode: ${startDate} s.d. ${endDate} • Jumlah: ${items.length}`;
 
@@ -921,8 +799,7 @@ async function ensureUsersLoaded(){
     }
 
     /* ===================== NAVIGASI VIEW ====================== */
-    function showOnly(v){
-      $("view-login").classList.add("hidden");
+    function show(v) {
       $("view-home").classList.add("hidden");
       $("view-checkin").classList.add("hidden");
       $("view-checkout").classList.add("hidden");
@@ -933,37 +810,19 @@ async function ensureUsersLoaded(){
       if (target) target.classList.remove("hidden");
 
       window.scrollTo({ top: 0, behavior: "auto" });
-    }
 
-    function show(v) {
-      // guard: semua view kecuali "login" harus auth
-      if (v !== 'login'){
-        const u = requireAuthOrGoLogin();
-        if (!u) return; // sudah dialihkan ke login
-      }
-
-      showOnly(v);
-
-      if (v === "home") {
-        updateHomeGreeting();
-      }
       if (v === "checkin") {
         init("ci");
         initBatches();
-        loadOrders("ci_order", "ci");
+        loadOrders("ci_order", "ci"); // ✅ FIX: body string "checkin"
         attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
         attachOrderTypeWatcher("ci_order", "ci");
-        // Prefill nama dari user login (opsional)
-        const u = getAuthedUser();
-        if (u?.name) $('ci_nama').value = u.name;
       }
       if (v === "checkout") {
         init("co");
-        loadOrders("co_order", "co");
+        loadOrders("co_order", "co"); // ✅ FIX: body string "checkout"
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
         attachOrderTypeWatcher("co_order", "co");
-        const u = getAuthedUser();
-        if (u?.name) $('co_nama').value = u.name;
       }
       if (v === "jadwal") {
         initJadwal();
@@ -1077,8 +936,7 @@ async function ensureUsersLoaded(){
         const dt = new DataTransfer();
         (_photoStore[inputId] || []).slice(0, MAX_PHOTOS).forEach(f => dt.items.add(f));
         try { input.files = dt.files; } catch(e) {}
-      }
-      function render(){
+      }     function render(){
         preview.innerHTML = "";
         const files = (_photoStore[inputId] || []).slice(0, MAX_PHOTOS);
 
@@ -1128,76 +986,82 @@ async function ensureUsersLoaded(){
     }
 
     /* ===================== FIX: FLOW GET ORDER ==================== */
+    // Flow Anda minta BODY string (schema: type=string)
+    // dan response berupa ARRAY langsung: [{Name:"orderNumber", Value:"SPVaksin - 2026-02-00008"}, ...]
     async function loadOrders(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
+  const sel = $(selectId);
+  if(!sel) return;
 
-      // reset dropdown
-      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+  // reset dropdown
+  sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
 
-      const warn = $(prefix + "_warn");
-      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+  const warn = $(prefix + "_warn");
+  if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
 
-      const bodyText = (prefix === "co") ? "checkout" : "checkin";
+  // Flow trigger schema: type=string → body harus string mentah
+  const bodyText = (prefix === "co") ? "checkout" : "checkin";
 
-      try{
-        showLoading("⏳ Memuat nomor order...");
+  try{
+    showLoading("⏳ Memuat nomor order...");
 
-        const resp = await fetch(FLOW_GET_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain; charset=utf-8",
-            "Accept": "application/json"
-          },
-          body: bodyText
-        });
+    const resp = await fetch(FLOW_GET_ORDER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Accept": "application/json"
+      },
+      body: bodyText
+    });
 
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { data = null; }
+    const text = await resp.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = null; }
 
-        if(!resp.ok){
-          throw new Error(`HTTP ${resp.status}: ${text}`);
-        }
-
-        const arr =
-          Array.isArray(data?.orders) ? data.orders :
-          Array.isArray(data?.items)  ? data.items  :
-          Array.isArray(data?.value)  ? data.value  :
-          Array.isArray(data)         ? data        : null;
-
-        if(!Array.isArray(arr)){
-          throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
-        }
-
-        arr.forEach(it=>{
-          const v = (it?.Value ?? it?.value ?? "").toString().trim();
-          if(!v) return;
-
-          const low = v.toLowerCase();
-          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
-            ? "servis"
-            : "vaksin";
-
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          sel.appendChild(opt);
-        });
-
-        // trigger watcher
-        sel.dispatchEvent(new Event("change"));
-
-      }catch(e){
-        console.error("loadOrders error:", e);
-        if(warn){
-          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
-          warn.classList.remove("hidden");
-        }
-      }finally{
-        hideLoading();
-      }
+    if(!resp.ok){
+      throw new Error(`HTTP ${resp.status}: ${text}`);
     }
+
+    // ✅ FIX: ambil array dari data.orders (fallback: data.items / data.value)
+    const arr =
+      Array.isArray(data?.orders) ? data.orders :
+      Array.isArray(data?.items)  ? data.items  :
+      Array.isArray(data?.value)  ? data.value  :
+      Array.isArray(data)         ? data        : null;
+
+    if(!Array.isArray(arr)){
+      throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
+    }
+
+    // isi dropdown (tampil FULL)
+    arr.forEach(it=>{
+      const v = (it?.Value ?? it?.value ?? "").toString().trim();
+      if(!v) return;
+
+      // simpan tipe servis/vaksin agar hide/show field berjalan
+      const low = v.toLowerCase();
+      ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+        ? "servis"
+        : "vaksin";
+
+      const opt = document.createElement("option");
+      opt.value = v;        // ✅ value full
+      opt.textContent = v;  // ✅ tampil full
+      sel.appendChild(opt);
+    });
+
+    // trigger watcher
+    sel.dispatchEvent(new Event("change"));
+
+  }catch(e){
+    console.error("loadOrders error:", e);
+    if(warn){
+      warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
+      warn.classList.remove("hidden");
+    }
+  }finally{
+    hideLoading();
+  }
+}
 
     /* ===================== UTIL: ORDER TYPE ======================= */
     function getOrderTypeFromValue(val) {
@@ -1212,6 +1076,7 @@ async function ensureUsersLoaded(){
       const sel = $(selectId);
       if(!sel) return;
 
+      // bind sekali saja
       if(sel.dataset.watched === "1") return;
       sel.dataset.watched = "1";
 
@@ -1244,17 +1109,19 @@ async function ensureUsersLoaded(){
       apply();
     }
 
-    /* ===================== RESET FORM ========================== */
+    /* ===================== RESET FORM (AMAN BACK) ================== */
     function resetForm(prefix, reloadOrders = true){
       const warn = $(prefix + "_warn");
       if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
 
+      // umum
       const nama = $(prefix + "_nama");
       if(nama) nama.value = "";
 
       const catatan = $(prefix + "_catatan");
       if(catatan) catatan.value = "";
 
+      // order
       const orderSel = $(prefix + "_order");
       if(orderSel){
         orderSel.value = "";
@@ -1269,6 +1136,7 @@ async function ensureUsersLoaded(){
         $("ci_kondisi").value = "";
         resetBatches();
 
+        // reset foto
         _photoStore["ci_fotos"] = [];
         try{ $("ci_fotos").files = new DataTransfer().files; }catch(e){}
         $("ci_fotos_preview").innerHTML = "";
@@ -1285,73 +1153,80 @@ async function ensureUsersLoaded(){
       }
     }
 
-    /* ===================== FOTO -> BASE64 & PAYLOAD ============ */
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => {
-          const result = String(r.result || "");
-          const base64 = result.includes(",") ? result.split(",")[1] : result;
-          resolve(base64);
-        };
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
+    /* ===================== GO HOME (FIX KEMBALI) ================== */
+    function goHome(prefix) {
+      try { resetForm(prefix, false); } catch(e) {}
+      show("home");
     }
+/* ===================== FOTO -> BASE64 & BUILD PAYLOAD ============ */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const result = String(r.result || "");
+      const base64 = result.includes(",") ? result.split(",")[1] : result;
+      resolve(base64);
+    };
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
 
-    async function buildPhotosPayload(inputId, prefix) {
-      const input = $(inputId);
-      const files = Array.from(input?.files || []).slice(0, MAX_PHOTOS);
-      const photos = [];
+async function buildPhotosPayload(inputId, prefix) {
+  const input = $(inputId);
+  const files = Array.from(input?.files || []).slice(0, MAX_PHOTOS);
+  const photos = [];
 
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (!f || !(f.type || "").startsWith("image/")) continue;
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    if (!f || !(f.type || "").startsWith("image/")) continue;
 
-        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
-        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
+    const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+    const safeName = `${prefix}_photo_${i + 1}.${ext}`;
 
-        photos.push({
-          fileName: safeName,
-          contentType: f.type || "application/octet-stream",
-          contentBytes: await fileToBase64(f),
-        });
-      }
-      return photos;
-    }
+    photos.push({
+      fileName: safeName,
+      contentType: f.type || "application/octet-stream",
+      contentBytes: await fileToBase64(f),
+    });
+  }
+  return photos;
+}
+function sanitizeText(val) {
+  return String(val ?? "")
+    .replace(/[<>{}$$$$\\\/'"`;&]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-    function sanitizeText(val) {
-      return String(val ?? "")
-        .replace(/[<>#${}\\\/'"`;&]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
+function cleanPayload(obj) {
+  const copy = { ...obj };
+  if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
+  if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
+  if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
+  if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
+  if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
+  if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+  return copy;
+}
+async function sendJson(url, payload) {
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 
-    function cleanPayload(obj) {
-      const copy = { ...obj };
-      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
-      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
-      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
-      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
-      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
-      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
-      return copy;
-    }
+  const text = await resp.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  return { ok: resp.ok, status: resp.status, data };
+}
 
-    async function sendJson(url, payload) {
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
 
-      const text = await resp.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = { raw: text }; }
-      return { ok: resp.ok, status: resp.status, data };
-    }
+    /* ===================== SUBMIT: CEK-IN (LANJUT KODE ANDA) ====== */
+    // NOTE: bagian submitCI/submitCO di bawah ini saya tulis persis mengikuti struktur Anda sebelumnya
+    // (tidak mengubah field & payload selain memastikan tetap memakai orderNumber dari dropdown)
 
-    /* ===================== SUBMIT: CEK-IN ====================== */
     async function submitCI() {
       const warn = $("ci_warn");
       warn.classList.add("hidden");
@@ -1399,7 +1274,7 @@ async function ensureUsersLoaded(){
         const basePayload = {
           appKey: APP_KEY,
           formType: "checkin",
-          orderNumber: order,
+          orderNumber: order, // FULL string sesuai dropdown
           namaVaksinator: nama,
           tanggal: $("ci_tanggal").value,
           jam: $("ci_jam").value,
@@ -1436,7 +1311,7 @@ async function ensureUsersLoaded(){
       }
     }
 
-    /* ===================== SUBMIT: CEK-OUT ===================== */
+    /* ===================== SUBMIT: CEK-OUT ======================== */
     async function submitCO() {
       const warn = $("co_warn");
       warn.classList.add("hidden");
@@ -1480,7 +1355,7 @@ async function ensureUsersLoaded(){
         const basePayload = {
           appKey: APP_KEY,
           formType: "checkout",
-          orderNumber: order,
+          orderNumber: order, // FULL string sesuai dropdown
           namaVaksinator: nama,
           noKandang: kandang,
           tanggal: $("co_tanggal").value,
@@ -1518,20 +1393,7 @@ async function ensureUsersLoaded(){
       }
     }
 
-    /* ===================== BOOT ================================ */
-    function boot(){
-      // Jika sudah ada sesi → langsung ke Home, jika belum → Login
-      const u = getAuthedUser();
-      if (u){
-        updateHomeGreeting();
-        show('home');
-      }else{
-        show('login');
-      }
-    }
-
-    // Jalankan saat load
-    (function(){ boot(); })();
+    /* ===================== END SCRIPT ============================ */
   </script>
 </body>
 </html>
