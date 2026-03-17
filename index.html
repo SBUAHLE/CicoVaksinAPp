@@ -264,7 +264,7 @@
         </div>
       </div>
 
-      <!-- ============ FOTO CEK-IN (DI-GANTI PENUH) ============ -->
+      <!-- ============ FOTO CEK-IN ============ -->
       <label>Upload Foto (maks. 5)</label>
       <input
         type="file"
@@ -275,11 +275,13 @@
       />
       <div class="hint">
         Pilih 1–5 foto. Bisa hapus per-foto (ikon ×) atau hapus semua.<br/>
-        Jika perangkat tidak langsung membuka kamera, gunakan tombol <b>📷 Ambil dari Kamera</b> di bawah.
+        Klik tombol <b>➕ Pilih Foto</b> untuk pilih <b>Kamera</b> atau <b>Galeri</b>.
       </div>
       <div id="ci_fotos_preview" class="photos-preview"></div>
       <div class="btn-group">
-        <button type="button" class="btn btn-primary" onclick="openCameraFor('ci_fotos')">📷 Ambil dari Kamera</button>
+        <button type="button" class="btn btn-primary" onclick="openPhotoChooser('ci_fotos')">
+          ➕ Pilih Foto (Kamera / Galeri)
+        </button>
         <button type="button" id="ci_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
       <!-- ============ /FOTO CEK-IN ============ -->
@@ -354,7 +356,7 @@
         <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
       </div>
 
-      <!-- ============ FOTO CEK-OUT (DI-GANTI PENUH) ============ -->
+      <!-- ============ FOTO CEK-OUT ============ -->
       <label>Upload Foto (maks. 5)</label>
       <input
         type="file"
@@ -365,11 +367,13 @@
       />
       <div class="hint">
         Pilih 1–5 foto. Bisa hapus per-foto (ikon ×) atau hapus semua.<br/>
-        Jika perangkat tidak langsung membuka kamera, gunakan tombol <b>📷 Ambil dari Kamera</b> di bawah.
+        Klik tombol <b>➕ Pilih Foto</b> untuk pilih <b>Kamera</b> atau <b>Galeri</b>.
       </div>
       <div id="co_fotos_preview" class="photos-preview"></div>
       <div class="btn-group">
-        <button type="button" class="btn btn-primary" onclick="openCameraFor('co_fotos')">📷 Ambil dari Kamera</button>
+        <button type="button" class="btn btn-primary" onclick="openPhotoChooser('co_fotos')">
+          ➕ Pilih Foto (Kamera / Galeri)
+        </button>
         <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
       <!-- ============ /FOTO CEK-OUT ============ -->
@@ -474,8 +478,27 @@
     ⏳ Memproses...
   </div>
 
+  <!-- ====================== MODAL PILIH SUMBER FOTO =================== -->
+  <div id="photo_choice_modal" class="hidden" style="
+    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99998;
+    display:flex; align-items:center; justify-content:center;">
+    <div class="card" style="max-width:360px; width:92%; text-align:center;">
+      <div style="font-size:20px; font-weight:700; color:#1e3a8a; margin-bottom:8px;">
+        Pilih Sumber Foto
+      </div>
+      <div class="hint" style="margin-bottom:10px;">
+        Ambil foto baru dari kamera atau pilih dari galeri.
+      </div>
+      <div class="btn-group" style="justify-content:center;">
+        <button type="button" class="btn btn-primary" id="pc_choice_camera">📷 Kamera</button>
+        <button type="button" class="btn btn-ghost"   id="pc_choice_gallery">🖼 Galeri</button>
+        <button type="button" class="btn btn-danger"  id="pc_choice_cancel">✖ Batal</button>
+      </div>
+    </div>
+  </div>
+  <!-- ====================== /MODAL PILIH SUMBER FOTO =================== -->
+
   <!-- ====================== MODAL KAMERA (getUserMedia) =================== -->
-  <!-- DILETAKKAN DI AKHIR <body>, SEBELUM <script> BESAR -->
   <div id="cam_modal" class="hidden" style="
     position:fixed; inset:0; background:rgba(0,0,0,.7);
     display:flex; align-items:center; justify-content:center; z-index:99999;">
@@ -988,7 +1011,6 @@
         loadOrders("ci_order", "ci");
         attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
         attachOrderTypeWatcher("ci_order", "ci");
-        // Prefill nama dari user login (opsional)
         const u = getAuthedUser();
         if (u?.name) $('ci_nama').value = u.name;
       }
@@ -1274,6 +1296,65 @@
       _camTargetInputId = null;
     }
 
+    /* ===================== PHOTO CHOOSER (Popup: Kamera / Galeri) ===================== */
+    let _photoChooserTarget = null; // 'ci_fotos' | 'co_fotos'
+
+    function openPhotoChooser(inputId){
+      _photoChooserTarget = inputId || null;
+
+      const modal = document.getElementById('photo_choice_modal');
+      const btnCam = document.getElementById('pc_choice_camera');
+      const btnGal = document.getElementById('pc_choice_gallery');
+      const btnCancel = document.getElementById('pc_choice_cancel');
+
+      if (!modal || !btnCam || !btnGal || !btnCancel) {
+        alert('Komponen Photo Chooser tidak ditemukan.');
+        return;
+      }
+
+      // Tampilkan modal
+      modal.classList.remove('hidden');
+
+      // Bersihkan listener lama agar tidak dobel
+      btnCam.onclick = null;
+      btnGal.onclick = null;
+      btnCancel.onclick = null;
+      modal.onclick = null;
+
+      // Klik di luar card: tutup
+      modal.onclick = (e) => {
+        if (e.target === modal) closePhotoChooser();
+      };
+
+      btnCam.onclick = () => {
+        try {
+          openCameraFor(_photoChooserTarget, 'environment');
+        } finally {
+          closePhotoChooser();
+        }
+      };
+
+      btnGal.onclick = () => {
+        try {
+          const input = document.getElementById(_photoChooserTarget);
+          if (!input) throw new Error('Input target tidak ditemukan.');
+          input.click(); // buka file picker (galeri)
+        } catch (e) {
+          alert(e?.message || e);
+        } finally {
+          closePhotoChooser();
+        }
+      };
+
+      btnCancel.onclick = closePhotoChooser;
+    }
+
+    function closePhotoChooser(){
+      const modal = document.getElementById('photo_choice_modal');
+      if (modal) modal.classList.add('hidden');
+      _photoChooserTarget = null;
+    }
+
     /* ===================== FIX: FLOW GET ORDER (v2 JSON + Branch) ==================== */
     async function loadOrders(selectId, prefix){
       const sel = $(selectId);
@@ -1334,7 +1415,6 @@
 
         // Isi dropdown + map tipe (servis/vaksin)
         arr.forEach(it=>{
-          // Ambil nomor order dari beberapa kemungkinan properti
           const v = (it?.Value ?? it?.value ?? it?.orderNumber ?? "").toString().trim();
           if(!v) return;
 
@@ -1707,7 +1787,8 @@
     window.submitCO = submitCO;
     window.resetForm = resetForm;
     window.goHome = goHome;
-    window.openCameraFor = openCameraFor; // <— Export tombol kamera
+    window.openCameraFor = openCameraFor;
+    window.openPhotoChooser = openPhotoChooser;
 
     // Jalankan saat load
     (function(){ boot(); })();
