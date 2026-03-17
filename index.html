@@ -264,8 +264,10 @@
         </div>
       </div>
 
-      <!-- ============ FOTO CEK-IN ============ -->
+      <!-- ============ FOTO CEK-IN (Kamera lewat Choose File + Tombol Galeri) ============ -->
       <label>Upload Foto (maks. 5)</label>
+
+      <!-- Input utama (prioritas kamera) -->
       <input
         type="file"
         id="ci_fotos"
@@ -273,14 +275,26 @@
         capture="environment"
         multiple
       />
+
       <div class="hint">
-        Pilih 1–5 foto. Bisa hapus per-foto (ikon ×) atau hapus semua.<br/>
-        Klik tombol <b>➕ Pilih Foto</b> untuk pilih <b>Kamera</b> atau <b>Galeri</b>.
+        Tombol <b>Choose File</b> akan membuka <b>Kamera</b> (prioritas).<br/>
+        Jika ingin memilih dari <b>Galeri</b>, gunakan tombol di bawah.
       </div>
+
       <div id="ci_fotos_preview" class="photos-preview"></div>
+
+      <!-- Input Galeri tersembunyi (tanpa capture) -->
+      <input
+        type="file"
+        id="ci_fotos_gallery"
+        accept="image/*"
+        multiple
+        style="display:none"
+      />
+
       <div class="btn-group">
-        <button type="button" class="btn btn-primary" onclick="openPhotoChooser('ci_fotos')">
-          ➕ Pilih Foto (Kamera / Galeri)
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('ci_fotos_gallery').click()">
+          🖼 Pilih dari Galeri
         </button>
         <button type="button" id="ci_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
@@ -356,8 +370,10 @@
         <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
       </div>
 
-      <!-- ============ FOTO CEK-OUT ============ -->
+      <!-- ============ FOTO CEK-OUT (Kamera lewat Choose File + Tombol Galeri) ============ -->
       <label>Upload Foto (maks. 5)</label>
+
+      <!-- Input utama (prioritas kamera) -->
       <input
         type="file"
         id="co_fotos"
@@ -365,14 +381,26 @@
         capture="environment"
         multiple
       />
+
       <div class="hint">
-        Pilih 1–5 foto. Bisa hapus per-foto (ikon ×) atau hapus semua.<br/>
-        Klik tombol <b>➕ Pilih Foto</b> untuk pilih <b>Kamera</b> atau <b>Galeri</b>.
+        Tombol <b>Choose File</b> akan membuka <b>Kamera</b> (prioritas).<br/>
+        Jika ingin memilih dari <b>Galeri</b>, gunakan tombol di bawah.
       </div>
+
       <div id="co_fotos_preview" class="photos-preview"></div>
+
+      <!-- Input Galeri tersembunyi (tanpa capture) -->
+      <input
+        type="file"
+        id="co_fotos_gallery"
+        accept="image/*"
+        multiple
+        style="display:none"
+      />
+
       <div class="btn-group">
-        <button type="button" class="btn btn-primary" onclick="openPhotoChooser('co_fotos')">
-          ➕ Pilih Foto (Kamera / Galeri)
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('co_fotos_gallery').click()">
+          🖼 Pilih dari Galeri
         </button>
         <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
@@ -478,46 +506,6 @@
     ⏳ Memproses...
   </div>
 
-  <!-- ====================== MODAL PILIH SUMBER FOTO =================== -->
-  <div id="photo_choice_modal" class="hidden" style="
-    position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99998;
-    display:flex; align-items:center; justify-content:center;">
-    <div class="card" style="max-width:360px; width:92%; text-align:center;">
-      <div style="font-size:20px; font-weight:700; color:#1e3a8a; margin-bottom:8px;">
-        Pilih Sumber Foto
-      </div>
-      <div class="hint" style="margin-bottom:10px;">
-        Ambil foto baru dari kamera atau pilih dari galeri.
-      </div>
-      <div class="btn-group" style="justify-content:center;">
-        <button type="button" class="btn btn-primary" id="pc_choice_camera">📷 Kamera</button>
-        <button type="button" class="btn btn-ghost"   id="pc_choice_gallery">🖼 Galeri</button>
-        <button type="button" class="btn btn-danger"  id="pc_choice_cancel">✖ Batal</button>
-      </div>
-    </div>
-  </div>
-  <!-- ====================== /MODAL PILIH SUMBER FOTO =================== -->
-
-  <!-- ====================== MODAL KAMERA (getUserMedia) =================== -->
-  <div id="cam_modal" class="hidden" style="
-    position:fixed; inset:0; background:rgba(0,0,0,.7);
-    display:flex; align-items:center; justify-content:center; z-index:99999;">
-    <div style="background:#111; padding:12px; border-radius:12px; width:min(520px, 96%); color:#fff;">
-      <div style="position:relative;">
-        <video id="cam_video" autoplay playsinline style="width:100%; border-radius:8px; background:#000;"></video>
-        <canvas id="cam_canvas" class="hidden"></canvas>
-      </div>
-      <div class="btn-group" style="justify-content:center; margin-top:10px; flex-wrap:wrap;">
-        <button type="button" class="btn btn-primary" id="cam_shoot">📸 Ambil</button>
-        <button type="button" class="btn btn-ghost"   id="cam_retake">↺ Ulangi</button>
-        <button type="button" class="btn btn-primary" id="cam_use">✅ Pakai Foto</button>
-        <button type="button" class="btn btn-danger"  id="cam_close">✖ Tutup</button>
-      </div>
-      <div class="hint" style="text-align:center;margin-top:6px;">Arahkan kamera lalu tekan “Ambil”.</div>
-    </div>
-  </div>
-  <!-- ====================== /MODAL KAMERA =================== -->
-
   <!-- ====================== SCRIPT / LOGIC ==================== -->
   <script>
     /* ===================== KONFIGURASI ENDPOINT =============== */
@@ -544,7 +532,6 @@
 
     /* ===================== USERS JSON (jadwal) ================ */
     const USERS_JSON_URL = new URL('data/users.json', document.baseURI).toString();
-    // const USERS_JSON_URL = new URL('../data/users.json', document.baseURI).toString();
 
     let userDict = null;
 
@@ -555,11 +542,6 @@
       }[c]));
     }
 
-    /**
-     * Loader users:
-     * - Tangani error fetch dengan pesan jelas (path/CORS/404).
-     * - Validasi struktur dictionary keyed-by-email.
-     */
     async function ensureUsersLoaded(){
       if (userDict) return userDict;
 
@@ -1010,6 +992,7 @@
         initBatches();
         loadOrders("ci_order", "ci");
         attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
+        bindGalleryPicker("ci"); // <-- aktifkan galeri tersembunyi
         attachOrderTypeWatcher("ci_order", "ci");
         const u = getAuthedUser();
         if (u?.name) $('ci_nama').value = u.name;
@@ -1018,6 +1001,7 @@
         init("co");
         loadOrders("co_order", "co");
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
+        bindGalleryPicker("co"); // <-- aktifkan galeri tersembunyi
         attachOrderTypeWatcher("co_order", "co");
         const u = getAuthedUser();
         if (u?.name) $('co_nama').value = u.name;
@@ -1184,416 +1168,40 @@
       render();
     }
 
-    /* ===================== KAMERA (getUserMedia) ===================== */
-    let _camStream = null;
-    let _camTargetInputId = null;
+    /* ===================== GALERI PICKER -> GABUNG KE INPUT UTAMA ===================== */
+    function bindGalleryPicker(prefix){
+      const mainInputId = prefix + '_fotos';           // contoh: 'ci_fotos'
+      const galInputId  = prefix + '_fotos_gallery';   // contoh: 'ci_fotos_gallery'
+      const previewId   = prefix + '_fotos_preview';
+      const clearBtnId  = prefix + '_fotos_clear';
 
-    /**
-     * Buka kamera di modal.
-     * @param {string} inputId - 'ci_fotos' | 'co_fotos'
-     * @param {('environment'|'user')} facing - default 'environment' (kamera belakang)
-     */
-    async function openCameraFor(inputId, facing='environment') {
-      const modal = $('cam_modal');
-      const video = $('cam_video');
-      const canvas = $('cam_canvas');
-      const btnShoot = $('cam_shoot');
-      const btnRetake = $('cam_retake');
-      const btnUse = $('cam_use');
-      const btnClose = $('cam_close');
+      const mainInput = document.getElementById(mainInputId);
+      const galInput  = document.getElementById(galInputId);
+      if(!mainInput || !galInput) return;
 
-      _camTargetInputId = inputId;
-      canvas.classList.add('hidden');
-      video.classList.remove('hidden');
+      if (galInput.dataset.bound === '1') return;
+      galInput.dataset.bound = '1';
 
-      // Pastikan API tersedia
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Kamera tidak didukung di perangkat/browser ini.');
-        return;
-      }
+      galInput.addEventListener('change', ()=>{
+        const picked = Array.from(galInput.files || []).filter(f => (f.type || '').startsWith('image/'));
+        if (!_photoStore[mainInputId]) _photoStore[mainInputId] = [];
 
-      // Minta akses kamera
-      try {
-        _camStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false
-        });
-        video.srcObject = _camStream;
-        const playPromise = video.play?.();
-        if (playPromise && typeof playPromise.then === 'function') {
-          playPromise.catch(()=>{/* ignore autoplay block */});
-        }
-        modal.classList.remove('hidden');
-      } catch(e) {
-        alert('Tidak bisa mengakses kamera: ' + (e?.message || e));
-        _camStream = null;
-        return;
-      }
+        // Gabungkan + patuhi limit
+        const merged = (_photoStore[mainInputId] || []).concat(picked).slice(0, MAX_PHOTOS);
+        _photoStore[mainInputId] = merged;
 
-      // Ambil frame -> tampil ke canvas
-      btnShoot.onclick = () => {
-        const w = video.videoWidth || 1280;
-        const h = video.videoHeight || 720;
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, w, h);
-        canvas.classList.remove('hidden');
-        video.classList.add('hidden');
-      };
+        // Sinkron ke input utama
+        const dt = new DataTransfer();
+        merged.forEach(f => dt.items.add(f));
+        try { mainInput.files = dt.files; } catch(e){}
 
-      // Ulangi foto (kembali ke live)
-      btnRetake.onclick = () => {
-        canvas.classList.add('hidden');
-        video.classList.remove('hidden');
-      };
+        // Render ulang preview dengan handler existing
+        attachMultiPhotoHandler(mainInputId, previewId, clearBtnId); // no-op jika sudah bound
+        mainInput.dispatchEvent(new Event('change'));
 
-      // Simpan foto -> jadikan File -> masuk ke store & sinkron ke <input>
-      btnUse.onclick = async () => {
-        if (canvas.classList.contains('hidden')) {
-          alert('Ambil foto dulu.');
-          return;
-        }
-        canvas.toBlob((blob) => {
-          if (!blob) return;
-          const fname = `${_camTargetInputId}_camera_${Date.now()}.jpg`;
-          const file = new File([blob], fname, { type: 'image/jpeg' });
-
-          if (!_photoStore[_camTargetInputId]) _photoStore[_camTargetInputId] = [];
-          if (_photoStore[_camTargetInputId].length >= MAX_PHOTOS) {
-            alert(`Maksimal ${MAX_PHOTOS} foto.`);
-            return;
-          }
-          _photoStore[_camTargetInputId].push(file);
-
-          // Sinkronkan ke input
-          const input = $(_camTargetInputId);
-          const dt = new DataTransfer();
-          _photoStore[_camTargetInputId].slice(0, MAX_PHOTOS).forEach(f => dt.items.add(f));
-          try { input.files = dt.files; } catch(e){}
-
-          // Paksa render ulang preview pakai handler yang sudah ada
-          const previewId = (_camTargetInputId === 'ci_fotos') ? 'ci_fotos_preview' : 'co_fotos_preview';
-          const clearBtnId = (_camTargetInputId === 'ci_fotos') ? 'ci_fotos_clear' : 'co_fotos_clear';
-          attachMultiPhotoHandler(_camTargetInputId, previewId, clearBtnId); // no-op jika sudah bound
-          input.dispatchEvent(new Event('change'));
-
-          closeCamera();
-        }, 'image/jpeg', 0.9); // kompresi 90%
-      };
-
-      btnClose.onclick = closeCamera;
-    }
-
-    function closeCamera(){
-      const modal = $('cam_modal');
-      const video = $('cam_video');
-      modal.classList.add('hidden');
-      if (_camStream) {
-        _camStream.getTracks().forEach(t => t.stop());
-        _camStream = null;
-      }
-      video.srcObject = null;
-      _camTargetInputId = null;
-    }
-
-    /* ===================== PHOTO CHOOSER (Popup: Kamera / Galeri) ===================== */
-    let _photoChooserTarget = null; // 'ci_fotos' | 'co_fotos'
-
-    function openPhotoChooser(inputId){
-      _photoChooserTarget = inputId || null;
-
-      const modal = document.getElementById('photo_choice_modal');
-      const btnCam = document.getElementById('pc_choice_camera');
-      const btnGal = document.getElementById('pc_choice_gallery');
-      const btnCancel = document.getElementById('pc_choice_cancel');
-
-      if (!modal || !btnCam || !btnGal || !btnCancel) {
-        alert('Komponen Photo Chooser tidak ditemukan.');
-        return;
-      }
-
-      // Tampilkan modal
-      modal.classList.remove('hidden');
-
-      // Bersihkan listener lama agar tidak dobel
-      btnCam.onclick = null;
-      btnGal.onclick = null;
-      btnCancel.onclick = null;
-      modal.onclick = null;
-
-      // Klik di luar card: tutup
-      modal.onclick = (e) => {
-        if (e.target === modal) closePhotoChooser();
-      };
-
-      btnCam.onclick = () => {
-        try {
-          openCameraFor(_photoChooserTarget, 'environment');
-        } finally {
-          closePhotoChooser();
-        }
-      };
-
-      btnGal.onclick = () => {
-        try {
-          const input = document.getElementById(_photoChooserTarget);
-          if (!input) throw new Error('Input target tidak ditemukan.');
-          input.click(); // buka file picker (galeri)
-        } catch (e) {
-          alert(e?.message || e);
-        } finally {
-          closePhotoChooser();
-        }
-      };
-
-      btnCancel.onclick = closePhotoChooser;
-    }
-
-    function closePhotoChooser(){
-      const modal = document.getElementById('photo_choice_modal');
-      if (modal) modal.classList.add('hidden');
-      _photoChooserTarget = null;
-    }
-
-    /* ===================== FIX: FLOW GET ORDER (v2 JSON + Branch) ==================== */
-    async function loadOrders(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
-
-      // reset dropdown
-      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
-
-      const warn = $(prefix + "_warn");
-      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
-
-      // "checkin" / "checkout"
-      const formType = (prefix === "co") ? "checkout" : "checkin";
-
-      // Ambil user login
-      const user = getAuthedUser?.() || null;
-      const isAdminAll = ((user?.branch || '').trim().toUpperCase() === 'ALL');
-
-      // Payload JSON baru ke Flow (menyerahkan filter cabang ke Flow)
-      const payload = {
-        mode: 'getOrders',
-        form: formType,
-        branch: isAdminAll ? '' : (user?.branch || ''),
-        allBranches: isAdminAll,
-        xApiKey: APP_KEY
-      };
-
-      try{
-        showLoading("⏳ Memuat nomor order...");
-
-        const resp = await fetch(FLOW_GET_ORDER_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { data = null; }
-
-        if(!resp.ok){
-          throw new Error(`HTTP ${resp.status}: ${text}`);
-        }
-
-        // Normalisasi array hasil Flow (kompatibel berbagai bentuk)
-        const arr =
-          Array.isArray(data?.orders) ? data.orders :
-          Array.isArray(data?.items)  ? data.items  :
-          Array.isArray(data?.value)  ? data.value  :
-          Array.isArray(data)         ? data        : null;
-
-        if(!Array.isArray(arr)){
-          throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
-        }
-
-        // Isi dropdown + map tipe (servis/vaksin)
-        arr.forEach(it=>{
-          const v = (it?.Value ?? it?.value ?? it?.orderNumber ?? "").toString().trim();
-          if(!v) return;
-
-          const low = v.toLowerCase();
-          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
-            ? "servis"
-            : "vaksin";
-
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          sel.appendChild(opt);
-        });
-
-        // trigger watcher (untuk hide/show field sesuai tipe order)
-        sel.dispatchEvent(new Event("change"));
-
-      }catch(e){
-        console.error("loadOrders error:", e);
-        if(warn){
-          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
-          warn.classList.remove("hidden");
-        }
-      }finally{
-        hideLoading();
-      }
-    }
-
-    /* ===================== UTIL: ORDER TYPE ======================= */
-    function getOrderTypeFromValue(val) {
-      const key = String(val || "").trim();
-      if (key && ORDER_TYPE_MAP[key]) return ORDER_TYPE_MAP[key];
-      const v = key.toLowerCase();
-      if (v.includes("spservis") || v.includes("service") || v.includes("servis")) return "servis";
-      return "vaksin";
-    }
-
-    function attachOrderTypeWatcher(selectId, prefix){
-      const sel = $(selectId);
-      if(!sel) return;
-
-      if(sel.dataset.watched === "1") return;
-      sel.dataset.watched = "1";
-
-      const apply = ()=>{
-        const tipe = getOrderTypeFromValue(sel.value);
-        const isServis = (tipe === "servis");
-
-        if(prefix === "ci"){
-          $("ci_kondisi_wrap")?.classList.toggle("hidden", isServis);
-          $("ci_batch_section")?.classList.toggle("hidden", isServis);
-
-          if(isServis){
-            $("ci_kondisi").value = "";
-            resetBatches();
-          }
-        }
-
-        if(prefix === "co"){
-          $("co_ayam_wrap")?.classList.toggle("hidden", isServis);
-          $("co_vaksin_wrap")?.classList.toggle("hidden", isServis);
-
-          if(isServis){
-            $("co_ayam").value = "";
-            $("co_vaksin").value = "";
-          }
-        }
-      };
-
-      sel.addEventListener("change", apply);
-      apply();
-    }
-
-    /* ===================== RESET FORM ========================== */
-    function resetForm(prefix, reloadOrders = true){
-      const warn = $(prefix + "_warn");
-      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
-
-      const nama = $(prefix + "_nama");
-      if(nama) nama.value = "";
-
-      const catatan = $(prefix + "_catatan");
-      if(catatan) catatan.value = "";
-
-      const orderSel = $(prefix + "_order");
-      if(orderSel){
-        orderSel.value = "";
-        if(reloadOrders){
-          loadOrders(prefix + "_order", prefix);
-        }else{
-          orderSel.dispatchEvent(new Event("change"));
-        }
-      }
-
-      if(prefix === "ci"){
-        $("ci_kondisi").value = "";
-        resetBatches();
-
-        _photoStore["ci_fotos"] = [];
-        try{ $("ci_fotos").files = new DataTransfer().files; }catch(e){}
-        $("ci_fotos_preview").innerHTML = "";
-      }
-
-      if(prefix === "co"){
-        $("co_kandang").value = "";
-        $("co_ayam").value = "";
-        $("co_vaksin").value = "";
-
-        _photoStore["co_fotos"] = [];
-        try{ $("co_fotos").files = new DataTransfer().files; }catch(e){}
-        $("co_fotos_preview").innerHTML = "";
-      }
-    }
-
-    /* ===================== FOTO -> BASE64 & PAYLOAD ============ */
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => {
-          const result = String(r.result || "");
-          const base64 = result.includes(",") ? result.split(",")[1] : result;
-          resolve(base64);
-        };
-        r.onerror = reject;
-        r.readAsDataURL(file);
+        // Reset supaya event change berikutnya tetap terpanggil
+        galInput.value = '';
       });
-    }
-
-    async function buildPhotosPayload(inputId, prefix) {
-      const input = $(inputId);
-      const files = Array.from(input?.files || []).slice(0, MAX_PHOTOS);
-      const photos = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (!f || !(f.type || "").startsWith("image/")) continue;
-
-        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
-        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
-
-        photos.push({
-          fileName: safeName,
-          contentType: f.type || "application/octet-stream",
-          contentBytes: await fileToBase64(f),
-        });
-      }
-      return photos;
-    }
-
-    const SANITIZE_RE = /[<>#${}\\/'"`;&]/g;
-    function sanitizeText(val) {
-      return String(val ?? "")
-        .replace(SANITIZE_RE, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function cleanPayload(obj) {
-      const copy = { ...obj };
-      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
-      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
-      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
-      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
-      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
-      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
-      return copy;
-    }
-
-    async function sendJson(url, payload) {
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const text = await resp.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = { raw: text }; }
-      return { ok: resp.ok, status: resp.status, data };
     }
 
     /* ===================== SUBMIT: CEK-IN ====================== */
@@ -1787,8 +1395,7 @@
     window.submitCO = submitCO;
     window.resetForm = resetForm;
     window.goHome = goHome;
-    window.openCameraFor = openCameraFor;
-    window.openPhotoChooser = openPhotoChooser;
+    window.bindGalleryPicker = bindGalleryPicker;
 
     // Jalankan saat load
     (function(){ boot(); })();
