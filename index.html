@@ -184,7 +184,7 @@
       <div style="font-size:44px">💉</div>
       <h1>CICO VAKSINATOR</h1>
       <div id="home_greet" class="hint" style="margin:-6px 0 14px 0"></div>
-      <p>Sistem Check-In & Check-Out<br>Dengan Lokasi & Waktu Otomatis</p>
+      <p>Sistem Check-In &amp; Check-Out<br>Dengan Lokasi &amp; Waktu Otomatis</p>
       <div class="landing-actions">
         <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN</button>
         <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT</button>
@@ -264,17 +264,11 @@
         </div>
       </div>
 
-      <!-- ============ FOTO CEK-IN (Kamera lewat Choose File + Tombol Galeri) ============ -->
+      <!-- ================= FOTO (CEK-IN) ================= -->
       <label>Upload Foto (maks. 5)</label>
 
-      <!-- Input utama (prioritas kamera) -->
-      <input
-        type="file"
-        id="ci_fotos"
-        accept="image/*"
-        capture="environment"
-        multiple
-      />
+      <!-- Choose File (input utama): prioritas kamera -->
+      <input type="file" id="ci_fotos" accept="image/*" capture="environment" multiple />
 
       <div class="hint">
         Tombol <b>Choose File</b> akan membuka <b>Kamera</b> (prioritas).<br/>
@@ -283,14 +277,8 @@
 
       <div id="ci_fotos_preview" class="photos-preview"></div>
 
-      <!-- Input Galeri tersembunyi (tanpa capture) -->
-      <input
-        type="file"
-        id="ci_fotos_gallery"
-        accept="image/*"
-        multiple
-        style="display:none"
-      />
+      <!-- Input galeri tersembunyi: khusus galeri -->
+      <input type="file" id="ci_fotos_gallery" accept="image/*" multiple style="display:none" />
 
       <div class="btn-group">
         <button type="button" class="btn btn-primary" onclick="document.getElementById('ci_fotos_gallery').click()">
@@ -298,7 +286,7 @@
         </button>
         <button type="button" id="ci_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
-      <!-- ============ /FOTO CEK-IN ============ -->
+      <!-- ================= /FOTO (CEK-IN) ================= -->
 
       <label>Catatan</label>
       <textarea id="ci_catatan" placeholder="Opsional"></textarea>
@@ -370,17 +358,11 @@
         <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
       </div>
 
-      <!-- ============ FOTO CEK-OUT (Kamera lewat Choose File + Tombol Galeri) ============ -->
+      <!-- ================= FOTO (CEK-OUT) ================= -->
       <label>Upload Foto (maks. 5)</label>
 
-      <!-- Input utama (prioritas kamera) -->
-      <input
-        type="file"
-        id="co_fotos"
-        accept="image/*"
-        capture="environment"
-        multiple
-      />
+      <!-- Choose File (input utama): prioritas kamera -->
+      <input type="file" id="co_fotos" accept="image/*" capture="environment" multiple />
 
       <div class="hint">
         Tombol <b>Choose File</b> akan membuka <b>Kamera</b> (prioritas).<br/>
@@ -389,14 +371,8 @@
 
       <div id="co_fotos_preview" class="photos-preview"></div>
 
-      <!-- Input Galeri tersembunyi (tanpa capture) -->
-      <input
-        type="file"
-        id="co_fotos_gallery"
-        accept="image/*"
-        multiple
-        style="display:none"
-      />
+      <!-- Input galeri tersembunyi: khusus galeri -->
+      <input type="file" id="co_fotos_gallery" accept="image/*" multiple style="display:none" />
 
       <div class="btn-group">
         <button type="button" class="btn btn-primary" onclick="document.getElementById('co_fotos_gallery').click()">
@@ -404,7 +380,7 @@
         </button>
         <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
       </div>
-      <!-- ============ /FOTO CEK-OUT ============ -->
+      <!-- ================= /FOTO (CEK-OUT) ================= -->
 
       <label>Catatan</label>
       <textarea id="co_catatan" placeholder="Opsional"></textarea>
@@ -531,7 +507,11 @@
     let _authUser = null;
 
     /* ===================== USERS JSON (jadwal) ================ */
+    /**
+     * Path robust untuk GitHub Pages.
+     */
     const USERS_JSON_URL = new URL('data/users.json', document.baseURI).toString();
+    // const USERS_JSON_URL = new URL('../data/users.json', document.baseURI).toString();
 
     let userDict = null;
 
@@ -542,6 +522,9 @@
       }[c]));
     }
 
+    /**
+     * Loader users:
+     */
     async function ensureUsersLoaded(){
       if (userDict) return userDict;
 
@@ -622,7 +605,6 @@
     }
     function logout(){
       setAuthedUser(null);
-      // bersihkan tampilan
       resetForm('ci', false);
       resetForm('co', false);
       resetJadwal(true);
@@ -649,8 +631,6 @@
 
       setAuthedUser({ ...u, email });
       $('login_email').value = '';
-
-      // Masuk ke HOME
       show('home');
     }
 
@@ -658,10 +638,7 @@
       const u = getAuthedUser();
       const el = $('home_greet');
       if (!el) return;
-      if (!u){
-        el.textContent = '';
-        return;
-      }
+      if (!u){ el.textContent = ''; return; }
       el.textContent = `Masuk sebagai: ${u?.name || '-'} • Cabang: ${u?.branch || '-'} • Role: ${u?.role || '-'}`;
     }
 
@@ -979,7 +956,7 @@
       // guard: semua view kecuali "login" harus auth
       if (v !== 'login'){
         const u = requireAuthOrGoLogin();
-        if (!u) return; // sudah dialihkan ke login
+        if (!u) return;
       }
 
       showOnly(v);
@@ -992,7 +969,7 @@
         initBatches();
         loadOrders("ci_order", "ci");
         attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
-        bindGalleryPicker("ci"); // <-- aktifkan galeri tersembunyi
+        bindGalleryPicker("ci"); // <-- tambahan galeri (tidak mengganggu loadOrders)
         attachOrderTypeWatcher("ci_order", "ci");
         const u = getAuthedUser();
         if (u?.name) $('ci_nama').value = u.name;
@@ -1001,7 +978,7 @@
         init("co");
         loadOrders("co_order", "co");
         attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
-        bindGalleryPicker("co"); // <-- aktifkan galeri tersembunyi
+        bindGalleryPicker("co"); // <-- tambahan galeri
         attachOrderTypeWatcher("co_order", "co");
         const u = getAuthedUser();
         if (u?.name) $('co_nama').value = u.name;
@@ -1009,7 +986,6 @@
       if (v === "jadwal") {
         initJadwal();
       }
-      // detail: tidak init
     }
 
     function goHome(prefix) {
@@ -1103,6 +1079,7 @@
 
     /* ===================== FOTO HANDLER (multi + delete) ====== */
     const _photoStore = Object.create(null);
+
     function attachMultiPhotoHandler(inputId, previewId, clearBtnId){
       const input = $(inputId);
       const preview = $(previewId);
@@ -1119,6 +1096,7 @@
         (_photoStore[inputId] || []).slice(0, MAX_PHOTOS).forEach(f => dt.items.add(f));
         try { input.files = dt.files; } catch(e) {}
       }
+
       function render(){
         preview.innerHTML = "";
         const files = (_photoStore[inputId] || []).slice(0, MAX_PHOTOS);
@@ -1164,14 +1142,13 @@
         render();
       });
 
-      // render awal
       render();
     }
 
     /* ===================== GALERI PICKER -> GABUNG KE INPUT UTAMA ===================== */
     function bindGalleryPicker(prefix){
-      const mainInputId = prefix + '_fotos';           // contoh: 'ci_fotos'
-      const galInputId  = prefix + '_fotos_gallery';   // contoh: 'ci_fotos_gallery'
+      const mainInputId = prefix + '_fotos';           // ci_fotos / co_fotos
+      const galInputId  = prefix + '_fotos_gallery';   // ci_fotos_gallery / co_fotos_gallery
       const previewId   = prefix + '_fotos_preview';
       const clearBtnId  = prefix + '_fotos_clear';
 
@@ -1186,22 +1163,261 @@
         const picked = Array.from(galInput.files || []).filter(f => (f.type || '').startsWith('image/'));
         if (!_photoStore[mainInputId]) _photoStore[mainInputId] = [];
 
-        // Gabungkan + patuhi limit
         const merged = (_photoStore[mainInputId] || []).concat(picked).slice(0, MAX_PHOTOS);
         _photoStore[mainInputId] = merged;
 
-        // Sinkron ke input utama
         const dt = new DataTransfer();
         merged.forEach(f => dt.items.add(f));
         try { mainInput.files = dt.files; } catch(e){}
 
-        // Render ulang preview dengan handler existing
-        attachMultiPhotoHandler(mainInputId, previewId, clearBtnId); // no-op jika sudah bound
+        // re-render via handler existing
+        attachMultiPhotoHandler(mainInputId, previewId, clearBtnId);
         mainInput.dispatchEvent(new Event('change'));
 
-        // Reset supaya event change berikutnya tetap terpanggil
+        // reset gal input agar pilih file sama tetap trigger
         galInput.value = '';
       });
+    }
+
+    /* ===================== FIX: FLOW GET ORDER (v2 JSON + Branch) ==================== */
+    async function loadOrders(selectId, prefix){
+      const sel = $(selectId);
+      if(!sel) return;
+
+      // reset dropdown
+      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+
+      const warn = $(prefix + "_warn");
+      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+
+      // "checkin" / "checkout"
+      const formType = (prefix === "co") ? "checkout" : "checkin";
+
+      // Ambil user login
+      const user = getAuthedUser?.() || null;
+      const isAdminAll = ((user?.branch || '').trim().toUpperCase() === 'ALL');
+
+      // Payload JSON baru ke Flow
+      const payload = {
+        mode: 'getOrders',
+        form: formType,
+        branch: isAdminAll ? '' : (user?.branch || ''),
+        allBranches: isAdminAll,
+        xApiKey: APP_KEY
+      };
+
+      try{
+        showLoading("⏳ Memuat nomor order...");
+
+        const resp = await fetch(FLOW_GET_ORDER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await resp.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = null; }
+
+        if(!resp.ok){
+          throw new Error(`HTTP ${resp.status}: ${text}`);
+        }
+
+        // Normalisasi array hasil Flow
+        const arr =
+          Array.isArray(data?.orders) ? data.orders :
+          Array.isArray(data?.items)  ? data.items  :
+          Array.isArray(data?.value)  ? data.value  :
+          Array.isArray(data)         ? data        : null;
+
+        if(!Array.isArray(arr)){
+          throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
+        }
+
+        // Isi dropdown + map tipe
+        arr.forEach(it=>{
+          const v = (it?.Value ?? it?.value ?? it?.orderNumber ?? "").toString().trim();
+          if(!v) return;
+
+          const low = v.toLowerCase();
+          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+            ? "servis"
+            : "vaksin";
+
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          sel.appendChild(opt);
+        });
+
+        // trigger watcher
+        sel.dispatchEvent(new Event("change"));
+
+      }catch(e){
+        console.error("loadOrders error:", e);
+        if(warn){
+          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
+          warn.classList.remove("hidden");
+        }
+      }finally{
+        hideLoading();
+      }
+    }
+
+    /* ===================== UTIL: ORDER TYPE ======================= */
+    function getOrderTypeFromValue(val) {
+      const key = String(val || "").trim();
+      if (key && ORDER_TYPE_MAP[key]) return ORDER_TYPE_MAP[key];
+      const v = key.toLowerCase();
+      if (v.includes("spservis") || v.includes("service") || v.includes("servis")) return "servis";
+      return "vaksin";
+    }
+
+    function attachOrderTypeWatcher(selectId, prefix){
+      const sel = $(selectId);
+      if(!sel) return;
+
+      if(sel.dataset.watched === "1") return;
+      sel.dataset.watched = "1";
+
+      const apply = ()=>{
+        const tipe = getOrderTypeFromValue(sel.value);
+        const isServis = (tipe === "servis");
+
+        if(prefix === "ci"){
+          $("ci_kondisi_wrap")?.classList.toggle("hidden", isServis);
+          $("ci_batch_section")?.classList.toggle("hidden", isServis);
+
+          if(isServis){
+            $("ci_kondisi").value = "";
+            resetBatches();
+          }
+        }
+
+        if(prefix === "co"){
+          $("co_ayam_wrap")?.classList.toggle("hidden", isServis);
+          $("co_vaksin_wrap")?.classList.toggle("hidden", isServis);
+
+          if(isServis){
+            $("co_ayam").value = "";
+            $("co_vaksin").value = "";
+          }
+        }
+      };
+
+      sel.addEventListener("change", apply);
+      apply();
+    }
+
+    /* ===================== RESET FORM ========================== */
+    function resetForm(prefix, reloadOrders = true){
+      const warn = $(prefix + "_warn");
+      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+
+      const nama = $(prefix + "_nama");
+      if(nama) nama.value = "";
+
+      const catatan = $(prefix + "_catatan");
+      if(catatan) catatan.value = "";
+
+      const orderSel = $(prefix + "_order");
+      if(orderSel){
+        orderSel.value = "";
+        if(reloadOrders){
+          loadOrders(prefix + "_order", prefix);
+        }else{
+          orderSel.dispatchEvent(new Event("change"));
+        }
+      }
+
+      if(prefix === "ci"){
+        $("ci_kondisi").value = "";
+        resetBatches();
+
+        _photoStore["ci_fotos"] = [];
+        try{ $("ci_fotos").files = new DataTransfer().files; }catch(e){}
+        $("ci_fotos_preview").innerHTML = "";
+        // reset input galeri
+        const g = $("ci_fotos_gallery"); if (g) g.value = "";
+      }
+
+      if(prefix === "co"){
+        $("co_kandang").value = "";
+        $("co_ayam").value = "";
+        $("co_vaksin").value = "";
+
+        _photoStore["co_fotos"] = [];
+        try{ $("co_fotos").files = new DataTransfer().files; }catch(e){}
+        $("co_fotos_preview").innerHTML = "";
+        const g = $("co_fotos_gallery"); if (g) g.value = "";
+      }
+    }
+
+    /* ===================== FOTO -> BASE64 & PAYLOAD ============ */
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => {
+          const result = String(r.result || "");
+          const base64 = result.includes(",") ? result.split(",")[1] : result;
+          resolve(base64);
+        };
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function buildPhotosPayload(inputId, prefix) {
+      const input = $(inputId);
+      const files = Array.from(input?.files || []).slice(0, MAX_PHOTOS);
+      const photos = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (!f || !(f.type || "").startsWith("image/")) continue;
+
+        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
+
+        photos.push({
+          fileName: safeName,
+          contentType: f.type || "application/octet-stream",
+          contentBytes: await fileToBase64(f),
+        });
+      }
+      return photos;
+    }
+
+    const SANITIZE_RE = /[<>#${}\\/'"`;&]/g;
+    function sanitizeText(val) {
+      return String(val ?? "")
+        .replace(SANITIZE_RE, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function cleanPayload(obj) {
+      const copy = { ...obj };
+      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
+      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
+      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
+      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
+      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
+      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+      return copy;
+    }
+
+    async function sendJson(url, payload) {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+      return { ok: resp.ok, status: resp.status, data };
     }
 
     /* ===================== SUBMIT: CEK-IN ====================== */
@@ -1395,7 +1611,6 @@
     window.submitCO = submitCO;
     window.resetForm = resetForm;
     window.goHome = goHome;
-    window.bindGalleryPicker = bindGalleryPicker;
 
     // Jalankan saat load
     (function(){ boot(); })();
