@@ -240,6 +240,9 @@
         <option value="">-- Pilih Nomor Order --</option>
       </select>
 
+      <label>Email Vaksinator</label>
+      <input id="ci_email" readonly />
+
       <label>Nama Vaksinator</label>
       <input id="ci_nama" placeholder="Nama lengkap petugas" />
 
@@ -341,6 +344,9 @@
       <select id="co_order">
         <option value="">-- Pilih Nomor Order --</option>
       </select>
+      
+      <label>Email Petugas</label>
+      <input id="co_email" readonly />
 
       <label>Nama Vaksinator</label>
       <input id="co_nama" placeholder="Nama lengkap petugas" />
@@ -973,6 +979,7 @@
         attachOrderTypeWatcher("ci_order", "ci");
         const u = getAuthedUser();
         if (u?.name) $('ci_nama').value = u.name;
+        if (u?.email) $('ci_email').value = u.email;
       }
       if (v === "checkout") {
         init("co");
@@ -982,6 +989,7 @@
         attachOrderTypeWatcher("co_order", "co");
         const u = getAuthedUser();
         if (u?.name) $('co_nama').value = u.name;
+        if (u?.email) $('co_email').value = u.email;
       }
       if (v === "jadwal") {
         initJadwal();
@@ -1404,6 +1412,7 @@
       if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
       if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
       if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+      if ("emailVaksinator" in copy) copy.emailVaksinator = sanitizeText(copy.emailVaksinator);
       return copy;
     }
 
@@ -1470,6 +1479,7 @@
           formType: "checkin",
           orderNumber: order,
           namaVaksinator: nama,
+          emailVaksinator: $('ci_email').value,
           tanggal: $("ci_tanggal").value,
           jam: $("ci_jam").value,
           lokasi: $("ci_lokasi").value,
@@ -1551,6 +1561,7 @@
           formType: "checkout",
           orderNumber: order,
           namaVaksinator: nama,
+          emailVaksinator: $('co_email').value,
           noKandang: kandang,
           tanggal: $("co_tanggal").value,
           jam: $("co_jam").value,
