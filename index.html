@@ -1244,21 +1244,32 @@
         }
 
         // Isi dropdown + map tipe
-        arr.forEach(it=>{
-          const v = (it?.Value ?? it?.value ?? it?.orderNumber ?? "").toString().trim();
-          if(!v) return;
+arr.forEach(it => {
+  // ✅ SUPPORT SEMUA FORMAT:
+  // 1) string langsung  -> "SPVaksin - 2026-04-00003"
+  // 2) object lama      -> { Name, Value }
+  // 3) object variant   -> { orderNumber }
 
-          const low = v.toLowerCase();
-          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
-            ? "servis"
-            : "vaksin";
+  const v = (
+    typeof it === "string" ? it :
+    it?.Value ??
+    it?.value ??
+    it?.orderNumber ??
+    ""
+  ).toString().trim();
 
-          const opt = document.createElement("option");
-          opt.value = v;
-          opt.textContent = v;
-          sel.appendChild(opt);
-        });
+  if (!v) return;
 
+  const low = v.toLowerCase();
+  ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+    ? "servis"
+    : "vaksin";
+
+  const opt = document.createElement("option");
+  opt.value = v;
+  opt.textContent = v;
+  sel.appendChild(opt);
+});
         // trigger watcher
         sel.dispatchEvent(new Event("change"));
 
