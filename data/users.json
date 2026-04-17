@@ -157,6 +157,8 @@
 "miftahul.hardianto99@japfa.com":{"email":"miftahul.hardianto99@japfa.com","name":"Miftahul Ilham Hardianto","branch":"AJS TASIKMALAYA","branchCode":"BDG","role":"TSR","notes":"TSR depo Tasikmalaya","active":true},
 "elans5958@gmail.com":{"email":"elans5958@gmail.com","name":"Elan Suherlan Jaelani","branch":"AJS TASIKMALAYA","branchCode":"BDG","role":"VAKSINATOR","notes":"Vaksinator","active":true},
 
+"natasya.febriani@japfa.com":{"email":"natasya.febriani@japfa.com","name":"Natasya Febriani","branch":"AJS PEKANBARU","branchCode":"PKB","role":"TSR","notes":"TSR PEKANBARU","active":true},
+
 "agia.barriyadi@japfa.com":{"email":"agia.barriyadi@japfa.com","name":"Admin Aplikasi Vaksinator","branch":"ALL","branchCode":"ALL","role":"ADMIN","notes":"Full access maintenance","active":true},
 "irfan.ahmadi@japfa.com":{"email":"irfan.ahmadi@japfa.com","name":"Irfan Ahmadi","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
 "eko.putra@japfa.com":{"email":"eko.putra@japfa.com","name":"Eko Kurnia","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
