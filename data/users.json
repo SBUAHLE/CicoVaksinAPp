@@ -1,6 +1,6 @@
 {
-"donnybagushermawan@gmail.com":{"email":"donnybagushermawan@gmail.com","name":"Doni","branch":"AJS PARE","branchCode":"SBY","role":"VAKSINATOR","notes":"Vaksinator","active":true},
-"herpriazka.fajriansyah@japfa.com":{"email":"herpriazka.fajriansyah@japfa.com","name":"Herpriazka Fajriansyah","branch":"AJS JABO 1-2","branchCode":"JBO","role":"KOORDINATOR","notes":"Koordinator Jabo 1-2","active":true},
+"fatkhurohman.sodiq@japfa.com":{"email":"fatkhurohman.sodiq@japfa.com","name":"M. Fatkhurohman Sodiq","branch":"AJS PARE","branchCode":"SBY","role":"KOORDINATOR","notes":"Koordinator vaksinato Pare","active":true},
+"cungkithadi@gmail.com":{"email":"cungkithadi@gmail.com","name":"Hadi","branch":"AJS PARE","branchCode":"SBY","role":"VAKSINATOR","notes":"Vaksinator","active":true},
   
 "agia.barriyadi@japfa.com":{"email":"agia.barriyadi@japfa.com","name":"Admin Aplikasi Vaksinator","branch":"ALL","branchCode":"ALL","role":"ADMIN","notes":"Full access maintenance","active":true},
 "irfan.ahmadi@japfa.com":{"email":"irfan.ahmadi@japfa.com","name":"Irfan Ahmadi","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
