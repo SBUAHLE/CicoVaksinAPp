@@ -58,6 +58,18 @@
 "andripurnomo350@gmail.com":{"email":"andripurnomo350@gmail.com","name":"Andri Purnomo","branch":"AJS PALEMBANG","branchCode":"PLB","role":"VAKSINATOR","notes":"Vaksinator Internal Palembang","active":true},
 "futri.hartini@japfa.com":{"email":"futri.hartini@japfa.com","name":"Msy Futri Efrida","branch":"AJS PALEMBANG","branchCode":"PLB","role":"AS","notes":"ADMIN SALES PALEMBANG","active":true},
 
+"anjas.oktapriono@japfa.com":{"email":"anjas.oktapriono@japfa.com","name":"Anjas Oktapriono","branch":"AJS JAMBI","branchCode":"JBI","role":"TSR","notes":"TSR cabang Jambi","active":true},
+"rahmat.arifin99@japfa.com":{"email":"rahmat.arifin99@japfa.com","name":"Rahmat Arifin","branch":"AJS JAMBI","branchCode":"JBI","role":"KOORDINATOR","notes":"KOORDINATOR cabang Jambi","active":true},
+"wibowoandi142@gmail.com":{"email":"wibowoandi142@gmail.com","name":"Andi Wibowo","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"amarjmb567@gmail.com":{"email":"amarjmb567@gmail.com","name":"Adam Dwi Ammar","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"frengkiandrianto98@gmail.com":{"email":"frengkiandrianto98@gmail.com","name":"Frengki Andrianto","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"Renoldiarnando@gmail.com":{"email":"Renoldiarnando@gmail.com","name":"Renoldi Arnando","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"suprayitno2892@gmail.com":{"email":"suprayitno2892@gmail.com","name":"Suprayitno","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"rndimlana@gmail.com":{"email":"rndimlana@gmail.com","name":"Rendi Maulana","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"wildan.jambi.123456@gmail.com":{"email":"wildan.jambi.123456@gmail.com","name":"Muhammad Wildan Amnur","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"irmanrizqiyansah@gmail.com":{"email":"irmanrizqiyansah@gmail.com","name":"Irman Rizqi Yansah","branch":"AJS JAMBI","branchCode":"JBI","role":"VAKSINATOR","notes":"VAKSINATOR cabang Jambi","active":true},
+"adminjambi.ajs@japfa.com":{"email":"adminjambi.ajs@japfa.com","name":"Sumanto","branch":"AJS JAMBI","branchCode":"JBI","role":"AS","notes":"AS cabang Jambi","active":true},
+
 "agia.barriyadi@japfa.com":{"email":"agia.barriyadi@japfa.com","name":"Admin Aplikasi Vaksinator","branch":"ALL","branchCode":"ALL","role":"ADMIN","notes":"Full access maintenance","active":true},
 "irfan.ahmadi@japfa.com":{"email":"irfan.ahmadi@japfa.com","name":"Irfan Ahmadi","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
 "eko.putra@japfa.com":{"email":"eko.putra@japfa.com","name":"Eko Kurnia","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
