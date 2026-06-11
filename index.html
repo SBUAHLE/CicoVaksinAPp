@@ -489,6 +489,39 @@
 
   <!-- ====================== SCRIPT / LOGIC ==================== -->
   <script>
+    
+/* ===================== GLOBAL ERROR HANDLER ===================== */
+window.addEventListener("error", function (e) {
+  console.error("GLOBAL ERROR:", e.message);
+  alert("❌ Error: " + e.message);
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  console.error("PROMISE ERROR:", e.reason);
+  alert("❌ Error async: " + (e.reason?.message || e.reason));
+});
+
+/* ===================== FETCH DEBUG WRAPPER ===================== */
+const _originalFetch = window.fetch;
+window.fetch = async function (...args) {
+  try {
+    console.log("🌐 FETCH:", args[0]);
+
+    const response = await _originalFetch(...args);
+
+    if (!response.ok) {
+      const text = await response.clone().text();
+      console.error("❌ HTTP ERROR:", response.status, text);
+    }
+
+    return response;
+  } catch (err) {
+    console.error("❌ FETCH FAILED:", err);
+    alert("❌ Koneksi gagal / diblok browser / timeout.\n\nDetail: " + err.message);
+    throw err;
+  }
+};
+
     /* ===================== KONFIGURASI ENDPOINT =============== */
     const FLOW_GET_ORDER_URL =
       "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ff449c8ef324ca0a42584a4df12c156/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGcWwO_nuZ-M5yFZ9yHUlXR-MSf2BVzZSceiY5lBWso";
