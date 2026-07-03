@@ -4,6 +4,7 @@
 "shollatunnisa.tasya@japfa.com":{"email":"shollatunnisa.tasya@japfa.com","name":"Shollatunnisa Putri de Tasya","branch":"AJS PADANG","branchCode":"PDG","role":"TSR","notes":"","active":true},
   
 "ermawati.purba@japfa.com":{"email":"ermawati.purba@japfa.com","name":"Ermawati Purba","branch":"AJS MEDAN TIMUR","branchCode":"MDT","role":"TSR","notes":"SPV cabang Medan","active":true},
+"jimmy.oktobrian@japfa.com":{"email":"jimmy.oktobrian@japfa.com","name":"Jimmy Oktobrian Silitonga","branch":"AJS MEDAN TIMUR","branchCode":"MDT","role":"TSR","notes":"TSR cabang Medan","active":true},
 "jambormbelin.ginting@japfa.com":{"email":"jambormbelin.ginting@japfa.com","name":"Jambormbelin Ginting","branch":"AJS MEDAN TIMUR","branchCode":"MDT","role":"TSR","notes":"TSR cabang Medan","active":true},
 "shari.fahriza@japfa.com":{"email":"shari.fahriza@japfa.com","name":"Shari Fahriza","branch":"AJS MEDAN TIMUR","branchCode":"MDT","role":"TSR","notes":"TSR cabang Medan","active":true},
 "nazaruddin@japfa.com":{"email":"nazaruddin@japfa.com","name":"Nazaruddin","branch":"AJS MEDAN TIMUR","branchCode":"MDT","role":"KOORDINATOR","notes":"Vaksinator Internal Medan (KARTAP)","active":true},
@@ -116,5 +117,6 @@
 "agia.barriyadi@japfa.com":{"email":"agia.barriyadi@japfa.com","name":"Admin Aplikasi Vaksinator","branch":"ALL","branchCode":"ALL","role":"ADMIN","notes":"Full access maintenance","active":true},
 "irfan.ahmadi@japfa.com":{"email":"irfan.ahmadi@japfa.com","name":"Irfan Ahmadi","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
 "eko.putra@japfa.com":{"email":"eko.putra@japfa.com","name":"Eko Kurnia","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
+"deny.nugroho@japfa.com":{"email":"deny.nugroho@japfa.com","name":"Deny Agun Nugroho","branch":"ALL","branchCode":"ALL","role":"MGMT","notes":"IT","active":true},
 "erwin.sumarto@japfa.com":{"email":"erwin.sumarto@japfa.com","name":"Erwin Widya Sumarto","branch":"ALL","branchCode":"ALL","role":"VAKSINATOR","notes":"Vaksinator","active":true}
 }
