@@ -1,0 +1,1662 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <!-- ====================== META & TITLE ====================== -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CICO</title>
+
+  <!-- ====================== STYLES / THEME ==================== -->
+  <style>
+    :root{
+      --bg:#eef2f7;
+      --card:#ffffff;
+      --primary:#1e40af;
+      --secondary:#6366f1;
+      --border:#dbe2f1;
+      --muted:#64748b;
+      --danger:#b91c1c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto;
+      background:linear-gradient(180deg,#f4f7fb,#e9eef7);
+      color:#0f172a;
+    }
+    .container{max-width:960px;margin:28px auto;padding:0 16px}
+    .hidden{display:none !important}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:22px;
+      margin-bottom:18px;
+      box-shadow:0 10px 30px rgba(15,23,42,.08);
+    }
+    .section-title{font-weight:700;color:#1e3a8a;margin-bottom:12px}
+    label{font-weight:600;display:block;margin:12px 0 6px}
+
+    input,select,textarea{
+      width:100%;
+      padding:12px 14px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      font-size:15px;
+      background:#fff;
+    }
+    input[readonly]{background:#f5f7fb}
+    textarea{min-height:90px}
+
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row>div{flex:1}
+
+    .btn{padding:12px 16px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-ghost{background:#eef2ff;color:#1e3a8a}
+    .btn-danger{background:#fee2e2;color:#b91c1c}
+    .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+    .warn{
+      background:#fff1f2;
+      color:var(--danger);
+      padding:12px;
+      border-radius:10px;
+      margin-bottom:12px;
+      white-space:pre-wrap;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#1e3a8a;
+      font-size:13px;
+      margin-top:6px;
+    }
+
+    .landing-wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle at top,#e0e7ff,#eef2f7);
+    }
+    .landing-card{
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      border-radius:22px;
+      padding:40px 28px;
+      max-width:420px;
+      width:100%;
+      text-align:center;
+      box-shadow:0 24px 50px rgba(30,64,175,.2);
+      border:1px solid var(--border);
+    }
+    .landing-card h1{font-size:30px;margin:6px 0;color:#1e3a8a}
+    .landing-card p{font-size:15px;color:#1f2937;margin-bottom:28px}
+    .landing-actions{display:grid;gap:14px}
+    .footer-note{margin-top:22px;font-size:13px;color:#64748b}
+
+    .photos-preview{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .photo-item{
+      position:relative;
+      width:72px;height:72px;
+      border-radius:8px;border:1px solid var(--border);
+      overflow:hidden;background:#f8fafc
+    }
+    .photo-item img{width:100%;height:100%;object-fit:cover}
+    .photo-del{
+      position:absolute;top:2px;right:2px;
+      background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:999px;
+      width:20px;height:20px;line-height:20px;text-align:center;font-size:13px;cursor:pointer
+    }
+    .hint{color:#64748b;font-size:12px;margin-top:4px}
+
+    /* Jadwal: center result text */
+    .center-text { text-align:center; }
+
+    /* Cards grid */
+    .cards-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap:12px;
+      margin-top:8px;
+    }
+    .order-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      padding:14px;
+      box-shadow:0 4px 16px rgba(15,23,42,.04);
+      cursor:pointer;
+    }
+    .order-card .line { margin-bottom:8px; }
+    .order-card .label{
+      font-size:12px; color:var(--muted);
+      text-transform:uppercase; letter-spacing:.02em;
+      margin-bottom:2px;
+    }
+    .order-card .value{ font-weight:600; }
+    .order-card .muted{ color:var(--muted); font-weight:500; }
+    .order-card .sep{ height:8px }
+
+    /* Detail key-value rows */
+    .kv{
+      display:grid;
+      grid-template-columns: 200px 1fr;
+      gap:8px 14px;
+      align-items:start;
+      margin-bottom:8px;
+    }
+    .kv .k{ color:var(--muted); font-size:13px; }
+    .kv .v{ font-weight:600; white-space:pre-wrap; }
+    @media (max-width:600px){
+      .kv{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ====================== VIEW: LOGIN (BARU) ================== -->
+  <div id="view-login" class="landing-wrap">
+    <div class="landing-card">
+      <div style="font-size:44px">🔐</div>
+      <h1>CICO VAKSINATOR</h1>
+      <p>Masuk dengan email yang terdaftar</p>
+      <div id="login_warn" class="warn hidden"></div>
+      <label for="login_email">Alamat Email</label>
+      <input id="login_email" type="email" placeholder="nama@perusahaan.com" autocomplete="email" />
+      <div class="btn-group" style="justify-content:center">
+        <button class="btn btn-primary" type="button" onclick="handleLogin()">Masuk</button>
+      </div>
+      <div class="hint">Gunakan email sesuai yang terdaftar di sistem.</div>
+      <div class="footer-note">📍 GPS • ⏱️ Waktu Sistem • 📸 Multi Foto • ⚙️ Ver1.0</div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: HOME ======================== -->
+  <div id="view-home" class="landing-wrap hidden">
+    <div class="landing-card">
+      <div style="font-size:44px">💉</div>
+      <h1>CICO VAKSINATOR</h1>
+      <div id="home_greet" class="hint" style="margin:-6px 0 14px 0"></div>
+      <p>Sistem Check-In &amp; Check-Out<br>Dengan Lokasi &amp; Waktu Otomatis</p>
+      <div class="landing-actions">
+        <button class="btn btn-primary" onclick="show('checkin')">✅ CEK-IN</button>
+        <button class="btn btn-ghost" onclick="show('checkout')">🚚 CEK-OUT</button>
+        <button class="btn btn-ghost" onclick="show('jadwal')">📅 VIEW JADWAL</button>
+      </div>
+      <div class="footer-note">
+        <button class="btn btn-danger" type="button" onclick="logout()">Keluar (Logout)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: CEK-IN ====================== -->
+  <div id="view-checkin" class="container hidden">
+    <button class="btn btn-ghost" onclick="goHome('ci')">← Kembali</button>
+    <h2>Form Cek-In</h2>
+
+    <div id="ci_warn" class="warn hidden"></div>
+
+    <div class="card">
+      <div class="section-title">Data Otomatis (Sistem)</div>
+      <div class="row">
+        <div>
+          <label>Tanggal</label>
+          <input id="ci_tanggal" readonly />
+        </div>
+        <div>
+          <label>Jam</label>
+          <input id="ci_jam" readonly />
+        </div>
+      </div>
+
+      <label>Nama Lokasi</label>
+      <input id="ci_lokasi" readonly />
+      <span id="ci_src" class="badge">Lokasi: -</span>
+
+      <div class="row">
+        <div>
+          <label>Latitude</label>
+          <input id="ci_lat" readonly />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="ci_lng" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Data Diisi Petugas</div>
+
+      <label>Nomor Order</label>
+      <select id="ci_order">
+        <option value="">-- Pilih Nomor Order --</option>
+      </select>
+
+      <label>Email Vaksinator</label>
+      <input id="ci_email" readonly />
+
+      <label>Nama Vaksinator</label>
+      <input id="ci_nama" placeholder="Nama lengkap petugas" />
+
+      <div id="ci_kondisi_wrap">
+        <label>Kondisi Vaksin</label>
+        <select id="ci_kondisi">
+          <option value="">-- Pilih --</option>
+          <option>Baik (Live)</option>
+          <option>Baik dan Thawing (Kill)</option>
+          <option>Baik dan Belum Thawing (Kill)</option>
+          <option>Rusak</option>
+        </select>
+      </div>
+
+      <div id="ci_batch_section">
+        <label>Nomor Batch Vaksin</label>
+        <div id="ci_batch_wrap"></div>
+        <div class="btn-group">
+          <button class="btn btn-ghost" type="button" onclick="addBatch()">➕ Tambah Batch</button>
+          <button class="btn btn-ghost" type="button" onclick="resetBatches()">↺ Reset Batch</button>
+        </div>
+      </div>
+
+      <!-- ================= FOTO (CEK-IN) ================= -->
+      <label>Upload Foto (maks. 5)</label>
+
+      <!-- Choose File (input utama): prioritas kamera -->
+      <input type="file" id="ci_fotos" accept="image/*" capture="environment" multiple />
+
+      <div class="hint">
+        Tombol <b>Choose File</b> akan membuka <b>Kamera</b> (prioritas).<br/>
+        Jika ingin memilih dari <b>Galeri</b>, gunakan tombol di bawah.
+      </div>
+
+      <div id="ci_fotos_preview" class="photos-preview"></div>
+
+      <!-- Input galeri tersembunyi: khusus galeri -->
+      <input type="file" id="ci_fotos_gallery" accept="image/*" multiple style="display:none" />
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('ci_fotos_gallery').click()">
+          🖼 Pilih dari Galeri
+        </button>
+        <button type="button" id="ci_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
+      </div>
+      <!-- ================= /FOTO (CEK-IN) ================= -->
+
+      <label>Catatan</label>
+      <textarea id="ci_catatan" placeholder="Opsional"></textarea>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="submitCI()">Kirim Cek-In</button>
+        <button class="btn btn-ghost" type="button" onclick="resetForm('ci')">↺ Reset Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: CEK-OUT ===================== -->
+  <div id="view-checkout" class="container hidden">
+    <button class="btn btn-ghost" onclick="goHome('co')">← Kembali</button>
+    <h2>Form Cek-Out</h2>
+
+    <div id="co_warn" class="warn hidden"></div>
+
+    <div class="card">
+      <div class="section-title">Data Otomatis (Sistem)</div>
+      <div class="row">
+        <div>
+          <label>Tanggal</label>
+          <input id="co_tanggal" readonly />
+        </div>
+        <div>
+          <label>Jam</label>
+          <input id="co_jam" readonly />
+        </div>
+      </div>
+
+      <label>Nama Lokasi</label>
+      <input id="co_lokasi" readonly />
+      <span id="co_src" class="badge">Lokasi: -</span>
+
+      <div class="row">
+        <div>
+          <label>Latitude</label>
+          <input id="co_lat" readonly />
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input id="co_lng" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Data Diisi Petugas</div>
+
+      <label>Nomor Order</label>
+      <select id="co_order">
+        <option value="">-- Pilih Nomor Order --</option>
+      </select>
+      
+      <label>Email Petugas</label>
+      <input id="co_email" readonly />
+
+      <label>Nama Vaksinator</label>
+      <input id="co_nama" placeholder="Nama lengkap petugas" />
+
+      <label>No Kandang</label>
+      <input id="co_kandang" placeholder="Contoh: A-12" />
+
+      <div id="co_ayam_wrap">
+        <label>Jumlah Ayam Tervaksin</label>
+        <input type="number" id="co_ayam" min="0" step="1" placeholder="⚠️ Masukkan angka bulat. Contoh: 500, 1000, 2500, 10000 dst" />
+      </div>
+
+      <div id="co_vaksin_wrap">
+        <label>Jumlah Vaksin Terpakai</label>
+        <input type="number" id="co_vaksin" min="0" step="1" placeholder="0" />
+      </div>
+
+      <!-- ================= FOTO (CEK-OUT) ================= -->
+      <label>Upload Foto (maks. 5)</label>
+
+      <!-- Choose File (input utama): prioritas kamera -->
+      <input type="file" id="co_fotos" accept="image/*" capture="environment" multiple />
+
+      <div class="hint">
+        Tombol <b>Choose File</b> akan membuka <b>Kamera</b> (prioritas).<br/>
+        Jika ingin memilih dari <b>Galeri</b>, gunakan tombol di bawah.
+      </div>
+
+      <div id="co_fotos_preview" class="photos-preview"></div>
+
+      <!-- Input galeri tersembunyi: khusus galeri -->
+      <input type="file" id="co_fotos_gallery" accept="image/*" multiple style="display:none" />
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('co_fotos_gallery').click()">
+          🖼 Pilih dari Galeri
+        </button>
+        <button type="button" id="co_fotos_clear" class="btn btn-danger">🗑️ Hapus Semua Foto</button>
+      </div>
+      <!-- ================= /FOTO (CEK-OUT) ================= -->
+
+      <label>Catatan</label>
+      <textarea id="co_catatan" placeholder="Opsional"></textarea>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="submitCO()">Kirim Cek-Out</button>
+        <button class="btn btn-ghost" type="button" onclick="resetForm('co')">↺ Reset Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: JADWAL ====================== -->
+  <div id="view-jadwal" class="container hidden">
+    <button class="btn btn-ghost" type="button" onclick="show('home')">← Kembali</button>
+    <h2>View Jadwal</h2>
+
+    <div id="vj_warn" class="warn hidden"></div>
+
+    <div id="vj_result_card" class="card center-text">
+      <div id="vj_result" style="font-weight:700;font-size:18px"></div>
+    </div>
+
+    <div id="vj_range_card" class="card">
+      <div class="section-title">Pilih Periode Jadwal</div>
+      <div class="row">
+        <div>
+          <label for="vj_start_date">Tanggal Mulai Periode</label>
+          <input type="date" id="vj_start_date" />
+        </div>
+        <div>
+          <label for="vj_end_date">Tanggal Akhir Periode</label>
+          <input type="date" id="vj_end_date" />
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" type="button" onclick="handleTampilkanJadwal()">Tampilkan Jadwal</button>
+      </div>
+      <div class="hint">Pilih rentang tanggal berdasarkan <b>Tanggal Pembuatan</b>.</div>
+    </div>
+
+    <div id="vj_list_card" class="card hidden">
+      <div class="section-title">Daftar Jadwal</div>
+      <div id="vj_list_meta" class="hint"></div>
+      <div id="vj_list" class="cards-grid"></div>
+    </div>
+  </div>
+
+  <!-- ====================== VIEW: DETAIL ====================== -->
+  <div id="view-detail" class="container hidden">
+    <button class="btn btn-ghost" type="button" onclick="backToJadwalFromDetail()">← Kembali ke Jadwal</button>
+    <h2>Detail Order</h2>
+
+    <div id="vd_warn" class="warn hidden"></div>
+
+    <div id="vd_head" class="card">
+      <div class="section-title" id="vd_title">Nomor Order: -</div>
+      <div class="badge" id="vd_type">Type: -</div>
+      <div class="badge" id="vd_status">Status: -</div>
+      <div class="badge" id="vd_branch">Cabang: -</div>
+    </div>
+
+    <div id="vd_body" class="card">
+      <div class="kv"><div class="k">Tanggal Pembuatan</div><div class="v" id="vd_created">-</div></div>
+
+      <div id="vd_block_vaksin">
+        <div class="kv"><div class="k">Jadwal Vaksin</div><div class="v" id="vd_jadwal_vaksin">-</div></div>
+        <div class="kv"><div class="k">Nama Vaksin</div><div class="v" id="vd_nama_vaksin">-</div></div>
+        <div class="kv"><div class="k">Metode Vaksinasi</div><div class="v" id="vd_metode_vaksin">-</div></div>
+        <div class="kv"><div class="k">Dosis Vaksin</div><div class="v" id="vd_dosis_vaksin">-</div></div>
+      </div>
+
+      <div id="vd_block_service" class="hidden">
+        <div class="kv"><div class="k">Jadwal Service</div><div class="v" id="vd_jadwal_service">-</div></div>
+        <div class="kv"><div class="k">Jenis Service</div><div class="v" id="vd_jenis_service">-</div></div>
+      </div>
+
+      <div class="kv"><div class="k">Nama Customer</div><div class="v" id="vd_customer">-</div></div>
+      <div class="kv"><div class="k">Alamat Farm</div><div class="v" id="vd_alamat">-</div></div>
+      <div class="kv"><div class="k">Populasi Kandang</div><div class="v" id="vd_populasi">-</div></div>
+      <div class="kv"><div class="k">Nama Vaksinator</div><div class="v" id="vd_vaksinator">-</div></div>
+      <div class="kv"><div class="k">Koordinator</div><div class="v" id="vd_koordinator">-</div></div>
+      <div class="kv"><div class="k">Nama TSR/AS</div><div class="v" id="vd_tsr_as">-</div></div>
+      <div class="kv"><div class="k">Catatan</div><div class="v" id="vd_catatan">-</div></div>
+    </div>
+  </div>
+
+  <!-- ====================== LOADING OVERLAY =================== -->
+  <div id="loading" class="hidden"
+    style="
+      position:fixed;
+      inset:0;
+      background:rgba(255,255,255,.85);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      font-weight:600;
+      font-size:18px;">
+    ⏳ Memproses...
+  </div>
+
+  <!-- ====================== SCRIPT / LOGIC ==================== -->
+  <script>
+    
+/* ===================== GLOBAL ERROR HANDLER ===================== */
+window.addEventListener("error", function (e) {
+  console.error("GLOBAL ERROR:", e.message);
+  alert("❌ Error: " + e.message);
+});
+
+window.addEventListener("unhandledrejection", function (e) {
+  console.error("PROMISE ERROR:", e.reason);
+  alert("❌ Error async: " + (e.reason?.message || e.reason));
+});
+
+/* ===================== FETCH DEBUG WRAPPER ===================== */
+const _originalFetch = window.fetch;
+window.fetch = async function (...args) {
+  try {
+    console.log("🌐 FETCH:", args[0]);
+
+    const response = await _originalFetch(...args);
+
+    if (!response.ok) {
+      const text = await response.clone().text();
+      console.error("❌ HTTP ERROR:", response.status, text);
+    }
+
+    return response;
+  } catch (err) {
+    console.error("❌ FETCH FAILED:", err);
+    alert("❌ Koneksi gagal / diblok browser / timeout.\n\nDetail: " + err.message);
+    throw err;
+  }
+};
+
+    /* ===================== KONFIGURASI ENDPOINT =============== */
+    const FLOW_GET_ORDER_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ff449c8ef324ca0a42584a4df12c156/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGcWwO_nuZ-M5yFZ9yHUlXR-MSf2BVzZSceiY5lBWso";
+
+    const FLOW_SUBMIT_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fbda6accf77d48cbbaf3b879ff63287d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=r3rqKUO_yBMlf-9D8L1uQsF4re6EuUC-gK11I6cY29g";
+
+    const FLOW_VIEWJADWAL_URL =
+      "https://default08c67d278fe34663834968bc1ace2e.be.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d5235f4bd86f4e4f8694fe5254e12e4f/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=zKCx3gB-sMvcoaKieQaW-BdCtBTVrPRtlIf5YBVth74";
+
+    const APP_KEY = "CICO-ACCESS-2026-01-x8F3pQk7";
+    const MAX_PHOTOS = 5;
+    const REQUIRE_SIGNATURE_CO = false;
+    const $ = (id) => document.getElementById(id);
+
+    // map tipe order by value full (mis: "SPVaksin - 2026-02-00008")
+    const ORDER_TYPE_MAP = Object.create(null);
+
+    // ====== Auth session (WAJIB ADA) ======
+    const AUTH_STORAGE_KEY = 'cico_user';
+    let _authUser = null;
+
+    /* ===================== USERS JSON (jadwal) ================ */
+    /**
+     * Path robust untuk GitHub Pages.
+     */
+    const USERS_JSON_URL = new URL('data/users.json', document.baseURI).toString();
+    // const USERS_JSON_URL = new URL('../data/users.json', document.baseURI).toString();
+
+    let userDict = null;
+
+    function normEmail(v){ return (v ?? '').toString().trim().toLowerCase(); }
+    function escapeHtml(s){
+      return (s ?? '').toString().replace(/[&<>\"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+      }[c]));
+    }
+
+    /**
+     * Loader users:
+     */
+    async function ensureUsersLoaded(){
+      if (userDict) return userDict;
+
+      const warn = $('login_warn');
+      try{
+        const resp = await fetch(USERS_JSON_URL, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const raw = await resp.json();
+
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+          throw new Error('Struktur users.json tidak sesuai (harus object keyed-by-email).');
+        }
+
+        const dict = Object.create(null);
+        for (const [k, v] of Object.entries(raw)) {
+          const emailKey = normEmail(k);
+          if (!emailKey || !v || typeof v !== 'object') continue;
+
+          dict[emailKey] = {
+            email: normEmail(v.email ?? emailKey),
+            name: v.name ?? '',
+            branch: v.branch ?? '',
+            branchCode: v.branchCode ?? '',
+            role: v.role ?? '',
+            notes: v.notes ?? '',
+            active: v.active !== false
+          };
+        }
+
+        userDict = dict;
+
+        if (Object.keys(userDict).length === 0) {
+          console.warn('users.json termuat tetapi kosong/tidak ada user aktif.');
+          if (warn) {
+            warn.innerHTML = `⚠️ users.json termuat, tetapi tidak ada user yang tervalidasi/aktif.<br>
+              Cek konten <code>${escapeHtml(USERS_JSON_URL)}</code> dan field <code>active</code>.`;
+            warn.classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        console.error('Gagal memuat users.json:', e);
+        userDict = {};
+        if (warn) {
+          warn.innerHTML = `❌ Gagal memuat <code>${escapeHtml(USERS_JSON_URL)}</code>.<br>
+            Kemungkinan: path salah, dibuka via <code>file://</code> (CORS), atau 404/JSON invalid.<br>
+            Saran: jalankan lewat server lokal (mis. <code>python -m http.server</code>) atau pastikan path benar.`;
+          warn.classList.remove('hidden');
+        }
+      }
+      return userDict;
+    }
+
+    /* ===================== AUTH HELPERS ======================= */
+    function setAuthedUser(u){
+      _authUser = u ? { ...u } : null;
+      try{
+        if (u) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(_authUser));
+        else localStorage.removeItem(AUTH_STORAGE_KEY);
+      }catch(e){}
+      updateHomeGreeting();
+    }
+    function getAuthedUser(){
+      if (_authUser) return _authUser;
+      try{
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (raw) _authUser = JSON.parse(raw);
+      }catch(e){ _authUser = null; }
+      return _authUser;
+    }
+    function requireAuthOrGoLogin(){
+      const u = getAuthedUser();
+      if (!u){
+        showOnly('login');
+        setTimeout(()=>{ $('login_email')?.focus(); },0);
+        return null;
+      }
+      return u;
+    }
+    function logout(){
+      setAuthedUser(null);
+      resetForm('ci', false);
+      resetForm('co', false);
+      resetJadwal(true);
+      show('login');
+    }
+
+    async function handleLogin(){
+      const warn = $('login_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+
+      await ensureUsersLoaded();
+      const email = normEmail($('login_email').value);
+      if (!email){
+        warn.textContent = '⚠️ Mohon isi alamat email terlebih dahulu.';
+        warn.classList.remove('hidden');
+        return;
+      }
+      const u = userDict[email];
+      if (!u){
+        warn.textContent = `⚠️ Email "${email}" tidak ditemukan pada daftar.`;
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      setAuthedUser({ ...u, email });
+      $('login_email').value = '';
+      show('home');
+    }
+
+    function updateHomeGreeting(){
+      const u = getAuthedUser();
+      const el = $('home_greet');
+      if (!el) return;
+      if (!u){ el.textContent = ''; return; }
+      el.textContent = `Masuk sebagai: ${u?.name || '-'} • Cabang: ${u?.branch || '-'} • Role: ${u?.role || '-'}`;
+    }
+
+    /* ===================== LOADING UI ========================= */
+    function showLoading(msg) {
+      const el = $("loading");
+      if (msg) el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+    function hideLoading() {
+      const el = $("loading");
+      el.classList.add("hidden");
+      el.textContent = "⏳ Memproses...";
+    }
+
+    /* ===================== JADWAL HELPERS ===================== */
+    let _vjUser = null;
+    let _vjLastItems = [];
+    let _vjScrollY = 0;
+
+    function resetJadwal(hideAll = false){
+      const w = $('vj_warn');
+      w.classList.add('hidden'); w.textContent = '';
+
+      if (hideAll){
+        $('vj_result_card')?.classList.add('hidden');
+        $('vj_range_card')?.classList.add('hidden');
+      }else{
+        $('vj_result_card')?.classList.remove('hidden');
+        $('vj_range_card')?.classList.remove('hidden');
+      }
+
+      $('vj_list_card')?.classList.add('hidden');
+      $('vj_list').innerHTML = '';
+      $('vj_list_meta').textContent = '';
+      _vjLastItems = [];
+      _vjScrollY = 0;
+    }
+
+    async function initJadwal(){
+      const u = requireAuthOrGoLogin();
+      if (!u) return;
+
+      resetJadwal();
+      await ensureUsersLoaded();
+
+      _vjUser = u; // gunakan user yang sudah login
+      const greeting = `Halo ${escapeHtml(u.name || '(Nama?)')}, cabang ${escapeHtml(u.branch || '(Cabang?)')}`;
+      $('vj_result').innerHTML = greeting + `<div class="hint">Kode Cabang: ${escapeHtml(u.branchCode || '-')} • Role: ${escapeHtml(u.role || '-')}</div>`;
+
+      // set default range = hari ini
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      const iso = `${yyyy}-${mm}-${dd}`;
+      $('vj_start_date').value = iso;
+      $('vj_end_date').value = iso;
+    }
+
+    function fmtDateOnly(s){
+      if(!s) return '-';
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s;
+      return d.toLocaleDateString('id-ID', { year:'numeric', month:'short', day:'2-digit' });
+    }
+
+    function renderJadwal(items){
+      const wrap = $('vj_list');
+      if(!Array.isArray(items) || items.length===0){
+        wrap.innerHTML = '<div class="hint">Tidak ada data untuk periode & cabang yang dipilih.</div>';
+        _vjLastItems = [];
+        return;
+      }
+
+      _vjLastItems = items.slice();
+
+      const cards = items.map(it=>{
+        const t = (it.typeOrder || '').toString().trim().toUpperCase();
+        const isService = (t === 'SERVICE' || t.includes('SERVICE'));
+
+        const orderNumber = escapeHtml(it.orderNumber || '-');
+        const tglBuat = fmtDateOnly(it.tanggalPembuatan || it.createdAt);
+        const namaCust = escapeHtml(it.namaCustomer || it.customer || '-');
+        const populasi = escapeHtml(it.populasiKandang || '-');
+        const vaksinator = escapeHtml(it.namaVaksinator || it.vaksinator || '-');
+
+        const jadwalVaksin = fmtDateOnly(it.jadwalVaksin);
+        const jadwalServis = fmtDateOnly(it.jadwalService);
+        const namaVaksin = escapeHtml(it.namaVaksin || '-');
+        const metode = escapeHtml(it.metodeVaksinasi || '-');
+        const jenisServis = escapeHtml(it.jenisService || '-');
+
+        let extraRows = '';
+        if (isService) {
+          extraRows = `
+            <div class="line">
+              <div class="label">Jadwal Service</div>
+              <div class="value">${jadwalServis}</div>
+            </div>
+            <div class="line">
+              <div class="label">Jenis Service</div>
+              <div class="value">${jenisServis}</div>
+            </div>
+          `;
+        } else {
+          extraRows = `
+            <div class="line">
+              <div class="label">Jadwal Vaksin</div>
+              <div class="value">${jadwalVaksin}</div>
+            </div>
+            <div class="line">
+              <div class="label">Nama Vaksin</div>
+              <div class="value">${namaVaksin}</div>
+            </div>
+            <div class="line">
+              <div class="label">Metode Vaksinasi</div>
+              <div class="value">${metode}</div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="order-card" tabindex="0" role="button" aria-label="Buka detail ${orderNumber}" data-id="${Number(it.id)||0}">
+            <div class="line">
+              <div class="label">Nomor Order</div>
+              <div class="value">${orderNumber}</div>
+            </div>
+            <div class="line">
+              <div class="label">Tanggal Pembuatan</div>
+              <div class="value">${tglBuat}</div>
+            </div>
+            ${extraRows}
+            <div class="line">
+              <div class="label">Nama Customer</div>
+              <div class="value">${namaCust}</div>
+            </div>
+            <div class="line">
+              <div class="label">Populasi Kandang</div>
+              <div class="value">${populasi}</div>
+            </div>
+            <div class="line">
+              <div class="label">Nama Vaksinator</div>
+              <div class="value">${vaksinator}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      wrap.innerHTML = cards;
+    }
+
+    document.addEventListener('click', (e)=>{
+      const card = e.target.closest('.order-card');
+      if(card && $('view-jadwal') && !$('view-jadwal').classList.contains('hidden')){
+        const id = Number(card.getAttribute('data-id') || '0');
+        if(id) openDetailFromCard(id);
+      }
+    });
+
+    document.addEventListener('keydown', (e)=>{
+      if((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('order-card')){
+        e.preventDefault();
+        const id = Number(e.target.getAttribute('data-id') || '0');
+        if(id) openDetailFromCard(id);
+      }
+    });
+
+    function openDetailFromCard(id){
+      _vjScrollY = window.scrollY || 0;
+      const it = _vjLastItems.find(x => Number(x.id) === Number(id));
+      prefillDetail(it, id);
+      show('detail');
+    }
+
+    function prefillDetail(it, id){
+      const warn = $('vd_warn'); warn.classList.add('hidden'); warn.textContent = '';
+
+      $('vd_title').textContent = 'Nomor Order: ' + (it?.orderNumber || '-');
+      $('vd_type').textContent  = 'Type: ' + (it?.typeOrder || '-');
+      $('vd_status').textContent= 'Status: ' + (it?.status || '-');
+      $('vd_branch').textContent= 'Cabang: ' + (it?.branch || '-');
+
+      const tglBuat = fmtDateOnly(it?.tanggalPembuatan || it?.createdAt);
+      $('vd_created').textContent = tglBuat;
+
+      const t = (it?.typeOrder || '').toString().trim().toUpperCase();
+      const isService = (t === 'SERVICE' || t.includes('SERVICE'));
+      $('vd_block_vaksin').classList.toggle('hidden', isService);
+      $('vd_block_service').classList.toggle('hidden', !isService);
+
+      if(isService){
+        $('vd_jadwal_service').textContent = fmtDateOnly(it?.jadwalService);
+        $('vd_jenis_service').textContent  = it?.jenisService || '-';
+      }else{
+        $('vd_jadwal_vaksin').textContent  = fmtDateOnly(it?.jadwalVaksin);
+        $('vd_nama_vaksin').textContent    = it?.namaVaksin || '-';
+        $('vd_metode_vaksin').textContent  = it?.metodeVaksinasi || '-';
+        $('vd_dosis_vaksin').textContent   = it?.dosisVaksin || '-';
+      }
+
+      $('vd_customer').textContent   = it?.namaCustomer || it?.customer || '-';
+      $('vd_alamat').textContent     = it?.alamatCustomer || it?.alamatFarm || '-';
+      $('vd_populasi').textContent   = it?.populasiKandang || '-';
+      $('vd_vaksinator').textContent = it?.namaVaksinator || it?.vaksinator || '-';
+      $('vd_koordinator').textContent= it?.koordinator || '-';
+      $('vd_tsr_as').textContent     = it?.namaTSRorAS || '-';
+      $('vd_catatan').textContent    = it?.catatan || '-';
+
+      if(!it){
+        warn.textContent = 'ℹ️ Data detail tidak ada di cache. Silakan kembali ke Jadwal dan muat ulang.';
+        warn.classList.remove('hidden');
+      }
+    }
+
+    function backToJadwalFromDetail(){
+      $("view-detail").classList.add("hidden");
+      $("view-jadwal").classList.remove("hidden");
+
+      $('vj_result_card').classList.remove('hidden');
+      $('vj_range_card').classList.remove('hidden');
+      if (_vjLastItems.length > 0) $('vj_list_card').classList.remove('hidden');
+
+      setTimeout(()=>{
+        window.scrollTo({ top: _vjScrollY || 0, behavior: 'instant' });
+      }, 0);
+    }
+
+    async function handleTampilkanJadwal(){
+      const warn = $('vj_warn');
+      warn.classList.add('hidden'); warn.textContent = '';
+
+      const user = getAuthedUser();
+      if(!user){
+        warn.textContent = '⚠️ Mohon login terlebih dahulu.';
+        warn.classList.remove('hidden');
+        show('login');
+        return;
+      }
+      _vjUser = user;
+
+      const startDate = $('vj_start_date').value;
+      const endDate   = $('vj_end_date').value;
+      if(!startDate || !endDate){
+        warn.textContent = '⚠️ Tanggal mulai & akhir periode wajib diisi.';
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (startDate > endDate){
+        warn.textContent = '⚠️ Tanggal mulai tidak boleh lebih besar dari tanggal akhir.';
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      const isAdminAll = ((user.branch || '').trim().toUpperCase() === 'ALL');
+
+      const payload = {
+        mode: 'viewSchedule',
+        branch: isAdminAll ? '' : user.branch,
+        startDate,
+        endDate,
+        allBranches: isAdminAll,
+        xApiKey: APP_KEY
+      };
+
+      try{
+        showLoading('⏳ Mengambil jadwal...');
+        const resp = await fetch(FLOW_VIEWJADWAL_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await resp.text();
+        let data;
+        try{ data = JSON.parse(text); }catch{ data = { raw: text }; }
+
+        if(!resp.ok){
+          throw new Error(`HTTP ${resp.status}: ${data?.message || data?.error || data?.raw || 'Gagal memuat jadwal'}`);
+        }
+
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const cabangLabel = isAdminAll ? 'Semua Cabang (ADMIN)' : (user.branch || '-');
+        $('vj_list_meta').textContent =
+          `Cabang: ${cabangLabel} • Periode: ${startDate} s.d. ${endDate} • Jumlah: ${items.length}`;
+
+        renderJadwal(items);
+        $('vj_list_card').classList.remove('hidden');
+      }catch(e){
+        console.error(e);
+        warn.textContent = '❌ Gagal memuat jadwal: ' + (e?.message || e);
+        warn.classList.remove('hidden');
+        $('vj_list_card').classList.add('hidden');
+      }finally{
+        hideLoading();
+      }
+    }
+
+    /* ===================== NAVIGASI VIEW ====================== */
+    function showOnly(v){
+      $("view-login").classList.add("hidden");
+      $("view-home").classList.add("hidden");
+      $("view-checkin").classList.add("hidden");
+      $("view-checkout").classList.add("hidden");
+      $("view-jadwal").classList.add("hidden");
+      $("view-detail").classList.add("hidden");
+
+      const target = $("view-" + v);
+      if (target) target.classList.remove("hidden");
+
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+
+    function show(v) {
+      // guard: semua view kecuali "login" harus auth
+      if (v !== 'login'){
+        const u = requireAuthOrGoLogin();
+        if (!u) return;
+      }
+
+      showOnly(v);
+
+      if (v === "home") {
+        updateHomeGreeting();
+      }
+      if (v === "checkin") {
+        init("ci");
+        initBatches();
+        loadOrders("ci_order", "ci");
+        attachMultiPhotoHandler("ci_fotos", "ci_fotos_preview", "ci_fotos_clear");
+        bindGalleryPicker("ci"); // <-- tambahan galeri (tidak mengganggu loadOrders)
+        attachOrderTypeWatcher("ci_order", "ci");
+        const u = getAuthedUser();
+        if (u?.name) $('ci_nama').value = u.name;
+        if (u?.email) $('ci_email').value = u.email;
+      }
+      if (v === "checkout") {
+        init("co");
+        loadOrders("co_order", "co");
+        attachMultiPhotoHandler("co_fotos", "co_fotos_preview", "co_fotos_clear");
+        bindGalleryPicker("co"); // <-- tambahan galeri
+        attachOrderTypeWatcher("co_order", "co");
+        const u = getAuthedUser();
+        if (u?.name) $('co_nama').value = u.name;
+        if (u?.email) $('co_email').value = u.email;
+      }
+      if (v === "jadwal") {
+        initJadwal();
+      }
+    }
+
+    function goHome(prefix) {
+      try { resetForm(prefix, false); } catch(e) {}
+      show("home");
+    }
+
+    /* ===================== INIT TANGGAL & JAM ================= */
+    function init(p) {
+      const d = new Date();
+      $(p + "_tanggal").value = d.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+      $(p + "_jam").value = d.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      loadLocation(p);
+    }
+
+    /* ===================== LOKASI (GPS/IP) ==================== */
+    function simplifyAddress(a) {
+      const parts = (a || "").split(",");
+      return parts.slice(1).join(",").trim() || (a || "");
+    }
+
+    async function loadLocation(p) {
+      const src = $(p + "_src");
+
+      if (!navigator.geolocation) {
+        src.textContent = "Lokasi: Tidak tersedia";
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          $(p + "_lat").value = pos.coords.latitude.toFixed(6);
+          $(p + "_lng").value = pos.coords.longitude.toFixed(6);
+          src.textContent = "Lokasi: GPS";
+
+          try {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`;
+            const r = await fetch(url, { headers: { "Accept": "application/json" } });
+            const j = await r.json();
+            if (j?.display_name) {
+              $(p + "_lokasi").value = simplifyAddress(j.display_name);
+            }
+          } catch (e) {
+            console.warn("Gagal reverse geocode", e);
+          }
+        },
+        async () => {
+          try {
+            const r = await fetch("https://ipapi.co/json/");
+            const j = await r.json();
+            $(p + "_lat").value = j.latitude ?? "";
+            $(p + "_lng").value = j.longitude ?? "";
+            $(p + "_lokasi").value = `${j.city ?? "-"}, ${j.region ?? "-"}, ${j.country_name ?? "-"}`;
+            src.textContent = "Lokasi: Perkiraan IP";
+          } catch (e) {
+            console.warn("Gagal ambil lokasi via IP", e);
+            src.textContent = "Lokasi: Tidak tersedia";
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    /* ===================== BATCHES (CEK-IN) =================== */
+    function initBatches() {
+      $("ci_batch_wrap").innerHTML = "";
+      addBatch();
+    }
+    function addBatch() {
+      const wrap = $("ci_batch_wrap");
+      const i = document.createElement("input");
+      i.placeholder = "Nomor Batch";
+      i.style.marginBottom = "8px";
+      wrap.appendChild(i);
+    }
+    function resetBatches() {
+      initBatches();
+    }
+    function getBatchValues() {
+      const inputs = Array.from($("ci_batch_wrap").querySelectorAll("input"));
+      return inputs.map((i) => i.value.trim()).filter((v) => v !== "");
+    }
+
+    /* ===================== FOTO HANDLER (multi + delete) ====== */
+    const _photoStore = Object.create(null);
+
+    function attachMultiPhotoHandler(inputId, previewId, clearBtnId){
+      const input = $(inputId);
+      const preview = $(previewId);
+      const clearBtn = $(clearBtnId);
+      if(!input || !preview || !clearBtn) return;
+
+      if (input.dataset.bound === "1") return;
+      input.dataset.bound = "1";
+
+      _photoStore[inputId] = [];
+
+      function syncInputFiles(){
+        const dt = new DataTransfer();
+        (_photoStore[inputId] || []).slice(0, MAX_PHOTOS).forEach(f => dt.items.add(f));
+        try { input.files = dt.files; } catch(e) {}
+      }
+
+      function render(){
+        preview.innerHTML = "";
+        const files = (_photoStore[inputId] || []).slice(0, MAX_PHOTOS);
+
+        files.forEach((file, idx)=>{
+          const item = document.createElement("div");
+          item.className = "photo-item";
+
+          const img = document.createElement("img");
+          img.alt = "foto";
+          const url = URL.createObjectURL(file);
+          img.src = url;
+          img.onload = ()=> URL.revokeObjectURL(url);
+
+          const del = document.createElement("button");
+          del.type = "button";
+          del.className = "photo-del";
+          del.textContent = "×";
+          del.title = "Hapus foto ini";
+          del.addEventListener("click", ()=>{
+            (_photoStore[inputId] || []).splice(idx, 1);
+            syncInputFiles();
+            render();
+          });
+
+          item.appendChild(img);
+          item.appendChild(del);
+          preview.appendChild(item);
+        });
+      }
+
+      input.addEventListener("change", ()=>{
+        const picked = Array.from(input.files || []).filter(f => (f.type || "").startsWith("image/"));
+        const merged = (_photoStore[inputId] || []).concat(picked).slice(0, MAX_PHOTOS);
+        _photoStore[inputId] = merged;
+        syncInputFiles();
+        render();
+      });
+
+      clearBtn.addEventListener("click", ()=>{
+        _photoStore[inputId] = [];
+        syncInputFiles();
+        render();
+      });
+
+      render();
+    }
+
+    /* ===================== GALERI PICKER -> GABUNG KE INPUT UTAMA ===================== */
+    function bindGalleryPicker(prefix){
+      const mainInputId = prefix + '_fotos';           // ci_fotos / co_fotos
+      const galInputId  = prefix + '_fotos_gallery';   // ci_fotos_gallery / co_fotos_gallery
+      const previewId   = prefix + '_fotos_preview';
+      const clearBtnId  = prefix + '_fotos_clear';
+
+      const mainInput = document.getElementById(mainInputId);
+      const galInput  = document.getElementById(galInputId);
+      if(!mainInput || !galInput) return;
+
+      if (galInput.dataset.bound === '1') return;
+      galInput.dataset.bound = '1';
+
+      galInput.addEventListener('change', ()=>{
+        const picked = Array.from(galInput.files || []).filter(f => (f.type || '').startsWith('image/'));
+        if (!_photoStore[mainInputId]) _photoStore[mainInputId] = [];
+
+        const merged = (_photoStore[mainInputId] || []).concat(picked).slice(0, MAX_PHOTOS);
+        _photoStore[mainInputId] = merged;
+
+        const dt = new DataTransfer();
+        merged.forEach(f => dt.items.add(f));
+        try { mainInput.files = dt.files; } catch(e){}
+
+        // re-render via handler existing
+        attachMultiPhotoHandler(mainInputId, previewId, clearBtnId);
+        mainInput.dispatchEvent(new Event('change'));
+
+        // reset gal input agar pilih file sama tetap trigger
+        galInput.value = '';
+      });
+    }
+
+    /* ===================== FIX: FLOW GET ORDER (v2 JSON + Branch) ==================== */
+    async function loadOrders(selectId, prefix){
+      const sel = $(selectId);
+      if(!sel) return;
+
+      // reset dropdown
+      sel.innerHTML = `<option value="">-- Pilih Nomor Order --</option>`;
+
+      const warn = $(prefix + "_warn");
+      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+
+      // "checkin" / "checkout"
+      const formType = (prefix === "co") ? "checkout" : "checkin";
+
+      // Ambil user login
+      const user = getAuthedUser?.() || null;
+      const isAdminAll = ((user?.branch || '').trim().toUpperCase() === 'ALL');
+
+      // Payload JSON baru ke Flow
+      const payload = {
+        mode: 'getOrders',
+        form: formType,
+        branch: isAdminAll ? '' : (user?.branch || ''),
+        allBranches: isAdminAll,
+        emailVaksinator: user.email,
+        xApiKey: APP_KEY
+      };
+
+      try{
+        showLoading("⏳ Memuat nomor order...");
+
+        const resp = await fetch(FLOW_GET_ORDER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await resp.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = null; }
+
+        if(!resp.ok){
+          throw new Error(`HTTP ${resp.status}: ${text}`);
+        }
+
+        // Normalisasi array hasil Flow
+        const arr =
+          Array.isArray(data?.orders) ? data.orders :
+          Array.isArray(data?.items)  ? data.items  :
+          Array.isArray(data?.value)  ? data.value  :
+          Array.isArray(data)         ? data        : null;
+
+        if(!Array.isArray(arr)){
+          throw new Error("Format response tidak sesuai.\nRaw:\n" + text);
+        }
+
+        // Isi dropdown + map tipe
+        arr.forEach(it=>{
+          const v = (it?.Value ?? it?.value ?? it?.orderNumber ?? "").toString().trim();
+          if(!v) return;
+
+          const low = v.toLowerCase();
+          ORDER_TYPE_MAP[v] = (low.includes("spservis") || low.includes("service") || low.includes("servis"))
+            ? "servis"
+            : "vaksin";
+
+          const opt = document.createElement("option");
+          opt.value = v;
+          opt.textContent = v;
+          sel.appendChild(opt);
+        });
+        // trigger watcher
+        sel.dispatchEvent(new Event("change"));
+
+      }catch(e){
+        console.error("loadOrders error:", e);
+        if(warn){
+          warn.textContent = "❌ Gagal memuat Nomor Order.\n" + (e?.message || e);
+          warn.classList.remove("hidden");
+        }
+      }finally{
+        hideLoading();
+      }
+    }
+
+    /* ===================== UTIL: ORDER TYPE ======================= */
+    function getOrderTypeFromValue(val) {
+      const key = String(val || "").trim();
+      if (key && ORDER_TYPE_MAP[key]) return ORDER_TYPE_MAP[key];
+      const v = key.toLowerCase();
+      if (v.includes("spservis") || v.includes("service") || v.includes("servis")) return "servis";
+      return "vaksin";
+    }
+
+    function attachOrderTypeWatcher(selectId, prefix){
+      const sel = $(selectId);
+      if(!sel) return;
+
+      if(sel.dataset.watched === "1") return;
+      sel.dataset.watched = "1";
+
+      const apply = ()=>{
+        const tipe = getOrderTypeFromValue(sel.value);
+        const isServis = (tipe === "servis");
+
+        if(prefix === "ci"){
+          $("ci_kondisi_wrap")?.classList.toggle("hidden", isServis);
+          $("ci_batch_section")?.classList.toggle("hidden", isServis);
+
+          if(isServis){
+            $("ci_kondisi").value = "";
+            resetBatches();
+          }
+        }
+
+        if(prefix === "co"){
+          $("co_ayam_wrap")?.classList.toggle("hidden", isServis);
+          $("co_vaksin_wrap")?.classList.toggle("hidden", isServis);
+
+          if(isServis){
+            $("co_ayam").value = "";
+            $("co_vaksin").value = "";
+          }
+        }
+      };
+
+      sel.addEventListener("change", apply);
+      apply();
+    }
+
+    /* ===================== RESET FORM ========================== */
+    function resetForm(prefix, reloadOrders = true){
+      const warn = $(prefix + "_warn");
+      if(warn){ warn.classList.add("hidden"); warn.textContent = ""; }
+
+      const nama = $(prefix + "_nama");
+      if(nama) nama.value = "";
+
+      const catatan = $(prefix + "_catatan");
+      if(catatan) catatan.value = "";
+
+      const orderSel = $(prefix + "_order");
+      if(orderSel){
+        orderSel.value = "";
+        if(reloadOrders){
+          loadOrders(prefix + "_order", prefix);
+        }else{
+          orderSel.dispatchEvent(new Event("change"));
+        }
+      }
+
+      if(prefix === "ci"){
+        $("ci_kondisi").value = "";
+        resetBatches();
+
+        _photoStore["ci_fotos"] = [];
+        try{ $("ci_fotos").files = new DataTransfer().files; }catch(e){}
+        $("ci_fotos_preview").innerHTML = "";
+        // reset input galeri
+        const g = $("ci_fotos_gallery"); if (g) g.value = "";
+      }
+
+      if(prefix === "co"){
+        $("co_kandang").value = "";
+        $("co_ayam").value = "";
+        $("co_vaksin").value = "";
+
+        _photoStore["co_fotos"] = [];
+        try{ $("co_fotos").files = new DataTransfer().files; }catch(e){}
+        $("co_fotos_preview").innerHTML = "";
+        const g = $("co_fotos_gallery"); if (g) g.value = "";
+      }
+    }
+
+    /* ===================== FOTO -> BASE64 & PAYLOAD ============ */
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => {
+          const result = String(r.result || "");
+          const base64 = result.includes(",") ? result.split(",")[1] : result;
+          resolve(base64);
+        };
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function buildPhotosPayload(inputId, prefix) {
+      const input = $(inputId);
+      const files = Array.from(input?.files || []).slice(0, MAX_PHOTOS);
+      const photos = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (!f || !(f.type || "").startsWith("image/")) continue;
+
+        const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+        const safeName = `${prefix}_photo_${i + 1}.${ext}`;
+
+        photos.push({
+          fileName: safeName,
+          contentType: f.type || "application/octet-stream",
+          contentBytes: await fileToBase64(f),
+        });
+      }
+      return photos;
+    }
+
+    const SANITIZE_RE = /[<>#${}\\/'"`;&]/g;
+    function sanitizeText(val) {
+      return String(val ?? "")
+        .replace(SANITIZE_RE, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function cleanPayload(obj) {
+      const copy = { ...obj };
+      if ("orderNumber" in copy) copy.orderNumber = sanitizeText(copy.orderNumber);
+      if ("namaVaksinator" in copy) copy.namaVaksinator = sanitizeText(copy.namaVaksinator);
+      if ("kondisiVaksin" in copy) copy.kondisiVaksin = sanitizeText(copy.kondisiVaksin);
+      if ("noKandang" in copy) copy.noKandang = sanitizeText(copy.noKandang);
+      if ("lokasi" in copy) copy.lokasi = sanitizeText(copy.lokasi);
+      if ("catatan" in copy) copy.catatan = sanitizeText(copy.catatan);
+      if ("emailVaksinator" in copy) copy.emailVaksinator = sanitizeText(copy.emailVaksinator);
+      return copy;
+    }
+
+    async function sendJson(url, payload) {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+      return { ok: resp.ok, status: resp.status, data };
+    }
+
+    /* ===================== SUBMIT: CEK-IN ====================== */
+    async function submitCI() {
+      const warn = $("ci_warn");
+      warn.classList.add("hidden");
+      warn.textContent = "";
+
+      const order = $("ci_order").value;
+      const nama = $("ci_nama").value.trim();
+      const tipe = getOrderTypeFromValue(order);
+      const kondisi = $("ci_kondisi").value;
+      const batches = getBatchValues();
+      const fotos = $("ci_fotos").files;
+
+      if (!order || !nama) {
+        warn.textContent = "⚠️ Nomor Order dan Nama Vaksinator wajib diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+
+      if (tipe !== "servis") {
+        if (!kondisi) {
+          warn.textContent = "⚠️ Kondisi Vaksin wajib diisi (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+        if (batches.length === 0) {
+          warn.textContent = "⚠️ Minimal 1 Nomor Batch diisi (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+      }
+
+      if (!fotos || fotos.length === 0) {
+        warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (fotos.length > MAX_PHOTOS) {
+        warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        showLoading("⏳ Menyiapkan foto (base64)...");
+        const basePayload = {
+          appKey: APP_KEY,
+          formType: "checkin",
+          orderNumber: order,
+          namaVaksinator: nama,
+          emailVaksinator: $('ci_email').value,
+          tanggal: $("ci_tanggal").value,
+          jam: $("ci_jam").value,
+          lokasi: $("ci_lokasi").value,
+          latitude: $("ci_lat").value,
+          longitude: $("ci_lng").value,
+          catatan: $("ci_catatan").value || "",
+          photos: await buildPhotosPayload("ci_fotos", "ci"),
+        };
+
+        if (tipe !== "servis") {
+          basePayload.kondisiVaksin = kondisi;
+          basePayload.batches = batches;
+        }
+
+        const payload = cleanPayload(basePayload);
+
+        showLoading("⏳ Mengirim Cek-In...");
+        const resp = await sendJson(FLOW_SUBMIT_URL, payload);
+        hideLoading();
+
+        if (resp.ok) {
+          alert("✅ Cek-In berhasil");
+          show("home");
+          resetForm("ci", false);
+        } else {
+          console.error(resp);
+          alert(`❌ Gagal submit Cek-In (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        }
+      } catch (e) {
+        hideLoading();
+        console.error(e);
+        alert("❌ Terjadi kesalahan saat submit Cek-In: " + (e?.message || e));
+      }
+    }
+
+    /* ===================== SUBMIT: CEK-OUT ===================== */
+    async function submitCO() {
+      const warn = $("co_warn");
+      warn.classList.add("hidden");
+      warn.textContent = "";
+
+      const order = $("co_order").value;
+      const nama = $("co_nama").value.trim();
+      const kandang = $("co_kandang").value.trim();
+      const tipe = getOrderTypeFromValue(order);
+      const ayam = $("co_ayam").value;
+      const vaksin = $("co_vaksin").value;
+      const fotos = $("co_fotos").files;
+
+      if (!order || !nama || !kandang) {
+        warn.textContent = "⚠️ Nomor Order, Nama Vaksinator, dan No Kandang wajib diisi.";
+        warn.classList.remove("hidden");
+        return;
+      }
+
+      if (tipe !== "servis") {
+        if (ayam === "" || Number(ayam) < 0 || vaksin === "" || Number(vaksin) < 0) {
+          warn.textContent = "⚠️ Jumlah Ayam dan Vaksin harus diisi dengan angka ≥ 0 (untuk SPVaksin).";
+          warn.classList.remove("hidden");
+          return;
+        }
+      }
+
+      if (!fotos || fotos.length === 0) {
+        warn.textContent = "⚠️ Wajib unggah minimal 1 foto (maksimal 5).";
+        warn.classList.remove('hidden');
+        return;
+      }
+      if (fotos.length > MAX_PHOTOS) {
+        warn.textContent = `⚠️ Maksimal ${MAX_PHOTOS} foto.`;
+        warn.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        showLoading("⏳ Menyiapkan foto...");
+        const basePayload = {
+          appKey: APP_KEY,
+          formType: "checkout",
+          orderNumber: order,
+          namaVaksinator: nama,
+          emailVaksinator: $('co_email').value,
+          noKandang: kandang,
+          tanggal: $("co_tanggal").value,
+          jam: $("co_jam").value,
+          lokasi: $("co_lokasi").value,
+          latitude: $("co_lat").value,
+          longitude: $("co_lng").value,
+          catatan: $("co_catatan").value || "",
+          photos: await buildPhotosPayload("co_fotos", "co"),
+        };
+
+        if (tipe !== "servis") {
+          basePayload.jumlahAyam = Number(ayam);
+          basePayload.jumlahVaksin = Number(vaksin);
+        }
+
+        const payload = cleanPayload(basePayload);
+
+        showLoading("⏳ Mengirim Cek-Out...");
+        const resp = await sendJson(FLOW_SUBMIT_URL, payload);
+        hideLoading();
+
+        if (resp.ok) {
+          alert("✅ Cek-Out berhasil");
+          show("home");
+          resetForm("co", false);
+        } else {
+          console.error(resp);
+          alert(`❌ Gagal submit Cek-Out (HTTP ${resp.status}).\n` + (resp.data?.message || resp.data?.raw || ""));
+        }
+      } catch (e) {
+        hideLoading();
+        console.error(e);
+        alert("❌ Terjadi kesalahan saat submit Cek-Out: " + (e?.message || e));
+      }
+    }
+
+    /* ===================== BOOT ================================ */
+    function boot(){
+      // Jika sudah ada sesi → langsung ke Home, jika belum → Login
+      const u = getAuthedUser();
+      if (u){
+        updateHomeGreeting();
+        show('home');
+      }else{
+        show('login');
+      }
+    }
+
+    // ==== Ekspor fungsi ke global agar onclick inline berfungsi ====
+    window.handleLogin = handleLogin;
+    window.logout = logout;
+    window.show = show;
+    window.handleTampilkanJadwal = handleTampilkanJadwal;
+    window.backToJadwalFromDetail = backToJadwalFromDetail;
+    window.addBatch = addBatch;
+    window.resetBatches = resetBatches;
+    window.submitCI = submitCI;
+    window.submitCO = submitCO;
+    window.resetForm = resetForm;
+    window.goHome = goHome;
+
+    // Jalankan saat load
+    (function(){ boot(); })();
+  </script>
+</body>
+</html>
